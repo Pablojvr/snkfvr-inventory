@@ -14,12 +14,11 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { ApiService, Producto, Movimiento } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule],
   templateUrl: './productos.html',
 })
 export class Productos implements OnInit {
@@ -35,7 +34,6 @@ export class Productos implements OnInit {
 
   menuItems: MenuItem[] = [];
 
-  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
 
@@ -146,7 +144,7 @@ export class Productos implements OnInit {
   }
 
   venderProducto(id: number) {
-    this.dialogVenta.showDialog(id);
+    this.router.navigate(['/venta-masiva'], { queryParams: { productoId: id } });
   }
 
   eliminar(id: number) {

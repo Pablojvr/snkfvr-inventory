@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'ingresos', loadComponent: () => import('./features/ingresos/ingresos').then(m => m.Ingresos) },
   { path: 'gastos', loadComponent: () => import('./features/gastos/gastos').then(m => m.Gastos) },
   { path: 'ventas', loadComponent: () => import('./features/ventas/ventas').then(m => m.Ventas) },
+  { path: 'venta-masiva', loadComponent: () => import('./features/venta-masiva/venta-masiva').then(m => m.VentaMasivaComponent) },
   { path: 'movimientos', loadComponent: () => import('./features/movimientos/movimientos').then(m => m.Movimientos) },
   { path: 'usuarios', loadComponent: () => import('./features/usuarios/usuarios').then(m => m.Usuarios) },
 ];

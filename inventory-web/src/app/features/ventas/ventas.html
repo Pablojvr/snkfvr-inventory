@@ -40,7 +40,6 @@
                     <td>{{ venta.costoEnvio | currency }}</td>
                     <td>
                         <p-button *ngIf="venta.estado !== 'Vendido'" pTooltip="Marcar como Entregado" tooltipPosition="top" icon="pi pi-check-circle" severity="success" [rounded]="true" [text]="true" (onClick)="marcarEntregado(venta)"></p-button>
-                        <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [text]="true" (onClick)="editar(venta)"></p-button>
                         <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" (onClick)="eliminar(venta.id)"></p-button>
                     </td>
                 </tr>
@@ -53,5 +52,3 @@
         </p-table>
     </div>
 </div>
-
-<app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>

@@ -7,7 +7,6 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Gasto, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 import { Router } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
@@ -16,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-gastos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, DialogVentaComponent, FormsModule, MenuModule],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule],
   templateUrl: './gastos.html',
 })
 export class Gastos implements OnInit {
@@ -32,7 +31,6 @@ export class Gastos implements OnInit {
   
   menuItems: MenuItem[] = [];
 
-  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
 
@@ -89,7 +87,7 @@ export class Gastos implements OnInit {
   }
 
   venderProducto(productoId: number) {
-    this.dialogVenta.showDialog(productoId);
+    this.router.navigate(['/venta-masiva'], { queryParams: { productoId: productoId } });
   }
 
   eliminar(id: number) {

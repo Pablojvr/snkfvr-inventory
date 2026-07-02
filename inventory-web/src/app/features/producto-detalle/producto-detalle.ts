@@ -6,12 +6,11 @@ import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Producto, Movimiento } from '../../core/services/api';
-import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule, DialogVentaComponent],
+  imports: [CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule],
   templateUrl: './producto-detalle.html',
   styles: [`
     .detail-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -32,7 +31,6 @@ export class ProductoDetalle implements OnInit {
   producto: Producto | null = null;
   movimientos: Movimiento[] = [];
 
-  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -84,7 +82,7 @@ export class ProductoDetalle implements OnInit {
   }
 
   venderProducto() {
-    this.dialogVenta.showDialog(this.productoId);
+    this.router.navigate(['/venta-masiva'], { queryParams: { productoId: this.productoId } });
   }
 
   volver() {

@@ -8,12 +8,10 @@ import { TimelineModule } from 'primeng/timeline';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
-import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -25,7 +23,6 @@ export class Dashboard implements OnInit {
   productosFiltrados: Producto[] = [];
   productoBuscado: any;
 
-  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
   
   constructor(private api: ApiService, private router: Router) {}
 
@@ -80,7 +77,7 @@ export class Dashboard implements OnInit {
   }
 
   nuevaVentaRapida() {
-      this.dialogVenta.showDialog();
+      this.router.navigate(['/venta-masiva']);
   }
 
   nuevoGastoRapido() {

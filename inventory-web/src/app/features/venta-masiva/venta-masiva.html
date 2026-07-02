@@ -1,0 +1,99 @@
+<div class="page-header">
+    <div class="header-left">
+        <h2>Añadir Masivo (Ventas)</h2>
+    </div>
+</div>
+
+<div class="p-fluid">
+    <div *ngFor="let item of items; let i = index" class="card" style="margin-bottom: 1rem; position: relative;">
+        <!-- Delete Button for Row -->
+        <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                style="position: absolute; right: 1rem; top: 1rem;" 
+                (click)="eliminarFila(i)" 
+                pTooltip="Eliminar formulario">
+        </button>
+
+        <h4 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-color);">#{{ i + 1 }}</h4>
+        
+        <!-- Error Message if backend or validation failed -->
+        <p-message *ngIf="item.error" severity="error" [text]="item.error" styleClass="w-full mb-3 block"></p-message>
+
+        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <!-- Producto -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Producto Vendido</label>
+                <p-select [options]="productos" [(ngModel)]="item.venta.productoId" optionLabel="descripcion" 
+                          [filter]="true" filterBy="descripcion" [showClear]="true" placeholder="Seleccionar producto..." 
+                          appendTo="body" styleClass="w-full" (onChange)="onProductoChange(item)"
+                          [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.venta.productoId}">
+                    <ng-template let-prod pTemplate="item">
+                        <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
+                    </ng-template>
+                </p-select>
+                <small class="p-error" *ngIf="item.submitted && !item.venta.productoId">El producto es obligatorio.</small>
+            </div>
+
+            <!-- Usuario -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Registrado por</label>
+                <p-select [options]="usuarios" [(ngModel)]="item.venta.usuarioId" optionLabel="nombre" optionValue="id"
+                          appendTo="body" styleClass="w-full"
+                          [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.venta.usuarioId}">
+                </p-select>
+                <small class="p-error" *ngIf="item.submitted && !item.venta.usuarioId">El usuario es obligatorio.</small>
+            </div>
+
+            <!-- Precio de Venta -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <label>Precio de Venta</label>
+                    <small *ngIf="item.costoActual !== undefined" style="color: #64748b; font-weight: 600;">(Costo actual: {{ item.costoActual | currency }})</small>
+                </div>
+                <p-inputNumber [(ngModel)]="item.venta.precioVenta" mode="currency" currency="USD" locale="en-US" styleClass="w-full"
+                               [ngClass]="{'ng-invalid ng-dirty': item.submitted && (!item.venta.precioVenta || item.venta.precioVenta <= 0)}">
+                </p-inputNumber>
+                <small class="p-error" *ngIf="item.submitted && (!item.venta.precioVenta || item.venta.precioVenta <= 0)">El precio de venta es obligatorio y debe ser mayor a 0.</small>
+            </div>
+
+            <!-- Costo de Envío -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Costo de Envío <small style="color: #64748b;">(Opcional)</small></label>
+                <p-inputNumber [(ngModel)]="item.venta.costoEnvio" mode="currency" currency="USD" locale="en-US" styleClass="w-full"></p-inputNumber>
+            </div>
+            
+            <!-- Costos Adicionales -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Costos Adicionales <small style="color: #64748b;">(Opcional)</small></label>
+                <p-inputNumber [(ngModel)]="item.venta.costosAdicionales" mode="currency" currency="USD" locale="en-US" styleClass="w-full"></p-inputNumber>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; margin-bottom: 2rem;">
+        <p-button label="Agregar Otra Venta" icon="pi pi-plus" [text]="true" [raised]="true" (onClick)="agregarFila()" [disabled]="guardando"></p-button>
+        <p-button label="Guardar Todas" icon="pi pi-save" (onClick)="confirmarGuardado()" [loading]="guardando" [disabled]="guardando"></p-button>
+    </div>
+</div>
+
+<p-dialog header="Confirmar Registro de Ventas" [(visible)]="displayConfirmModal" [modal]="true" [style]="{width: 'min(600px, 95vw)'}" [draggable]="false" [resizable]="false">
+    <p class="p-m-0">Vas a registrar las siguientes ventas. Por favor, verifica que todo sea correcto:</p>
+    
+    <div style="margin-top: 1.5rem; max-height: 400px; overflow-y: auto;">
+        <div *ngFor="let item of items; let i = index" style="padding: 1rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <span style="font-weight: 600; color: #1e293b;">{{ getNombreProducto(item.venta.productoId) }}</span>
+                <span style="font-size: 0.875rem; color: #64748b;">
+                    Registrado por {{ getNombreUsuario(item.venta.usuarioId) }}
+                </span>
+            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #10b981;">
+                {{ item.venta.precioVenta | currency }}
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayConfirmModal = false"></p-button>
+        <p-button label="Confirmar y Guardar" icon="pi pi-check" (onClick)="guardarTodos()" [loading]="guardando" [disabled]="guardando"></p-button>
+    </ng-template>
+</p-dialog>

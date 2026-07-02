@@ -6,12 +6,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, TooltipModule, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, TooltipModule],
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit {
@@ -19,9 +19,7 @@ export class Ventas implements OnInit {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
 
-  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
-
-  constructor(private api: ApiService, private toastManager: ToastManagerService) {}
+  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
 
   ngOnInit() {
     this.cargarDatos();
@@ -46,11 +44,7 @@ export class Ventas implements OnInit {
   }
 
   showDialog() {
-    this.dialogVenta.showDialog();
-  }
-
-  editar(venta: Venta) {
-    this.dialogVenta.showDialog(undefined, venta);
+    this.router.navigate(['/venta-masiva']);
   }
 
   marcarEntregado(venta: Venta) {

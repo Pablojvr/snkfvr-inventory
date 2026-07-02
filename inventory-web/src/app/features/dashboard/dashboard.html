@@ -14,24 +14,7 @@
     </div>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card stat-green">
-        <h4>Total Ventas</h4>
-        <h2>{{ totalVentas | currency }}</h2>
-    </div>
-    <div class="stat-card stat-blue">
-        <h4>Ingresos Manuales</h4>
-        <h2>{{ totalIngresos | currency }}</h2>
-    </div>
-    <div class="stat-card stat-red">
-        <h4>Total Gastos</h4>
-        <h2>{{ totalGastos | currency }}</h2>
-    </div>
-    <div class="stat-card stat-purple">
-        <h4>Balance General</h4>
-        <h2>{{ balance | currency }}</h2>
-    </div>
-</div>
+
 
 <div class="card">
     <h3 class="section-title-warn">
@@ -71,10 +54,7 @@
 </div>
 
 <div class="dashboard-bottom">
-    <div class="card chart-card">
-        <h3 style="margin-top: 0;">Resumen Financiero</h3>
-        <p-chart type="bar" [data]="basicData" [options]="basicOptions" height="300px"></p-chart>
-    </div>
+
 
     <div class="card timeline-card">
         <h3 class="section-title-dark">

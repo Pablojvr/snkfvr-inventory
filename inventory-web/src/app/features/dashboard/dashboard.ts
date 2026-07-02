@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ChartModule } from 'primeng/chart';
+
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TimelineModule } from 'primeng/timeline';
@@ -14,17 +14,11 @@ import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialo
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ChartModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogGastoComponent, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogGastoComponent, DialogVentaComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
-  basicData: any;
-  basicOptions: any;
   
-  totalVentas: number = 0;
-  totalIngresos: number = 0;
-  totalGastos: number = 0;
-  balance: number = 0;
   ventasReservadas: any[] = [];
   movimientos: any[] = [];
   
@@ -42,23 +36,6 @@ export class Dashboard implements OnInit {
   }
   
   cargarDatos() {
-    this.api.getDashboardBalance().subscribe(data => {
-       this.totalVentas = data.totalVentas;
-       this.totalIngresos = data.totalIngresos;
-       this.totalGastos = data.totalGastos;
-       this.balance = data.balance;
-       
-       this.basicData = {
-           labels: ['Ventas', 'Ingresos Manuales', 'Gastos / Compras'],
-           datasets: [
-               {
-                   label: 'Monto Total',
-                   data: [this.totalVentas, this.totalIngresos, this.totalGastos],
-                   backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
-               }
-           ]
-       };
-    });
 
     import('rxjs').then(({ forkJoin }) => {
         forkJoin({
@@ -91,20 +68,6 @@ export class Dashboard implements OnInit {
           });
         });
     });
-    this.basicOptions = {
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#495057'
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-            }
-        }
-    };
   }
 
   filtrarProductos(event: any) {

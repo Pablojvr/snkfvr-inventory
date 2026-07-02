@@ -9,6 +9,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
+import { DialogModule } from 'primeng/dialog';
 import { ApiService, Gasto, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { forkJoin, of } from 'rxjs';
@@ -33,7 +34,8 @@ export interface GastoMasivoItem {
     DatePickerModule,
     SelectModule,
     CardModule,
-    MessageModule
+    MessageModule,
+    DialogModule
   ],
   templateUrl: './anadir-masivo.html',
 })
@@ -47,6 +49,8 @@ export class AnadirMasivoComponent implements OnInit {
 
   guardando: boolean = false;
   defaultUsuarioId: number = 0;
+  
+  displayConfirmModal: boolean = false;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private route: ActivatedRoute) {}
 
@@ -107,7 +111,7 @@ export class AnadirMasivoComponent implements OnInit {
   }
 
   onTipoOProductoChange(item: GastoMasivoItem) {
-    if (item.gasto.tipo === 'Comisión') {
+    if (item.gasto.tipo === 'Comisión' || item.gasto.tipo === 'Envío') {
       let nombreProducto = '';
       if (item.gasto.productoId) {
         let pId = item.gasto.productoId;
@@ -119,8 +123,32 @@ export class AnadirMasivoComponent implements OnInit {
           nombreProducto = prod.descripcion;
         }
       }
-      item.gasto.motivo = nombreProducto ? `COM | ${nombreProducto}` : 'COM | ';
+      const prefix = item.gasto.tipo === 'Comisión' ? 'COM' : 'ENV';
+      item.gasto.motivo = nombreProducto ? `${prefix} | ${nombreProducto}` : `${prefix} | `;
+    } else if (!item.gasto.motivo.startsWith('COM |') && !item.gasto.motivo.startsWith('ENV |')) {
+      // Si cambia a Calzado y no había un motivo específico, no hacemos nada, pero si venia de COM/ENV se lo podemos borrar o dejar
+      // Dejémoslo si ya el usuario escribió algo
     }
+  }
+
+  getNombreUsuario(id: number): string {
+    return this.usuarios.find(u => u.id === id)?.nombre || 'Desconocido';
+  }
+
+  confirmarGuardado() {
+    let todosValidos = true;
+    this.items.forEach(item => {
+      if (!this.validarFila(item)) {
+        todosValidos = false;
+      }
+    });
+
+    if (!todosValidos) {
+      this.toastManager.showError('Error de Validación', 'Hay errores en uno o más formularios. Revísalos.');
+      return;
+    }
+
+    this.displayConfirmModal = true;
   }
 
   validarFila(item: GastoMasivoItem): boolean {
@@ -141,19 +169,7 @@ export class AnadirMasivoComponent implements OnInit {
   }
 
   guardarTodos() {
-    // Validar todas las filas primero
-    let todosValidos = true;
-    this.items.forEach(item => {
-      if (!this.validarFila(item)) {
-        todosValidos = false;
-      }
-    });
-
-    if (!todosValidos) {
-      this.toastManager.showError('Error de Validación', 'Hay errores en uno o más formularios. Revísalos.');
-      return;
-    }
-
+    this.displayConfirmModal = false;
     this.guardando = true;
 
     // Crear array de Observables que retornen el resultado (éxito o fallo)

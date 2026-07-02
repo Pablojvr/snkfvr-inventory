@@ -3,7 +3,7 @@
         <h2>Añadir Masivo (Gastos / Compras)</h2>
     </div>
     <div class="header-right">
-        <p-button label="Guardar Todos" icon="pi pi-save" (onClick)="guardarTodos()" [loading]="guardando" [disabled]="guardando"></p-button>
+        <p-button label="Guardar Todos" icon="pi pi-save" (onClick)="confirmarGuardado()" [loading]="guardando" [disabled]="guardando"></p-button>
     </div>
 </div>
 
@@ -43,7 +43,9 @@
             <!-- Motivo -->
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <label>Motivo / Descripción</label>
-                <input pInputText [(ngModel)]="item.gasto.motivo" style="width: 100%" [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.gasto.motivo}" />
+                <input pInputText [(ngModel)]="item.gasto.motivo" style="width: 100%" 
+                       [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.gasto.motivo}" 
+                       [readonly]="item.gasto.tipo === 'Comisión' || item.gasto.tipo === 'Envío'" />
                 <small class="p-error" *ngIf="item.submitted && !item.gasto.motivo">El motivo es obligatorio.</small>
             </div>
 
@@ -73,3 +75,27 @@
         <p-button label="Agregar Otro" icon="pi pi-plus" [text]="true" [raised]="true" (onClick)="agregarFila()" [disabled]="guardando"></p-button>
     </div>
 </div>
+
+<p-dialog header="Confirmar Guardado Masivo" [(visible)]="displayConfirmModal" [modal]="true" [style]="{width: 'min(600px, 95vw)'}" [draggable]="false" [resizable]="false">
+    <p class="p-m-0">Vas a registrar los siguientes elementos. Por favor, verifica que todo sea correcto:</p>
+    
+    <div style="margin-top: 1.5rem; max-height: 400px; overflow-y: auto;">
+        <div *ngFor="let item of items; let i = index" style="padding: 1rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <span style="font-weight: 600; color: #1e293b;">{{ item.gasto.motivo }}</span>
+                <span style="font-size: 0.875rem; color: #64748b;">
+                    <span class="badge-warn" style="margin-right: 0.5rem; font-size: 0.7rem; padding: 0.1rem 0.4rem;">{{ item.gasto.tipo }}</span> 
+                    {{ getNombreUsuario(item.gasto.usuarioId) }}
+                </span>
+            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #10b981;">
+                {{ item.gasto.monto | currency }}
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayConfirmModal = false"></p-button>
+        <p-button label="Confirmar y Guardar" icon="pi pi-check" (onClick)="guardarTodos()" [loading]="guardando" [disabled]="guardando"></p-button>
+    </ng-template>
+</p-dialog>

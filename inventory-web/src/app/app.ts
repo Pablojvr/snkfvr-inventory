@@ -10,4 +10,13 @@ import { ToastModule } from 'primeng/toast';
 })
 export class App {
   protected readonly title = signal('inventory-web');
+  sidebarVisible = signal(false);
+
+  toggleSidebar() {
+    this.sidebarVisible.update(v => !v);
+  }
+
+  closeSidebar() {
+    this.sidebarVisible.set(false);
+  }
 }

@@ -1,0 +1,65 @@
+<div class="card">
+  <h2>Usuarios</h2>
+  <p>Gestiona los usuarios que realizan transacciones. El usuario que selecciones como activo será el predeterminado en Compras y Ventas.</p>
+  
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="left">
+      <button pButton type="button" label="Nuevo Usuario" icon="pi pi-plus" class="p-button-success mr-2" (click)="mostrarModal()"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table #dt [value]="usuarios" [rows]="10" [paginator]="true" [globalFilterFields]="['nombre']" responsiveLayout="scroll">
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-0">Gestión de Usuarios</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar..." />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-usuario>
+      <tr>
+        <td>{{ usuario.nombre }}</td>
+        <td>
+          <span class="p-badge" [ngClass]="usuario.activo ? 'p-badge-success' : 'p-badge-danger'">
+            {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        <td>
+          <button pButton type="button" icon="pi pi-check" class="p-button-rounded p-button-success mr-2" 
+                  [disabled]="usuario.id === usuarioActivoId"
+                  (click)="setUsuarioActivo(usuario)" pTooltip="Establecer como usuario local">
+          </button>
+          <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2" 
+                  (click)="editar(usuario)">
+          </button>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger" 
+                  (click)="eliminarUsuario(usuario.id)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog [header]="editando ? 'Editar Usuario' : 'Detalles del Usuario'" [(visible)]="displayModal" [modal]="true" [style]="{width: '450px'}" [closable]="true" [dismissableMask]="true">
+    <div class="p-fluid" style="margin-top: 1rem;">
+      <div class="field">
+        <label for="nombre">Nombre del Usuario</label>
+        <input type="text" pInputText id="nombre" [(ngModel)]="nuevoUsuario.nombre" required autofocus [ngClass]="{'ng-invalid ng-dirty': submitted && !nuevoUsuario.nombre}" />
+        <small class="p-error" *ngIf="submitted && !nuevoUsuario.nombre">El nombre es requerido.</small>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="displayModal = false"></button>
+      <button pButton type="button" label="Guardar" icon="pi pi-check" class="p-button-text" (click)="guardarUsuario()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

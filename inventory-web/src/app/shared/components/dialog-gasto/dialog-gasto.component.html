@@ -1,0 +1,39 @@
+<p-dialog [header]="editando ? 'Editar Gasto' : 'Registrar Gasto'" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '450px' }">
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="tipo">Tipo de Gasto</label>
+            <p-select id="tipo" [options]="tiposGasto" [(ngModel)]="gasto.tipo" (onChange)="onTipoOProductoChange()" appendTo="body" styleClass="w-full" [disabled]="fijarTipo || (editando && productoInicialId != null)"></p-select>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="motivo">Descripción</label>
+            <input pInputText id="motivo" [(ngModel)]="gasto.motivo" [disabled]="gasto.tipo === 'Comisión'" style="width: 100%" [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" />
+            <small class="p-error" *ngIf="submitted && !gasto.motivo">La descripción es obligatoria.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="responsable">Quién lo hizo</label>
+            <p-select id="responsable" [options]="usuarios" [(ngModel)]="gasto.usuarioId" optionLabel="nombre"
+                optionValue="id" placeholder="Seleccione un usuario" appendTo="body" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.usuarioId}"></p-select>
+            <small class="p-error" *ngIf="submitted && !gasto.usuarioId">Debe seleccionar un usuario.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="monto">Monto</label>
+            <p-inputNumber inputId="monto" [(ngModel)]="gasto.monto" mode="currency" currency="USD" locale="en-US"
+                styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && (!gasto.monto || gasto.monto <= 0)}"></p-inputNumber>
+            <small class="p-error" *ngIf="submitted && (!gasto.monto || gasto.monto <= 0)">El monto debe ser mayor a 0.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="fecha">Fecha</label>
+            <p-datepicker id="fecha" [(ngModel)]="gasto.fecha" appendTo="body" styleClass="w-full"></p-datepicker>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;" *ngIf="gasto.tipo !== 'Calzado'">
+            <label for="producto">Asociar Producto (Opcional)</label>
+            <p-select id="producto" [options]="productos" [(ngModel)]="gasto.productoId" (onChange)="onTipoOProductoChange()" optionLabel="descripcion"
+                optionValue="id" [showClear]="true" [filter]="true" filterBy="descripcion"
+                placeholder="Seleccione un producto" appendTo="body" styleClass="w-full" [disabled]="fijarProductoId || (editando && productoInicialId != null)"></p-select>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()"></p-button>
+    </ng-template>
+</p-dialog>

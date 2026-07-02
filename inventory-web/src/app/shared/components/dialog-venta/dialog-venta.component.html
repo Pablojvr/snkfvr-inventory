@@ -1,0 +1,35 @@
+<p-dialog [header]="editando ? 'Editar Venta' : 'Registrar Venta'" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '450px' }">
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="producto">Producto</label>
+            <p-select id="producto" [options]="productos" [(ngModel)]="venta.productoId" optionLabel="descripcion" optionValue="id" [filter]="true" filterBy="descripcion" placeholder="Seleccione un producto" appendTo="body" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && !venta.productoId}"></p-select>
+            <small class="p-error" *ngIf="submitted && !venta.productoId">Debe seleccionar un producto.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="vendedor">Vendedor</label>
+            <p-select id="vendedor" [options]="usuarios" [(ngModel)]="venta.usuarioId" optionLabel="nombre" optionValue="id" placeholder="Seleccione un usuario" appendTo="body" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && !venta.usuarioId}"></p-select>
+            <small class="p-error" *ngIf="submitted && !venta.usuarioId">Debe seleccionar un vendedor.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="precio">Precio de Venta</label>
+            <p-inputNumber inputId="precio" [(ngModel)]="venta.precioVenta" mode="currency" currency="USD" locale="en-US" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && (!venta.precioVenta || venta.precioVenta <= 0)}"></p-inputNumber>
+            <small class="p-error" *ngIf="submitted && (!venta.precioVenta || venta.precioVenta <= 0)">El precio debe ser mayor a 0.</small>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="envio">Costo de Envío</label>
+            <p-inputNumber inputId="envio" [(ngModel)]="venta.costoEnvio" mode="currency" currency="USD" locale="en-US" styleClass="w-full"></p-inputNumber>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="adicionales">Costos Adicionales</label>
+            <p-inputNumber inputId="adicionales" [(ngModel)]="venta.costosAdicionales" mode="currency" currency="USD" locale="en-US" styleClass="w-full"></p-inputNumber>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="fecha">Fecha de Venta</label>
+            <p-datepicker id="fecha" [(ngModel)]="venta.fechaVenta" appendTo="body" styleClass="w-full"></p-datepicker>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()"></p-button>
+    </ng-template>
+</p-dialog>

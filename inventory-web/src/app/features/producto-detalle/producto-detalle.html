@@ -1,0 +1,50 @@
+<div class="detail-card" *ngIf="producto">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="volver()"></p-button>
+                <h2 style="margin: 0;">{{ producto.descripcion }}</h2>
+                <span class="status-badge" [ngClass]="getStatusClass(producto.estado)">{{ producto.estado || 'Disponible' }}</span>
+            </div>
+            <div style="color: #64748b; font-size: 0.875rem; margin-left: 3rem;">
+                Adquirido el {{ producto.fechaCompra | date }}
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <p-button label="Generar Comisión" icon="pi pi-dollar" severity="warn" (onClick)="agregarComision()" *ngIf="producto.estado !== 'Vendido'"></p-button>
+            <p-button label="Vender" icon="pi pi-shopping-cart" severity="success" (onClick)="venderProducto()" *ngIf="producto.estado !== 'Vendido'"></p-button>
+            <p-button label="Generar Gasto" icon="pi pi-receipt" severity="secondary" (onClick)="generarGasto()" *ngIf="producto.estado !== 'Vendido'"></p-button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Costo Base</span>
+            <span class="info-value">{{ producto.costo | currency }}</span>
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+
+    <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Línea de Tiempo del Producto</h3>
+    
+    <div style="padding-left: 1rem;">
+        <p-timeline [value]="movimientos">
+            <ng-template pTemplate="content" let-mov>
+                <small class="p-text-secondary">{{ mov.fecha | date:'medium' }}</small>
+                <div style="font-weight: bold; font-size: 1.1rem; margin-top: 0.25rem;">{{ mov.tipo }}</div>
+                <div style="color: #475569; margin-top: 0.25rem;" [innerHTML]="mov.descripcion"></div>
+                <div *ngIf="mov.montoTotal !== 0" [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600; font-size: 1.1rem; margin-top: 0.25rem;">
+                    {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
+                </div>
+            </ng-template>
+        </p-timeline>
+        <div *ngIf="movimientos.length === 0" style="text-align: center; color: #64748b; padding: 2rem 0; background: #f8fafc; border-radius: 8px;">
+            No hay historia registrada para este producto.
+        </div>
+    </div>
+</div>
+
+<app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>
+<app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>

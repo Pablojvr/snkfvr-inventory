@@ -1,0 +1,43 @@
+<div class="card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin: 0;">Bitácora de Movimientos</h2>
+        <p style="color: #64748b;">Registro histórico de todas las entradas y salidas de dinero.</p>
+    </div>
+
+    <p-table #dt [value]="movimientos" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="15" [globalFilterFields]="['descripcion', 'tipo']">
+        <ng-template pTemplate="caption">
+            <div style="display: flex; justify-content: flex-end;">
+                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar..." />
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Monto Total</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-mov>
+            <tr>
+                <td>{{ mov.id }}</td>
+                <td>{{ mov.fecha | date:'medium' }}</td>
+                <td>
+                    <span [ngStyle]="{'background': mov.montoTotal > 0 ? '#10b981' : '#ef4444', 'color': 'white', 'padding': '0.25rem 0.5rem', 'border-radius': '4px', 'font-size': '0.875rem'}">
+                        {{ mov.tipo }}
+                    </span>
+                </td>
+                <td [innerHTML]="mov.descripcion"></td>
+                <td [ngStyle]="{'color': mov.montoTotal > 0 ? '#10b981' : '#ef4444', 'font-weight': 'bold'}">
+                    {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5">No hay movimientos registrados.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

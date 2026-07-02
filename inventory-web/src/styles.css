@@ -1,0 +1,194 @@
+@import "primeicons/primeicons.css";
+
+:root {
+  --primary-color: #3b82f6;
+  --surface-ground: #f8fafc;
+  --surface-section: #ffffff;
+  --text-color: #334155;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f8fafc;
+  --sidebar-hover: #334155;
+  --border-color: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+.layout-wrapper {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  padding: 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--sidebar-hover);
+}
+
+.logo h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.nav-menu a {
+  padding: 1rem 1.5rem;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background-color 0.2s;
+}
+
+.nav-menu a:hover, .nav-menu a.active {
+  background-color: var(--sidebar-hover);
+  border-left: 4px solid var(--primary-color);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 60px;
+  background-color: var(--surface-section);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Modern Toast Styles */
+.p-toast {
+  width: 25rem;
+}
+
+.p-toast .p-toast-message {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOutUp 0.3s 2.7s forwards;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  border-left: 6px solid #10b981;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  border-left: 6px solid #3b82f6;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  border-left: 6px solid #f59e0b;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  border-left: 6px solid #ef4444;
+}
+
+.p-toast .p-toast-message .p-toast-message-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon {
+  color: #10b981;
+}
+
+.p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon {
+  color: #3b82f6;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
+  color: #f59e0b;
+}
+
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon {
+  color: #ef4444;
+}
+
+.p-toast .p-toast-message .p-toast-message-text {
+  margin: 0;
+  flex: 1;
+}
+
+.p-toast .p-toast-summary {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.p-toast .p-toast-detail {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.p-toast .p-toast-icon-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: #64748b;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.p-toast .p-toast-icon-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}

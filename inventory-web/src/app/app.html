@@ -1,0 +1,40 @@
+<div class="layout-wrapper">
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>Inventario SNKFVR</h2>
+    </div>
+    <nav class="nav-menu">
+      <a routerLink="/dashboard" routerLinkActive="active">
+        <i class="pi pi-home"></i> Dashboard
+      </a>
+      <a routerLink="/gastos" routerLinkActive="active">
+        <i class="pi pi-dollar"></i> Compras / Gastos
+      </a>
+      <a routerLink="/ventas" routerLinkActive="active">
+        <i class="pi pi-shopping-cart"></i> Ventas
+      </a>
+      <a routerLink="/ingresos" routerLinkActive="active">
+        <i class="pi pi-arrow-down-left"></i> Ingresos
+      </a>
+      <a routerLink="/productos" routerLinkActive="active">
+        <i class="pi pi-box"></i> Productos
+      </a>
+      <a routerLink="/usuarios" routerLinkActive="active">
+        <i class="pi pi-users"></i> Usuarios
+      </a>
+      <a routerLink="/movimientos" routerLinkActive="active">
+        <i class="pi pi-list"></i> Bitácora
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span>Bienvenido, Admin</span>
+    </header>
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+<p-toast position="bottom-center"></p-toast>

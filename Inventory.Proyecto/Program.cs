@@ -37,9 +37,12 @@ builder.Services.AddScoped<Inventory.Application.UseCases.IEditarIngresoUseCase,
 // Configurar CORS para permitir que Angular se conecte
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowVercel", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "https://snkfvr-inventory.vercel.app",
+                "http://localhost:4200"
+              )
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -47,15 +50,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Usar CORS antes de la autorización
-app.UseCors("AllowAll");
-
 // Aplicar migraciones automáticamente
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<Inventory.Settings.Data.InventarioDbContext>();
     dbContext.Database.Migrate();
 }
+
+// CORS debe ir antes de routing y authorization
+app.UseRouting();
+app.UseCors("AllowVercel");
 
 // Configurar el pipeline de peticiones HTTP.
 if (app.Environment.IsDevelopment())

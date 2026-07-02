@@ -1,0 +1,78 @@
+<div class="page-header">
+    <div class="header-left">
+        <h2>Añadir Masivo (Gastos / Compras)</h2>
+    </div>
+    <div class="header-right">
+        <p-button label="Guardar Todos" icon="pi pi-save" (onClick)="guardarTodos()" [loading]="guardando" [disabled]="guardando"></p-button>
+    </div>
+</div>
+
+<div class="p-fluid">
+    <div *ngFor="let item of items; let i = index" class="card" style="margin-bottom: 1rem; position: relative;">
+        <!-- Delete Button for Row -->
+        <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                style="position: absolute; right: 1rem; top: 1rem;" 
+                (click)="eliminarFila(i)" 
+                pTooltip="Eliminar formulario">
+        </button>
+
+        <h4 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-color);">#{{ i + 1 }}</h4>
+        
+        <!-- Error Message if backend or validation failed -->
+        <p-message *ngIf="item.error" severity="error" [text]="item.error" styleClass="w-full mb-3 block"></p-message>
+
+        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <!-- Tipo -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Tipo de Gasto</label>
+                <p-select [options]="tiposGasto" [(ngModel)]="item.gasto.tipo" appendTo="body" styleClass="w-full" (onChange)="onTipoOProductoChange(item)"></p-select>
+            </div>
+
+            <!-- Producto (if not Calzado without product usually) -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Producto (Opcional)</label>
+                <p-select [options]="productos" [(ngModel)]="item.gasto.productoId" optionLabel="descripcion" 
+                          [filter]="true" filterBy="descripcion" [showClear]="true" placeholder="Asociar a un producto..." 
+                          appendTo="body" styleClass="w-full" (onChange)="onTipoOProductoChange(item)">
+                    <ng-template let-prod pTemplate="item">
+                        <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
+                    </ng-template>
+                </p-select>
+                <small class="p-error" *ngIf="item.submitted && item.gasto.productoId && item.gasto.tipo !== 'Comisión' && item.gasto.tipo !== 'Envío' && item.gasto.tipo !== 'Calzado'">
+                    Incompatible con este tipo.
+                </small>
+            </div>
+
+            <!-- Motivo -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Motivo / Descripción</label>
+                <input pInputText [(ngModel)]="item.gasto.motivo" style="width: 100%" [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.gasto.motivo}" />
+                <small class="p-error" *ngIf="item.submitted && !item.gasto.motivo">El motivo es obligatorio.</small>
+            </div>
+
+            <!-- Monto -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Monto</label>
+                <p-inputNumber [(ngModel)]="item.gasto.monto" mode="currency" currency="USD" locale="en-US" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': item.submitted && (!item.gasto.monto || item.gasto.monto <= 0)}"></p-inputNumber>
+                <small class="p-error" *ngIf="item.submitted && (!item.gasto.monto || item.gasto.monto <= 0)">El monto debe ser > 0.</small>
+            </div>
+
+            <!-- Fecha -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Fecha</label>
+                <p-datepicker [(ngModel)]="item.gasto.fecha" appendTo="body" styleClass="w-full"></p-datepicker>
+            </div>
+
+            <!-- Usuario -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label>Usuario / Responsable</label>
+                <p-select [options]="usuarios" [(ngModel)]="item.gasto.usuarioId" optionLabel="nombre" optionValue="id" appendTo="body" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.gasto.usuarioId}"></p-select>
+                <small class="p-error" *ngIf="item.submitted && !item.gasto.usuarioId">Obligatorio.</small>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 1rem; margin-bottom: 2rem;">
+        <p-button label="Agregar Otro" icon="pi pi-plus" [text]="true" [raised]="true" (onClick)="agregarFila()" [disabled]="guardando"></p-button>
+    </div>
+</div>

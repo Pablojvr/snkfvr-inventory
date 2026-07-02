@@ -10,12 +10,13 @@ import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Router } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-gastos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule, DialogGastoComponent],
   templateUrl: './gastos.html',
 })
 export class Gastos implements OnInit {
@@ -30,6 +31,8 @@ export class Gastos implements OnInit {
   ];
   
   menuItems: MenuItem[] = [];
+
+  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
@@ -57,11 +60,12 @@ export class Gastos implements OnInit {
   }
 
   showDialog() {
-    this.router.navigate(['/anadir-masivo']);
+    this.dialogGasto.showDialog();
   }
 
   toggleMenu(event: any, gasto: Gasto, menu: any) {
     this.menuItems = [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(gasto) },
       { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(gasto.id!) }
     ];
 
@@ -78,12 +82,16 @@ export class Gastos implements OnInit {
     menu.toggle(event);
   }
 
+  editar(gasto: Gasto) {
+    this.dialogGasto.showDialog(undefined, undefined, gasto);
+  }
+
   agregarComision(productoId: number) {
-    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: productoId, tipo: 'Comisión' } });
+    this.dialogGasto.showDialog(productoId, 'Comisión');
   }
 
   agregarEnvio(productoId: number) {
-    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: productoId, tipo: 'Envío' } });
+    this.dialogGasto.showDialog(productoId, 'Envío');
   }
 
   venderProducto(productoId: number) {

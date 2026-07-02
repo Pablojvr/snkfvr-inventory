@@ -29,8 +29,8 @@
             </div>
 
             <!-- Producto (if not Calzado without product usually) -->
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label>Producto (Opcional)</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;" *ngIf="item.gasto.tipo === 'Comisión' || item.gasto.tipo === 'Envío'">
+                <label>Producto Relacionado</label>
                 <p-select [options]="productos" [(ngModel)]="item.gasto.productoId" optionLabel="descripcion" 
                           [filter]="true" filterBy="descripcion" [showClear]="true" placeholder="Asociar a un producto..." 
                           appendTo="body" styleClass="w-full" (onChange)="onTipoOProductoChange(item)">
@@ -38,9 +38,6 @@
                         <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
                     </ng-template>
                 </p-select>
-                <small class="p-error" *ngIf="item.submitted && item.gasto.productoId && item.gasto.tipo !== 'Comisión' && item.gasto.tipo !== 'Envío' && item.gasto.tipo !== 'Calzado'">
-                    Incompatible con este tipo.
-                </small>
             </div>
 
             <!-- Motivo -->

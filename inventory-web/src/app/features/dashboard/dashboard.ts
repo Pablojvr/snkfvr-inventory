@@ -8,13 +8,12 @@ import { TimelineModule } from 'primeng/timeline';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
-import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogGastoComponent, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogVentaComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -26,7 +25,6 @@ export class Dashboard implements OnInit {
   productosFiltrados: Producto[] = [];
   productoBuscado: any;
 
-  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
   
   constructor(private api: ApiService, private router: Router) {}
@@ -86,6 +84,6 @@ export class Dashboard implements OnInit {
   }
 
   nuevoGastoRapido() {
-      this.dialogGasto.showDialog();
+    this.router.navigate(['/anadir-masivo']);
   }
 }

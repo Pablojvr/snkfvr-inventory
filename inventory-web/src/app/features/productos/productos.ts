@@ -14,13 +14,12 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { ApiService, Producto, Movimiento } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent, DialogVentaComponent],
+  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogVentaComponent],
   templateUrl: './productos.html',
 })
 export class Productos implements OnInit {
@@ -36,7 +35,6 @@ export class Productos implements OnInit {
 
   menuItems: MenuItem[] = [];
 
-  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
@@ -57,7 +55,7 @@ export class Productos implements OnInit {
       ];
       
       if (prod.estado !== 'Vendido') {
-          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.dialogGasto.showDialog(prod.id, 'Comisión') });
+          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: prod.id, tipo: 'Comisión' } }) });
           this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.venderProducto(prod.id!) });
       }
       
@@ -144,7 +142,7 @@ export class Productos implements OnInit {
   }
 
   generarGasto(id: number) {
-    this.dialogGasto.showDialog(id);
+    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: id, tipo: 'Calzado' } });
   }
 
   venderProducto(id: number) {

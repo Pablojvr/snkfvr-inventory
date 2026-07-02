@@ -6,13 +6,12 @@ import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Producto, Movimiento } from '../../core/services/api';
-import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule, DialogGastoComponent, DialogVentaComponent],
+  imports: [CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule, DialogVentaComponent],
   templateUrl: './producto-detalle.html',
   styles: [`
     .detail-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -32,7 +31,6 @@ export class ProductoDetalle implements OnInit {
   producto: Producto | null = null;
   movimientos: Movimiento[] = [];
 
-  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(
@@ -77,11 +75,11 @@ export class ProductoDetalle implements OnInit {
   }
 
   generarGasto() {
-    this.dialogGasto.showDialog(this.productoId);
+    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: this.productoId, tipo: 'Calzado' } });
   }
   
   agregarComision() {
-    this.dialogGasto.showDialog(this.productoId, 'Comisión');
+    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: this.productoId, tipo: 'Comisión' } });
   }
 
   venderProducto() {

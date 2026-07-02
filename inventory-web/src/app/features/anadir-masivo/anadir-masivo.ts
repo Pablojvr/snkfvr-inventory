@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -47,13 +48,30 @@ export class AnadirMasivoComponent implements OnInit {
   guardando: boolean = false;
   defaultUsuarioId: number = 0;
 
-  constructor(private api: ApiService, private toastManager: ToastManagerService) {}
+  constructor(private api: ApiService, private toastManager: ToastManagerService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.cargarDatos();
     const savedUser = localStorage.getItem('usuarioActivoId');
     this.defaultUsuarioId = savedUser ? parseInt(savedUser, 10) : 0;
-    this.agregarFila(); // Por defecto 1 fila
+    
+    this.route.queryParams.subscribe(params => {
+      const tipoQuery = params['tipo'] || 'Calzado';
+      const productoIdQuery = params['productoId'] ? parseInt(params['productoId'], 10) : undefined;
+      
+      this.items.push({
+        idLocal: this.nextId++,
+        submitted: false,
+        gasto: {
+          motivo: '',
+          fecha: new Date(),
+          usuarioId: this.defaultUsuarioId,
+          monto: 0,
+          tipo: tipoQuery,
+          productoId: productoIdQuery
+        }
+      });
+    });
   }
 
   cargarDatos() {

@@ -7,7 +7,6 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Gasto, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 import { Router } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
@@ -17,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-gastos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, FormsModule, MenuModule],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, DialogVentaComponent, FormsModule, MenuModule],
   templateUrl: './gastos.html',
 })
 export class Gastos implements OnInit {
@@ -33,7 +32,6 @@ export class Gastos implements OnInit {
   
   menuItems: MenuItem[] = [];
 
-  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
@@ -61,12 +59,11 @@ export class Gastos implements OnInit {
   }
 
   showDialog() {
-    this.dialogGasto.showDialog();
+    this.router.navigate(['/anadir-masivo']);
   }
 
   toggleMenu(event: any, gasto: Gasto, menu: any) {
     this.menuItems = [
-      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(gasto) },
       { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(gasto.id!) }
     ];
 
@@ -83,16 +80,12 @@ export class Gastos implements OnInit {
     menu.toggle(event);
   }
 
-  editar(gasto: Gasto) {
-    this.dialogGasto.showDialog(undefined, undefined, gasto);
-  }
-
   agregarComision(productoId: number) {
-    this.dialogGasto.showDialog(productoId, 'Comisión');
+    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: productoId, tipo: 'Comisión' } });
   }
 
   agregarEnvio(productoId: number) {
-    this.dialogGasto.showDialog(productoId, 'Envío');
+    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: productoId, tipo: 'Envío' } });
   }
 
   venderProducto(productoId: number) {

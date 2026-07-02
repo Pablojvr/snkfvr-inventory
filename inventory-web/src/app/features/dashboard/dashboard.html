@@ -1,16 +1,15 @@
-<div class="page-header-bar">
-    <div class="quick-actions">
-        <h3 class="section-label">Acciones Rápidas:</h3>
-        <p-button label="Registrar Venta" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()"></p-button>
-        <p-button label="Registrar Gasto" icon="pi pi-dollar" severity="warn" (onClick)="nuevoGastoRapido()"></p-button>
-    </div>
-    <div class="product-search">
-        <span class="search-label">Buscar Producto:</span>
-        <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Ej. Air Force 1">
+<div class="page-header-bar" style="flex-direction: column; align-items: stretch; gap: 1rem;">
+    <div class="product-search" style="width: 100%; display: flex; flex-direction: column;">
+        <span class="search-label" style="margin-bottom: 0.5rem;">Buscar Producto:</span>
+        <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Ej. Air Force 1" styleClass="w-full">
             <ng-template let-prod pTemplate="item">
                 <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
             </ng-template>
         </p-select>
+    </div>
+    <div class="quick-actions" style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem; align-items: stretch;">
+        <p-button label="Registrar Venta" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()" styleClass="w-full"></p-button>
+        <p-button label="Registrar Compra / Gasto" icon="pi pi-dollar" severity="warn" (onClick)="nuevoGastoRapido()" styleClass="w-full"></p-button>
     </div>
 </div>
 
@@ -74,5 +73,4 @@
     </div>
 </div>
 
-<app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>
 <app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>

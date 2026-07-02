@@ -311,7 +311,7 @@ body {
 .p-toast .p-toast-message.p-toast-message-warn    .p-toast-message-icon { color: #f59e0b; }
 .p-toast .p-toast-message.p-toast-message-error   .p-toast-message-icon { color: #ef4444; }
 
-.p-toast .p-toast-message .p-toast-message-text { margin: 0; flex: 1; }
+.p-toast .p-toast-message .p-toast-message-text { margin: 0; flex: 1; word-break: break-word; }
 .p-toast .p-toast-summary { font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem; }
 .p-toast .p-toast-detail  { font-size: 0.875rem; color: #64748b; margin: 0; }
 

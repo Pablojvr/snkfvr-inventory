@@ -25,6 +25,7 @@ export class Ingresos implements OnInit {
 
   editando: boolean = false;
   submitted: boolean = false;
+  guardando: boolean = false;
 
   constructor(private api: ApiService, private toastManager: ToastManagerService) {}
 
@@ -65,21 +66,31 @@ export class Ingresos implements OnInit {
 
   guardar() {
     this.submitted = true;
+    if (this.guardando) return;
     if (!this.ingreso.motivo || !this.ingreso.usuarioId || !this.ingreso.monto || this.ingreso.monto <= 0) {
       return;
     }
 
+    this.guardando = true;
     if (this.editando && this.ingreso.id) {
-      this.api.editarIngreso(this.ingreso.id, this.ingreso).subscribe(() => {
-        this.displayDialog = false;
-        this.cargarDatos();
-        this.toastManager.showSuccess('Éxito', `Se editó el ingreso: ${this.ingreso.motivo}`);
+      this.api.editarIngreso(this.ingreso.id, this.ingreso).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.cargarDatos();
+          this.toastManager.showSuccess('Éxito', `Se editó el ingreso: ${this.ingreso.motivo}`);
+        },
+        error: () => this.guardando = false
       });
     } else {
-      this.api.crearIngreso(this.ingreso).subscribe(() => {
-        this.displayDialog = false;
-        this.cargarDatos();
-        this.toastManager.showSuccess('Éxito', `Se registró el ingreso: ${this.ingreso.motivo}`);
+      this.api.crearIngreso(this.ingreso).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.cargarDatos();
+          this.toastManager.showSuccess('Éxito', `Se registró el ingreso: ${this.ingreso.motivo}`);
+        },
+        error: () => this.guardando = false
       });
     }
   }

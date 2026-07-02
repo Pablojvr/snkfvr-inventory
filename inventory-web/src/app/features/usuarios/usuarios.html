@@ -59,7 +59,7 @@
     </div>
     <ng-template pTemplate="footer">
       <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="displayModal = false"></button>
-      <button pButton type="button" label="Guardar" icon="pi pi-check" class="p-button-text" (click)="guardarUsuario()"></button>
+      <button pButton type="button" label="Guardar" icon="pi pi-check" class="p-button-text" (click)="guardarUsuario()" [loading]="guardando" [disabled]="guardando"></button>
     </ng-template>
   </p-dialog>
 </div>

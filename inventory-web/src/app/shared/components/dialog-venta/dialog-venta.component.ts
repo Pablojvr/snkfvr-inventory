@@ -22,6 +22,7 @@ export class DialogVentaComponent {
   
   editando: boolean = false;
   submitted: boolean = false;
+  guardando: boolean = false;
   
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
@@ -61,6 +62,7 @@ export class DialogVentaComponent {
 
   guardar() {
     this.submitted = true;
+    if (this.guardando) return;
     if (!this.venta.productoId || !this.venta.usuarioId || !this.venta.precioVenta || this.venta.precioVenta <= 0) {
       return;
     }
@@ -69,17 +71,26 @@ export class DialogVentaComponent {
         this.venta.productoId = (this.venta.productoId as any).id;
     }
 
+    this.guardando = true;
     if (this.editando && this.venta.id) {
-      this.api.editarVenta(this.venta.id, this.venta).subscribe(() => {
-        this.displayDialog = false;
-        this.onSaved.emit();
-        this.toastManager.showSuccess('Éxito', 'Se editó la venta exitosamente.');
+      this.api.editarVenta(this.venta.id, this.venta).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.onSaved.emit();
+          this.toastManager.showSuccess('Éxito', 'Se editó la venta exitosamente.');
+        },
+        error: () => this.guardando = false
       });
     } else {
-      this.api.crearVenta(this.venta).subscribe(() => {
-        this.displayDialog = false;
-        this.onSaved.emit();
-        this.toastManager.showSuccess('Éxito', 'Se registró la venta exitosamente.');
+      this.api.crearVenta(this.venta).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.onSaved.emit();
+          this.toastManager.showSuccess('Éxito', 'Se registró la venta exitosamente.');
+        },
+        error: () => this.guardando = false
       });
     }
   }

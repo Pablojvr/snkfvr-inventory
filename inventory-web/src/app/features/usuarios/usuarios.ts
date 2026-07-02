@@ -33,6 +33,7 @@ export class Usuarios implements OnInit {
   
   editando: boolean = false;
   submitted: boolean = false;
+  guardando: boolean = false;
 
   constructor(private apiService: ApiService, private toastManager: ToastManagerService) {}
 
@@ -69,22 +70,30 @@ export class Usuarios implements OnInit {
 
   guardarUsuario() {
     this.submitted = true;
+    if (this.guardando) return;
     if (!this.nuevoUsuario.nombre || !this.nuevoUsuario.nombre.trim()) {
       return;
     }
+    
+    this.guardando = true;
 
     if (this.editando && this.nuevoUsuario.id) {
       this.apiService.editarUsuario(this.nuevoUsuario.id, this.nuevoUsuario).subscribe({
         next: (data) => {
+          this.guardando = false;
           this.displayModal = false;
           this.cargarUsuarios();
           this.toastManager.showSuccess('Éxito', `Se editó el usuario: ${this.nuevoUsuario.nombre}`);
         },
-        error: (e) => console.error('Error editando usuario', e)
+        error: (e) => {
+          this.guardando = false;
+          console.error('Error editando usuario', e);
+        }
       });
     } else {
       this.apiService.crearUsuario(this.nuevoUsuario).subscribe({
         next: (data) => {
+          this.guardando = false;
           this.usuarios.push(data);
           this.displayModal = false;
           // Set it as default automatically if there is none
@@ -93,7 +102,10 @@ export class Usuarios implements OnInit {
           }
           this.toastManager.showSuccess('Éxito', `Se registró el usuario: ${data.nombre}`);
         },
-        error: (e) => console.error('Error creando usuario', e)
+        error: (e) => {
+          this.guardando = false;
+          console.error('Error creando usuario', e);
+        }
       });
     }
   }

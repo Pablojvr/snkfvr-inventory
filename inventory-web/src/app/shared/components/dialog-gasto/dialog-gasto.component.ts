@@ -22,6 +22,7 @@ export class DialogGastoComponent {
   
   editando: boolean = false;
   submitted: boolean = false;
+  guardando: boolean = false;
   tiposGasto: string[] = ['Calzado', 'Comisión', 'Viático', 'Envío', 'Otros'];
   productoInicialId?: number;
   fijarProductoId: boolean = false; // Sirve para deshabilitar el dropdown cuando lo forzamos
@@ -101,6 +102,7 @@ export class DialogGastoComponent {
 
   guardar() {
     this.submitted = true;
+    if (this.guardando) return;
     
     if (!this.gasto.motivo || !this.gasto.usuarioId || !this.gasto.monto || this.gasto.monto <= 0) {
       return;
@@ -119,17 +121,26 @@ export class DialogGastoComponent {
       this.gasto.productoId = undefined;
     }
 
+    this.guardando = true;
     if (this.editando && this.gasto.id) {
-      this.api.editarGasto(this.gasto.id, this.gasto).subscribe(() => {
-        this.displayDialog = false;
-        this.onSaved.emit();
-        this.toastManager.showSuccess('Éxito', 'Se editó el gasto exitosamente.');
+      this.api.editarGasto(this.gasto.id, this.gasto).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.onSaved.emit();
+          this.toastManager.showSuccess('Éxito', 'Se editó el gasto exitosamente.');
+        },
+        error: () => this.guardando = false
       });
     } else {
-      this.api.crearGasto(this.gasto).subscribe(() => {
-        this.displayDialog = false;
-        this.onSaved.emit();
-        this.toastManager.showSuccess('Éxito', 'Se registró el gasto exitosamente.');
+      this.api.crearGasto(this.gasto).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.onSaved.emit();
+          this.toastManager.showSuccess('Éxito', 'Se registró el gasto exitosamente.');
+        },
+        error: () => this.guardando = false
       });
     }
   }

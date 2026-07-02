@@ -30,6 +30,6 @@
     </div>
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
-        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
     </ng-template>
 </p-dialog>

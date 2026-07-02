@@ -32,6 +32,7 @@ export class Productos implements OnInit {
   
   editando: boolean = false;
   submitted: boolean = false;
+  guardando: boolean = false;
 
   menuItems: MenuItem[] = [];
 
@@ -104,21 +105,31 @@ export class Productos implements OnInit {
 
   guardar() {
     this.submitted = true;
+    if (this.guardando) return;
     if (!this.producto.descripcion || !this.producto.costo || this.producto.costo <= 0) {
       return;
     }
 
+    this.guardando = true;
     if (this.editando && this.producto.id) {
-      this.api.editarProducto(this.producto.id, this.producto).subscribe(() => {
-        this.displayDialog = false;
-        this.cargarDatos();
-        this.toastManager.showSuccess('Éxito', `Se editó el producto: ${this.producto.descripcion}`);
+      this.api.editarProducto(this.producto.id, this.producto).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.cargarDatos();
+          this.toastManager.showSuccess('Éxito', `Se editó el producto: ${this.producto.descripcion}`);
+        },
+        error: () => this.guardando = false
       });
     } else {
-      this.api.crearProducto(this.producto).subscribe(() => {
-        this.displayDialog = false;
-        this.cargarDatos();
-        this.toastManager.showSuccess('Éxito', `Se registró el producto: ${this.producto.descripcion}`);
+      this.api.crearProducto(this.producto).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.displayDialog = false;
+          this.cargarDatos();
+          this.toastManager.showSuccess('Éxito', `Se registró el producto: ${this.producto.descripcion}`);
+        },
+        error: () => this.guardando = false
       });
     }
   }

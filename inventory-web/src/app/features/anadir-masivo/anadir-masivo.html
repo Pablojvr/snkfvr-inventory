@@ -2,9 +2,6 @@
     <div class="header-left">
         <h2>Añadir Masivo (Gastos / Compras)</h2>
     </div>
-    <div class="header-right">
-        <p-button label="Guardar Todos" icon="pi pi-save" (onClick)="confirmarGuardado()" [loading]="guardando" [disabled]="guardando"></p-button>
-    </div>
 </div>
 
 <div class="p-fluid">
@@ -71,8 +68,9 @@
         </div>
     </div>
 
-    <div style="display: flex; justify-content: center; margin-top: 1rem; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; margin-bottom: 2rem;">
         <p-button label="Agregar Otro" icon="pi pi-plus" [text]="true" [raised]="true" (onClick)="agregarFila()" [disabled]="guardando"></p-button>
+        <p-button label="Guardar Todos" icon="pi pi-save" (onClick)="confirmarGuardado()" [loading]="guardando" [disabled]="guardando"></p-button>
     </div>
 </div>
 

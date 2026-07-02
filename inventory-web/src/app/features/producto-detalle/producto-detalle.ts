@@ -15,7 +15,8 @@ import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialo
   templateUrl: './producto-detalle.html',
   styles: [`
     .detail-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .header-actions { display: flex; gap: 1rem; align-items: center; }
+    .header-container { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .header-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
     .info-item { display: flex; flex-direction: column; gap: 0.5rem; }
     .info-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }

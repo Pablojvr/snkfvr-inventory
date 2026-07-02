@@ -1,28 +1,31 @@
 <div class="layout-wrapper">
-  <aside class="sidebar">
+  <aside class="sidebar" [class.active]="sidebarVisible()">
     <div class="logo">
       <h2>Inventario SNKFVR</h2>
+      <button class="close-sidebar-btn" (click)="toggleSidebar()">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
     <nav class="nav-menu">
-      <a routerLink="/dashboard" routerLinkActive="active">
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-home"></i> Dashboard
       </a>
-      <a routerLink="/gastos" routerLinkActive="active">
+      <a routerLink="/gastos" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-dollar"></i> Compras / Gastos
       </a>
-      <a routerLink="/ventas" routerLinkActive="active">
+      <a routerLink="/ventas" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-shopping-cart"></i> Ventas
       </a>
-      <a routerLink="/ingresos" routerLinkActive="active">
+      <a routerLink="/ingresos" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-arrow-down-left"></i> Ingresos
       </a>
-      <a routerLink="/productos" routerLinkActive="active">
+      <a routerLink="/productos" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-box"></i> Productos
       </a>
-      <a routerLink="/usuarios" routerLinkActive="active">
+      <a routerLink="/usuarios" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-users"></i> Usuarios
       </a>
-      <a routerLink="/movimientos" routerLinkActive="active">
+      <a routerLink="/movimientos" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-list"></i> Bitácora
       </a>
     </nav>
@@ -30,9 +33,14 @@
 
   <div class="main-content">
     <header class="topbar">
-      <span>Bienvenido, Admin</span>
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class="pi pi-bars"></i>
+      </button>
+      <div class="topbar-right">
+        <span>Bienvenido, Admin</span>
+      </div>
     </header>
-    <main class="content">
+    <main class="content" (click)="closeSidebar()">
       <router-outlet></router-outlet>
     </main>
   </div>

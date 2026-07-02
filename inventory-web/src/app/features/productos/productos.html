@@ -1,47 +1,49 @@
-<div class="card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0;">Productos</h2>
+<div class="card">
+    <div class="page-header">
+        <h2>Productos</h2>
         <p-button label="Nuevo Producto" icon="pi pi-plus" (onClick)="showDialog()"></p-button>
     </div>
 
-    <p-table #dt [value]="productos" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="10" [globalFilterFields]="['descripcion']">
-        <ng-template pTemplate="caption">
-            <div style="display: flex; justify-content: flex-end;">
-                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar por descripción..." />
-            </div>
-        </ng-template>
-        <ng-template pTemplate="header">
-            <tr>
-                <th>ID</th>
-                <th>Descripción</th>
-                <th>Fecha Compra</th>
-                <th>Costo</th>
-                <th>Estado</th>
-                <th style="width: 250px">Acciones</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-prod>
-            <tr>
-                <td>{{ prod.id }}</td>
-                <td>{{ prod.descripcion }}</td>
-                <td>{{ prod.fechaCompra | date }}</td>
-                <td>{{ prod.costo | currency }}</td>
-                <td>{{ prod.estado || 'Disponible' }}</td>
-                <td>
-                    <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-                    <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" (onClick)="toggleMenu($event, prod, menu)" pTooltip="Acciones" tooltipPosition="top"></p-button>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td colspan="6">No hay productos registrados.</td>
-            </tr>
-        </ng-template>
-    </p-table>
+    <div class="table-scroll-wrapper">
+        <p-table #dt [value]="productos" [paginator]="true" [rows]="10" [globalFilterFields]="['descripcion']">
+            <ng-template pTemplate="caption">
+                <div class="table-caption">
+                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar por descripción..." />
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Fecha Compra</th>
+                    <th>Costo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-prod>
+                <tr>
+                    <td>{{ prod.id }}</td>
+                    <td>{{ prod.descripcion }}</td>
+                    <td>{{ prod.fechaCompra | date }}</td>
+                    <td>{{ prod.costo | currency }}</td>
+                    <td>{{ prod.estado || 'Disponible' }}</td>
+                    <td>
+                        <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" (onClick)="toggleMenu($event, prod, menu)" pTooltip="Acciones" tooltipPosition="top"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="empty-msg">No hay productos registrados.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>
 
-<p-dialog header="Historial del Producto" [(visible)]="displayTimeline" [modal]="true" [style]="{ width: '500px' }">
+<p-dialog header="Historial del Producto" [(visible)]="displayTimeline" [modal]="true" [style]="{ width: 'min(500px, 95vw)' }">
     <div style="padding: 1rem 0;">
         <p-timeline [value]="movimientosProducto">
             <ng-template pTemplate="content" let-mov>
@@ -53,13 +55,11 @@
                 </div>
             </ng-template>
         </p-timeline>
-        <div *ngIf="movimientosProducto.length === 0" style="text-align: center; color: #64748b; padding: 1rem 0;">
-            No hay historia registrada para este producto.
-        </div>
+        <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay historia registrada para este producto.</div>
     </div>
 </p-dialog>
 
-<p-dialog [header]="editando ? 'Editar Producto' : 'Nuevo Producto'" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '450px' }">
+<p-dialog [header]="editando ? 'Editar Producto' : 'Nuevo Producto'" [(visible)]="displayDialog" [modal]="true" [style]="{ width: 'min(450px, 95vw)' }">
     <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
             <label for="desc">Descripción</label>

@@ -1,12 +1,11 @@
-<div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <div style="display: flex; gap: 1rem; align-items: center;">
-        <h3 style="margin: 0; color: #334155;">Acciones Rápidas:</h3>
+<div class="page-header-bar">
+    <div class="quick-actions">
+        <h3 class="section-label">Acciones Rápidas:</h3>
         <p-button label="Registrar Venta" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()"></p-button>
         <p-button label="Registrar Gasto" icon="pi pi-dollar" severity="warn" (onClick)="nuevoGastoRapido()"></p-button>
     </div>
-    
-    <div style="display: flex; gap: 1rem; align-items: center;">
-        <span style="color: #64748b; font-weight: 500;">Buscar Producto:</span>
+    <div class="product-search">
+        <span class="search-label">Buscar Producto:</span>
         <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Ej. Air Force 1">
             <ng-template let-prod pTemplate="item">
                 <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
@@ -15,73 +14,71 @@
     </div>
 </div>
 
-<div style="display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
-    <div style="flex: 1; min-width: 200px; background: white; padding: 2rem; border-radius: 8px; border-left: 4px solid #10b981; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h4 style="margin-top: 0; color: #64748b;">Total Ventas</h4>
-        <h2 style="margin: 0; font-size: 2rem;">{{ totalVentas | currency }}</h2>
+<div class="stats-grid">
+    <div class="stat-card stat-green">
+        <h4>Total Ventas</h4>
+        <h2>{{ totalVentas | currency }}</h2>
     </div>
-    <div style="flex: 1; min-width: 200px; background: white; padding: 2rem; border-radius: 8px; border-left: 4px solid #3b82f6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h4 style="margin-top: 0; color: #64748b;">Ingresos Manuales</h4>
-        <h2 style="margin: 0; font-size: 2rem;">{{ totalIngresos | currency }}</h2>
+    <div class="stat-card stat-blue">
+        <h4>Ingresos Manuales</h4>
+        <h2>{{ totalIngresos | currency }}</h2>
     </div>
-    <div style="flex: 1; min-width: 200px; background: white; padding: 2rem; border-radius: 8px; border-left: 4px solid #ef4444; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h4 style="margin-top: 0; color: #64748b;">Total Gastos</h4>
-        <h2 style="margin: 0; font-size: 2rem;">{{ totalGastos | currency }}</h2>
+    <div class="stat-card stat-red">
+        <h4>Total Gastos</h4>
+        <h2>{{ totalGastos | currency }}</h2>
     </div>
-    <div style="flex: 1; min-width: 200px; background: white; padding: 2rem; border-radius: 8px; border-left: 4px solid #8b5cf6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h4 style="margin-top: 0; color: #64748b;">Balance General</h4>
-        <h2 style="margin: 0; font-size: 2rem;">{{ balance | currency }}</h2>
+    <div class="stat-card stat-purple">
+        <h4>Balance General</h4>
+        <h2>{{ balance | currency }}</h2>
     </div>
 </div>
 
-<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-    <h3 style="margin-top: 0; color: #92400e; border-bottom: 2px solid #fef3c7; padding-bottom: 0.5rem;">
-        <i class="pi pi-clock" style="margin-right: 0.5rem"></i> Ventas Pendientes (Reservadas)
+<div class="card">
+    <h3 class="section-title-warn">
+        <i class="pi pi-clock"></i> Ventas Pendientes (Reservadas)
     </h3>
-    <p-table [value]="ventasReservadas" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="5">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>ID</th>
-                <th>Producto</th>
-                <th>Fecha Registro</th>
-                <th>Vendedor</th>
-                <th>Monto Esperado</th>
-                <th>Estado</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-venta>
-            <tr>
-                <td>{{ venta.id }}</td>
-                <td>{{ venta.productoDescripcion }}</td>
-                <td>{{ venta.fechaRegistro | date }}</td>
-                <td>{{ venta.usuarioNombre }}</td>
-                <td>{{ venta.precioVenta | currency }}</td>
-                <td>
-                    <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">
-                        {{ venta.estado }}
-                    </span>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td colspan="6" style="text-align: center; color: #6b7280; padding: 2rem;">
-                    No hay ventas reservadas o pendientes.
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+    <div class="table-scroll-wrapper">
+        <p-table [value]="ventasReservadas" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Fecha</th>
+                    <th>Vendedor</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-venta>
+                <tr>
+                    <td>{{ venta.id }}</td>
+                    <td>{{ venta.productoDescripcion }}</td>
+                    <td>{{ venta.fechaRegistro | date }}</td>
+                    <td>{{ venta.usuarioNombre }}</td>
+                    <td>{{ venta.precioVenta | currency }}</td>
+                    <td>
+                        <span class="badge-warn">{{ venta.estado }}</span>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="empty-msg">No hay ventas reservadas o pendientes.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+<div class="dashboard-bottom">
+    <div class="card chart-card">
         <h3 style="margin-top: 0;">Resumen Financiero</h3>
         <p-chart type="bar" [data]="basicData" [options]="basicOptions" height="300px"></p-chart>
     </div>
 
-    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0; color: #334155; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
-            <i class="pi pi-list" style="margin-right: 0.5rem"></i> Actividad Reciente
+    <div class="card timeline-card">
+        <h3 class="section-title-dark">
+            <i class="pi pi-list"></i> Actividad Reciente
         </h3>
         <p-timeline [value]="movimientos">
             <ng-template pTemplate="content" let-mov>
@@ -93,9 +90,7 @@
                 </div>
             </ng-template>
         </p-timeline>
-        <div *ngIf="movimientos.length === 0" style="text-align: center; color: #64748b; padding: 1rem 0;">
-            No hay actividad reciente.
-        </div>
+        <div *ngIf="movimientos.length === 0" class="empty-msg">No hay actividad reciente.</div>
     </div>
 </div>
 

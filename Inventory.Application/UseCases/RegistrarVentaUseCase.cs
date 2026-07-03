@@ -38,6 +38,8 @@ namespace Inventory.Application.UseCases
 
         public async Task<Venta> EjecutarAsync(VentaDto ventaDto)
         {
+            var estadoDeseado = !string.IsNullOrEmpty(ventaDto.Estado) ? ventaDto.Estado : "Reservado";
+
             var venta = new Venta
             {
                 ProductoId = ventaDto.ProductoId,
@@ -49,13 +51,13 @@ namespace Inventory.Application.UseCases
                 UsuarioId = ventaDto.UsuarioId,
                 NombreComprador = ventaDto.NombreComprador,
                 LugarDestino = ventaDto.LugarDestino,
+                Estado = estadoDeseado,
                 Activo = true
             };
 
             var ventaAgregada = await _ventaRepositorio.AgregarAsync(venta);
 
             var producto = await _productoRepositorio.ObtenerPorIdAsync(ventaDto.ProductoId);
-            var estadoDeseado = !string.IsNullOrEmpty(ventaDto.Estado) ? ventaDto.Estado : "Reservado";
 
             if (producto != null)
             {

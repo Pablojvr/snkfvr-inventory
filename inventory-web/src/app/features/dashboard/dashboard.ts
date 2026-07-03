@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -13,10 +13,14 @@ import { MenuItem } from 'primeng/api';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 
+import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule],
+  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, InputNumberModule, InputTextModule],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
@@ -37,6 +41,14 @@ export class Dashboard implements OnInit {
   // Menu
   menuItems: MenuItem[] = [];
   
+  // Dialog Gasto
+  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
+
+  // Dialog Nueva Venta
+  displayNuevaVenta: boolean = false;
+  nuevaVentaData: any = {};
+  productosDisponibles: Producto[] = [];
+
   constructor(private api: ApiService, private router: Router, private toastManager: ToastManagerService) {}
 
   ngOnInit() {
@@ -62,6 +74,9 @@ export class Dashboard implements OnInit {
               productoDescripcion: productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
               usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido'
             }));
+
+          this.productosDisponibles = productos.filter(p => p.estado === 'Disponible' || !p.estado);
+            
             
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
               let desc = mov.descripcion;
@@ -86,11 +101,43 @@ export class Dashboard implements OnInit {
   }
 
   nuevaVentaRapida() {
-      this.router.navigate(['/venta-masiva']);
+      this.nuevaVentaData = { 
+          productoSeleccionado: null, 
+          precioVenta: null, 
+          estado: 'Vendido',
+          costoEnvio: 0,
+          costosAdicionales: 0,
+          nombreComprador: '',
+          lugarDestino: ''
+      };
+      this.displayNuevaVenta = true;
+  }
+
+  guardarNuevaVenta() {
+      if (!this.nuevaVentaData.productoSeleccionado || !this.nuevaVentaData.precioVenta) return;
+      
+      const venta: Venta = {
+          productoId: this.nuevaVentaData.productoSeleccionado.id!,
+          usuarioId: parseInt(localStorage.getItem('usuarioActivoId') || '0', 10),
+          precioVenta: this.nuevaVentaData.precioVenta,
+          fechaRegistro: new Date(),
+          fechaVenta: this.nuevaVentaData.estado === 'Vendido' ? new Date() : undefined,
+          estado: this.nuevaVentaData.estado,
+          costoEnvio: this.nuevaVentaData.costoEnvio,
+          costosAdicionales: this.nuevaVentaData.costosAdicionales,
+          nombreComprador: this.nuevaVentaData.nombreComprador,
+          lugarDestino: this.nuevaVentaData.lugarDestino
+      };
+
+      this.api.crearVenta(venta).subscribe(() => {
+          this.displayNuevaVenta = false;
+          this.toastManager.showSuccess('Éxito', 'Venta registrada desde el Dashboard.');
+          this.cargarDatos();
+      });
   }
 
   nuevoGastoRapido() {
-    this.router.navigate(['/anadir-masivo']);
+    this.dialogGasto.showDialog(undefined, 'Calzado', undefined, true);
   }
 
   // --- Card actions ---

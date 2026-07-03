@@ -106,3 +106,64 @@
         </div>
     </ng-template>
 </p-dialog>
+
+<!-- Modal Registrar Venta -->
+<p-dialog [(visible)]="displayNuevaVenta" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Venta" [draggable]="false" [resizable]="false">
+    <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        
+        <div class="field">
+            <label>Seleccionar Producto Disponible</label>
+            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body">
+                <ng-template let-prod pTemplate="item">
+                    <div>{{prod.descripcion}} - {{prod.costo | currency}}</div>
+                </ng-template>
+            </p-select>
+        </div>
+
+        <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
+                <span class="detail-label" style="font-size: 0.75rem;">Costo Actual del Producto:</span>
+                <span class="detail-value" style="color: #64748b;">{{ nuevaVentaData.productoSeleccionado.costo | currency }}</span>
+            </div>
+
+            <div class="field">
+                <label>Precio de Venta</label>
+                <p-inputNumber [(ngModel)]="nuevaVentaData.precioVenta" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field">
+                    <label>Envío (Costo)</label>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costoEnvio" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                </div>
+                <div class="field">
+                    <label>Otros Costos</label>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costosAdicionales" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Nombre Comprador (Opcional)</label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.nombreComprador" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label>Lugar Destino (Opcional)</label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.lugarDestino" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label>Estado de Venta</label>
+                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+            </div>
+        </div>
+    </div>
+    
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayNuevaVenta = false"></p-button>
+        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="!nuevaVentaData.productoSeleccionado || !nuevaVentaData.precioVenta"></p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- Modal Registrar Gasto/Compra -->
+<app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>

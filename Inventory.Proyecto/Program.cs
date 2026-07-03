@@ -33,6 +33,7 @@ builder.Services.AddScoped<Inventory.Application.UseCases.IObtenerMovimientosUse
 builder.Services.AddScoped<Inventory.Application.UseCases.IRegistrarProductoUseCase, Inventory.Application.UseCases.RegistrarProductoUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IRegistrarIngresoUseCase, Inventory.Application.UseCases.RegistrarIngresoUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarGastoUseCase, Inventory.Application.UseCases.EditarGastoUseCase>();
+builder.Services.AddScoped<Inventory.Application.UseCases.IEliminarGastoUseCase, Inventory.Application.UseCases.EliminarGastoUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarProductoUseCase, Inventory.Application.UseCases.EditarProductoUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarVentaUseCase, Inventory.Application.UseCases.EditarVentaUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarIngresoUseCase, Inventory.Application.UseCases.EditarIngresoUseCase>();
@@ -53,11 +54,36 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente
+// Aplicar migraciones automáticamente y sembrar datos
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<Inventory.Settings.Data.InventarioDbContext>();
     dbContext.Database.Migrate();
+
+    // WARNING: Limpieza total de base de datos solicitada por el usuario
+    // NOTA: Para desactivar este comportamiento en el futuro, eliminar o comentar este bloque
+    var env = app.Environment;
+    if (true) // Se ejecuta siempre para limpiar local y remota según requerimiento
+    {
+        try 
+        {
+            dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE \"Ventas\", \"Gastos\", \"Productos\", \"Usuarios\", \"Movimientos\", \"Ingresos\" RESTART IDENTITY CASCADE;");
+        } 
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error al limpiar BD: " + ex.Message);
+        }
+
+        if (!dbContext.Usuarios.Any())
+        {
+            dbContext.Usuarios.AddRange(
+                new Inventory.Core.Entities.Usuario { Nombre = "Javier" },
+                new Inventory.Core.Entities.Usuario { Nombre = "Fabri" },
+                new Inventory.Core.Entities.Usuario { Nombre = "Alesito" }
+            );
+            dbContext.SaveChanges();
+        }
+    }
 }
 
 // CORS debe ir antes de routing y authorization

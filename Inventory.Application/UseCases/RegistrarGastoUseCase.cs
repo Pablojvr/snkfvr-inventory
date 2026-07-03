@@ -68,22 +68,12 @@ namespace Inventory.Application.UseCases
 
             if (productoId.HasValue && (tipo == "Comisión" || tipo == "Envío"))
             {
+                // NOTA: Según requerimiento, el costo no se suma a la base de datos de Producto.Costo
+                // El costo calculado será dinámico en el Frontend.
                 var producto = await _productoRepositorio.ObtenerPorIdAsync(productoId.Value);
                 if (producto != null)
                 {
-                    producto.Costo += gastoDto.Monto;
-                    await _productoRepositorio.ActualizarAsync(producto);
-
-                    var movimientoPrecio = new Movimiento
-                    {
-                        Tipo = "Edición de Precio",
-                        Fecha = gastoDto.Fecha,
-                        Descripcion = $"Aumento de costo del producto {producto.Id} por concepto de {tipo} ({gastoDto.Motivo})",
-                        MontoTotal = gastoDto.Monto,
-                        ReferenciaId = producto.Id,
-                        ProductoId = producto.Id
-                    };
-                    await _movimientoRepositorio.AgregarAsync(movimientoPrecio);
+                    // Ya no actualizamos producto.Costo += gastoDto.Monto;
                 }
             }
 

@@ -82,20 +82,9 @@ export class Gastos implements OnInit {
 
   toggleMenu(event: any, gasto: Gasto, menu: any) {
     this.menuItems = [
-      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(gasto) },
-      { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(gasto.id!) }
+      { label: 'Ver Detalle Compra', icon: 'pi pi-eye', command: () => this.router.navigate(['/gastos', gasto.id]) },
+      { label: 'Eliminar Compra', icon: 'pi pi-trash', command: () => this.eliminar(gasto.id!) }
     ];
-
-    if (gasto.tipo === 'Calzado' && gasto.productoId) {
-      const prod = this.productos.find(p => p.id === gasto.productoId);
-      this.menuItems.unshift({ label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', gasto.productoId]) });
-      
-      if (prod && prod.estado !== 'Vendido') {
-          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.agregarComision(gasto.productoId!) });
-          this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.venderProducto(gasto.productoId!) });
-      }
-    }
-
     menu.toggle(event);
   }
 

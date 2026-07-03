@@ -31,15 +31,17 @@ export class DialogGastoComponent {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
   tiposGasto = ['Calzado', 'Comisión', 'Envío'];
+  soloCalzado: boolean = false;
   
   @Output() onSaved = new EventEmitter<void>();
 
   constructor(private api: ApiService, private toastManager: ToastManagerService) {}
 
-  showDialog(productoId?: number, tipo?: string, gastoExistente?: Gasto) {
+  showDialog(productoId?: number, tipo?: string, gastoExistente?: Gasto, forceSoloCalzado: boolean = false) {
     this.productoNombre = '';
     this.costoActual = undefined;
     this.prefilledProducto = !!productoId;
+    this.soloCalzado = forceSoloCalzado;
     this.cargarDatos();
     
     if (gastoExistente) {

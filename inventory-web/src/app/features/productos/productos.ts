@@ -63,7 +63,21 @@ export class Productos implements OnInit {
   }
 
   cargarDatos() {
-    this.api.getProductos().subscribe(data => this.productos = data);
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin({
+        productos: this.api.getProductos(),
+        gastos: this.api.getGastos()
+      }).subscribe(({ productos, gastos }) => {
+        this.productos = productos.map(p => {
+            const gastosProducto = gastos.filter(g => g.productoId === p.id && (g.tipo === 'Comisión' || g.tipo === 'Envío'));
+            const costoCalculado = p.costo + gastosProducto.reduce((sum, g) => sum + g.monto, 0);
+            return {
+                ...p,
+                costoCalculado: costoCalculado
+            };
+        });
+      });
+    });
   }
 
   get productosFiltrados() {

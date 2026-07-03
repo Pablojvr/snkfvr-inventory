@@ -46,7 +46,7 @@ export class Ventas implements OnInit {
   displayNuevaVenta: boolean = false;
   nuevaVentaData: any = {};
   
-  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
+  constructor(private api: ApiService, private toastManager: ToastManagerService, public router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -65,6 +65,11 @@ export class Ventas implements OnInit {
           },
           queryParamsHandling: 'merge'
       });
+  }
+
+  setEstadoFiltro(estado: string) {
+      this.estadoFiltro = estado;
+      this.onFilterChange();
   }
 
   cargarDatos() {
@@ -156,25 +161,23 @@ export class Ventas implements OnInit {
     ];
     if (producto.estadoActual === 'Disponible') {
       this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.showDialog(producto) });
-    } else if (producto.ventaAsociada) {
-       this.menuItems.push({ label: 'Anular Venta', icon: 'pi pi-trash', command: () => this.anularVenta(producto.ventaAsociada.id) });
+    } else if (producto.estadoActual === 'Reservado') {
+      this.menuItems.push({ label: 'Marcar como Vendido', icon: 'pi pi-check', command: () => this.marcarComoVendido(producto) });
+      this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
+    } else if (producto.estadoActual === 'Vendido') {
+       // Si es vendido, la unica accion sobre la venta podría ser anularla para volver a disponible. 
+       this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
     }
     menu.toggle(event);
   }
 
-  onEstadoChange(producto: any) {
-      if (producto.estadoActual === 'Disponible') {
-          if (producto.ventaAsociada) {
-              this.anularVenta(producto.ventaAsociada.id);
-          }
-      } else if (producto.estadoActual === 'Vendido' || producto.estadoActual === 'Reservado') {
-          if (producto.ventaAsociada) {
-              const ventaActualizada = { ...producto.ventaAsociada, estado: producto.estadoActual };
-              this.api.editarVenta(producto.ventaAsociada.id, ventaActualizada).subscribe(() => {
-                  this.toastManager.showSuccess('Éxito', 'Estado actualizado');
-                  this.cargarDatos();
-              });
-          }
+  marcarComoVendido(producto: any) {
+      if (producto.ventaAsociada) {
+          const ventaActualizada = { ...producto.ventaAsociada, estado: 'Vendido' };
+          this.api.editarVenta(producto.ventaAsociada.id, ventaActualizada).subscribe(() => {
+              this.toastManager.showSuccess('Éxito', 'El producto ahora está Vendido');
+              this.cargarDatos();
+          });
       }
   }
 

@@ -29,7 +29,14 @@
                     <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ prod.fechaCompra | date:'dd/MM/yy' }}</span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.25rem;">
-                    <span class="entity-card-amount">{{ prod.costo | currency }}</span>
+                    <div style="text-align: right; margin-bottom: 0.25rem;">
+                        <span style="font-size: 0.75rem; color: #64748b; display: block; line-height: 1;">Base</span>
+                        <span style="font-size: 0.9rem; font-weight: 500; color: #475569;">{{ prod.costo | currency }}</span>
+                    </div>
+                    <div style="text-align: right; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.75rem; color: #64748b; display: block; line-height: 1;">Calculado</span>
+                        <span class="entity-card-amount" style="font-size: 1.15rem;">{{ prod.costoCalculado | currency }}</span>
+                    </div>
                     <span [ngClass]="{'badge-success': prod.estado === 'Disponible', 'badge-warn': prod.estado === 'Reservado', 'badge-secondary': prod.estado === 'Vendido'}">
                         {{ prod.estado || 'Disponible' }}
                     </span>

@@ -8,10 +8,14 @@
                     <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar producto o comprador..." style="width: 100%; padding-left: 2.5rem;" />
                 </div>
                 <div style="display: flex; gap: 0.5rem; width: 100%; overflow-x: auto;">
-                    <p-select [options]="estadoOpciones" [(ngModel)]="estadoFiltro" optionLabel="label" optionValue="value" (ngModelChange)="onFilterChange()" styleClass="w-full"></p-select>
+                    <p-button [label]="'Todos'" size="small" [severity]="estadoFiltro === 'Todos' ? 'primary' : 'secondary'" [outlined]="estadoFiltro !== 'Todos'" (onClick)="setEstadoFiltro('Todos')"></p-button>
+                    <p-button [label]="'Disponibles'" size="small" [severity]="estadoFiltro === 'Disponible' ? 'info' : 'secondary'" [outlined]="estadoFiltro !== 'Disponible'" (onClick)="setEstadoFiltro('Disponible')"></p-button>
+                    <p-button [label]="'Reservados'" size="small" [severity]="estadoFiltro === 'Reservado' ? 'warn' : 'secondary'" [outlined]="estadoFiltro !== 'Reservado'" (onClick)="setEstadoFiltro('Reservado')"></p-button>
+                    <p-button [label]="'Vendidos'" size="small" [severity]="estadoFiltro === 'Vendido' ? 'success' : 'secondary'" [outlined]="estadoFiltro !== 'Vendido'" (onClick)="setEstadoFiltro('Vendido')"></p-button>
                 </div>
             </div>
         </div>
+        <p-button label="Venta Masiva" icon="pi pi-bolt" (onClick)="router.navigate(['/venta-masiva'])" severity="warn" styleClass="w-full"></p-button>
     </div>
 
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
@@ -32,11 +36,7 @@
                 <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.5rem;">
                     <span *ngIf="producto.estadoActual !== 'Disponible'" class="entity-card-amount" style="color: #3b82f6;">{{ producto.precioVenta | currency }}</span>
                     
-                    <div *ngIf="producto.estadoActual === 'Reservado'" (click)="$event.stopPropagation()">
-                         <p-select [options]="estadoVentaOpciones" [(ngModel)]="producto.estadoActual" optionLabel="label" optionValue="value" (ngModelChange)="onEstadoChange(producto)" styleClass="w-full"></p-select>
-                    </div>
-
-                    <span *ngIf="producto.estadoActual !== 'Reservado'" [ngClass]="producto.estadoActual === 'Vendido' ? 'badge-success' : 'badge-primary'">{{ producto.estadoActual }}</span>
+                    <span [ngClass]="producto.estadoActual === 'Vendido' ? 'badge-success' : (producto.estadoActual === 'Reservado' ? 'badge-warn' : 'badge-primary')">{{ producto.estadoActual }}</span>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
 
             <div class="field">
                 <label>Estado de Venta</label>
-                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
             </div>
         </div>
     </div>

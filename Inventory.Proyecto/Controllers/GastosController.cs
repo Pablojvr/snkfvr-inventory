@@ -11,11 +11,16 @@ namespace Inventory.Proyecto.Controllers
     {
         private readonly IRegistrarGastoUseCase _registrarGastoUseCase;
         private readonly IRepositorio<Inventory.Core.Entities.Gasto> _gastoRepositorio;
+        private readonly IEliminarGastoUseCase _eliminarGastoUseCase;
 
-        public GastosController(IRegistrarGastoUseCase registrarGastoUseCase, IRepositorio<Inventory.Core.Entities.Gasto> gastoRepositorio)
+        public GastosController(
+            IRegistrarGastoUseCase registrarGastoUseCase, 
+            IRepositorio<Inventory.Core.Entities.Gasto> gastoRepositorio,
+            IEliminarGastoUseCase eliminarGastoUseCase)
         {
             _registrarGastoUseCase = registrarGastoUseCase;
             _gastoRepositorio = gastoRepositorio;
+            _eliminarGastoUseCase = eliminarGastoUseCase;
         }
 
         [HttpPost]
@@ -35,7 +40,7 @@ namespace Inventory.Proyecto.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarGasto(int id)
         {
-            await _gastoRepositorio.EliminarAsync(id);
+            await _eliminarGastoUseCase.EjecutarAsync(id);
             return Ok(new { message = "Gasto desactivado correctamente." });
         }
 

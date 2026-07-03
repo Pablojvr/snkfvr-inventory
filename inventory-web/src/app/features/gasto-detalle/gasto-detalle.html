@@ -1,0 +1,45 @@
+<div class="card" *ngIf="gasto">
+    <div class="page-header">
+        <div class="header-left">
+            <p-button icon="pi pi-arrow-left" [text]="true" (onClick)="volver()" styleClass="mr-2"></p-button>
+            <h2>Detalle de Gasto / Compra</h2>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+            <p-button icon="pi pi-ellipsis-v" [text]="true" (onClick)="toggleMenu($event, menu)"></p-button>
+        </div>
+    </div>
+
+    <div class="entity-cards-grid" style="grid-template-columns: 1fr;">
+        <div class="entity-card" style="cursor: default;">
+            <div class="entity-card-header">
+                <h4 class="entity-card-title">{{ gasto.motivo }}</h4>
+                <span class="badge-secondary">{{ gasto.tipo }}</span>
+            </div>
+            <div class="entity-card-body" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+                <div class="detail-row">
+                    <span class="detail-label">Monto (Costo)</span>
+                    <span class="detail-value" style="color: #ef4444; font-size: 1.25rem;">- {{ gasto.monto | currency }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Registro</span>
+                    <span class="detail-value">{{ gasto.fecha | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="detail-row" *ngIf="gasto.fechaIngreso">
+                    <span class="detail-label">Fecha de Ingreso del Calzado</span>
+                    <span class="detail-value">{{ gasto.fechaIngreso | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Registrado Por</span>
+                    <span class="detail-value">{{ usuarioNombre }}</span>
+                </div>
+                <div class="detail-row" *ngIf="productoAsociado">
+                    <span class="detail-label">Producto Asociado</span>
+                    <span class="detail-value">{{ productoAsociado.descripcion }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-dialog-gasto (onSaved)="onSaved()"></app-dialog-gasto>

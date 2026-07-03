@@ -52,15 +52,11 @@
       </a>
       <a routerLink="/gastos" routerLinkActive="active-tab">
         <i class="pi pi-dollar"></i>
-        <span>Compras</span>
+        <span>Registrar Compra</span>
       </a>
       <a routerLink="/ventas" routerLinkActive="active-tab">
         <i class="pi pi-shopping-cart"></i>
-        <span>Ventas</span>
-      </a>
-      <a routerLink="/productos" routerLinkActive="active-tab">
-        <i class="pi pi-box"></i>
-        <span>Productos</span>
+        <span>Registrar Venta</span>
       </a>
       
       <!-- More Options Button for Mobile -->
@@ -72,4 +68,17 @@
     <p-menu #mobileMenu [popup]="true" [model]="mobileMenuOptions" appendTo="body"></p-menu>
   </div>
 </div>
+
+<p-dialog [(visible)]="displayUserModal" [modal]="true" [closable]="false" [style]="{width: 'min(400px, 95vw)'}" header="Selecciona tu usuario" [draggable]="false" [resizable]="false">
+    <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        <div class="field">
+            <label>Usuario</label>
+            <p-select [options]="usuarios" [(ngModel)]="selectedUserId" optionLabel="nombre" optionValue="id" placeholder="Elige un usuario" styleClass="w-full" appendTo="body"></p-select>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Ingresar" icon="pi pi-check" (onClick)="guardarUsuario()" [disabled]="!selectedUserId"></p-button>
+    </ng-template>
+</p-dialog>
+
 <p-toast position="bottom-center"></p-toast>

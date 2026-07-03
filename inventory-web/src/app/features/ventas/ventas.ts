@@ -77,15 +77,22 @@ export class Ventas implements OnInit {
       forkJoin({
         ventas: this.api.getVentas(),
         productos: this.api.getProductos(),
-        usuarios: this.api.getUsuarios()
-      }).subscribe(({ ventas, productos, usuarios }) => {
+        usuarios: this.api.getUsuarios(),
+        gastos: this.api.getGastos()
+      }).subscribe(({ ventas, productos, usuarios, gastos }) => {
         this.ventasRaw = ventas;
         this.usuarios = usuarios;
         
         this.productos = productos.map(p => {
            const venta = ventas.find(v => v.productoId === p.id && v.activo);
+           
+           const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo && g.tipo !== 'Calzado');
+           const totalGastos = gastosProd.reduce((acc, curr) => acc + curr.monto, 0);
+           const costoCalculado = (p.costo || 0) + totalGastos;
+
            return {
                ...p,
+               costoCalculado: costoCalculado,
                ventaAsociada: venta,
                estadoActual: venta ? venta.estado : 'Disponible',
                nombreComprador: venta?.nombreComprador || '',
@@ -116,17 +123,42 @@ export class Ventas implements OnInit {
     return filtradas;
   }
 
+  get productosDisponibles() {
+    return this.productos.filter(p => p.estadoActual === 'Disponible');
+  }
+
   showDialog(producto: any) {
     this.nuevaVentaData = {
+        productoPreseleccionado: true,
         productoSeleccionado: producto,
-        precioVenta: producto.costo || 0,
+        precioVenta: producto.costoCalculado || producto.costo || 0,
         costoEnvio: 0,
         costosAdicionales: 0,
-        estado: 'Vendido',
+        estado: 'Reservado',
         nombreComprador: '',
         lugarDestino: ''
     };
     this.displayNuevaVenta = true;
+  }
+
+  nuevaVentaRapida() {
+    this.nuevaVentaData = {
+        productoPreseleccionado: false,
+        productoSeleccionado: null,
+        precioVenta: 0,
+        costoEnvio: 0,
+        costosAdicionales: 0,
+        estado: 'Reservado',
+        nombreComprador: '',
+        lugarDestino: ''
+    };
+    this.displayNuevaVenta = true;
+  }
+
+  onProductoSeleccionadoModal(producto: any) {
+      if (producto) {
+          this.nuevaVentaData.precioVenta = producto.costoCalculado || producto.costo || 0;
+      }
   }
 
   guardarNuevaVenta() {

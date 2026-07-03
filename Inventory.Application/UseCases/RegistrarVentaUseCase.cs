@@ -16,15 +16,18 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Venta> _ventaRepositorio;
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
+        private readonly IRepositorio<Gasto> _gastoRepositorio;
 
         public RegistrarVentaUseCase(
             IRepositorio<Venta> ventaRepositorio, 
             IRepositorio<Movimiento> movimientoRepositorio,
-            IRepositorio<Producto> productoRepositorio)
+            IRepositorio<Producto> productoRepositorio,
+            IRepositorio<Gasto> gastoRepositorio)
         {
             _ventaRepositorio = ventaRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
+            _gastoRepositorio = gastoRepositorio;
         }
 
         public async Task<Venta> EjecutarAsync(VentaDto ventaDto)
@@ -74,6 +77,36 @@ namespace Inventory.Application.UseCases
 
             await _movimientoRepositorio.AgregarAsync(movimiento);
             await _movimientoRepositorio.AgregarAsync(movimientoEstado);
+
+            if (ventaDto.CostoEnvio > 0)
+            {
+                var gastoEnvio = new Gasto
+                {
+                    Tipo = "Envío",
+                    Motivo = $"Envío asociado a la venta del producto {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
+                    Monto = ventaDto.CostoEnvio,
+                    Fecha = DateTime.Now,
+                    UsuarioId = ventaDto.UsuarioId,
+                    ProductoId = ventaDto.ProductoId,
+                    Activo = true
+                };
+                await _gastoRepositorio.AgregarAsync(gastoEnvio);
+            }
+
+            if (ventaDto.CostosAdicionales > 0)
+            {
+                var gastoOtros = new Gasto
+                {
+                    Tipo = "Comisión",
+                    Motivo = $"Otros costos/Comisión asociados a la venta del producto {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
+                    Monto = ventaDto.CostosAdicionales,
+                    Fecha = DateTime.Now,
+                    UsuarioId = ventaDto.UsuarioId,
+                    ProductoId = ventaDto.ProductoId,
+                    Activo = true
+                };
+                await _gastoRepositorio.AgregarAsync(gastoOtros);
+            }
 
             return ventaAgregada;
         }

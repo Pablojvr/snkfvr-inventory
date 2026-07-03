@@ -45,6 +45,7 @@ export class ProductoDetalle implements OnInit {
   producto: Producto | null = null;
   movimientos: Movimiento[] = [];
   comisiones: any[] = [];
+  costoCalculado: number = 0;
   
   editando: boolean = false;
   guardando: boolean = false;
@@ -103,6 +104,10 @@ export class ProductoDetalle implements OnInit {
                     ...g,
                     usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
                 }));
+            
+            const gastosProd = gastos.filter(g => g.productoId === this.productoId && g.activo && g.tipo !== 'Calzado');
+            const totalGastos = gastosProd.reduce((acc, curr) => acc + curr.monto, 0);
+            this.costoCalculado = (this.producto.costo || 0) + totalGastos;
         });
     });
   }

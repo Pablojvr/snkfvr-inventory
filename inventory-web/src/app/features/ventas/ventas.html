@@ -15,7 +15,6 @@
                 </div>
             </div>
         </div>
-        <p-button label="Venta Masiva" icon="pi pi-bolt" (onClick)="router.navigate(['/venta-masiva'])" severity="warn" styleClass="w-full"></p-button>
     </div>
 
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
@@ -47,19 +46,34 @@
     </div>
 </div>
 
+<!-- Floating Action Button for New Sale -->
+<p-button icon="pi pi-plus" [rounded]="true" size="large" severity="success" 
+    [style]="{'position': 'fixed', 'bottom': '5rem', 'right': '1.5rem', 'width': '4rem', 'height': '4rem', 'box-shadow': '0 4px 10px rgba(0,0,0,0.3)', 'z-index': '1000'}" 
+    (onClick)="nuevaVentaRapida()">
+</p-button>
+
 <!-- Modal Registrar Venta -->
 <p-dialog [(visible)]="displayNuevaVenta" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Venta" [draggable]="false" [resizable]="false">
     <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
         
+        <div class="field" *ngIf="!nuevaVentaData.productoPreseleccionado">
+            <label>Seleccionar Producto Disponible</label>
+            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onProductoSeleccionadoModal($event.value)">
+                <ng-template let-prod pTemplate="item">
+                    <div>{{prod.descripcion}} - {{prod.costoCalculado | currency}}</div>
+                </ng-template>
+            </p-select>
+        </div>
+
         <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">
             
-            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
+            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;" *ngIf="nuevaVentaData.productoPreseleccionado">
                 <span class="detail-label" style="font-size: 1rem; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.descripcion }}</span>
             </div>
             
             <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
-                <span class="detail-label" style="font-size: 0.75rem;">Costo Actual del Producto:</span>
-                <span class="detail-value" style="color: #64748b;">{{ nuevaVentaData.productoSeleccionado.costo | currency }}</span>
+                <span class="detail-label" style="font-size: 0.75rem;">Costo Calculado del Producto:</span>
+                <span class="detail-value" style="color: #64748b; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.costoCalculado | currency }}</span>
             </div>
 
             <div class="field">
@@ -97,6 +111,6 @@
     
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayNuevaVenta = false"></p-button>
-        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="!nuevaVentaData.precioVenta"></p-button>
+        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="!nuevaVentaData.productoSeleccionado || nuevaVentaData.precioVenta === null || nuevaVentaData.precioVenta === undefined"></p-button>
     </ng-template>
 </p-dialog>

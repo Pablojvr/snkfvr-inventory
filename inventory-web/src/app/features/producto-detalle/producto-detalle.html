@@ -32,9 +32,13 @@
 
     <div class="info-grid">
         <div class="info-item">
-            <span class="info-label">Costo Base</span>
+            <span class="info-label">Costo Original (Base)</span>
             <span *ngIf="!editando" class="info-value">{{ producto.costo | currency }}</span>
             <p-inputNumber *ngIf="editando" [(ngModel)]="producto.costo" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Costo Calculado</span>
+            <span class="info-value" style="color: #3b82f6;">{{ costoCalculado | currency }}</span>
         </div>
     </div>
 

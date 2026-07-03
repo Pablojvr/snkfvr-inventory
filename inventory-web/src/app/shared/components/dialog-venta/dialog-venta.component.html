@@ -64,8 +64,11 @@
             </div>
             
             <div class="field" *ngIf="nuevaVentaData.estado === 'Vendido'" style="background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <label style="color: #3b82f6; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión de venta asignada a Fabri</label>
-                <p-inputNumber [(ngModel)]="nuevaVentaData.comisionMonto" mode="currency" currency="USD" locale="en-US" class="w-full mt-2"></p-inputNumber>
+                <label style="color: #3b82f6; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión de venta</label>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <p-select [options]="usuarios" [(ngModel)]="nuevaVentaData.comisionUsuarioId" optionLabel="nombre" optionValue="id" placeholder="Asignar a..." styleClass="w-full" appendTo="body"></p-select>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.comisionMonto" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                </div>
                 <small class="block mt-1" style="color: #64748b;">Calculada automáticamente como la mitad de la ganancia, pero puedes editarla.</small>
             </div>
         </div>

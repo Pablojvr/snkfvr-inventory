@@ -132,7 +132,10 @@ export class DialogVentaComponent implements OnInit {
   onNuevaVentaChange() {
       if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
           const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
-          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
+          const envio = this.nuevaVentaData.costoEnvio || 0;
+          const otros = this.nuevaVentaData.costosAdicionales || 0;
+          const costoTotal = costoCalc + envio + otros;
+          const ganancia = this.nuevaVentaData.precioVenta - costoTotal;
           if (ganancia > 0) {
               this.nuevaVentaData.comisionMonto = ganancia / 2;
           } else {

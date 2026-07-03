@@ -28,7 +28,7 @@
             </div>
             <div class="entity-card-body">
                 <div class="entity-card-meta">
-                    <span style="font-weight: bold; color: #64748b;">Costo: {{ producto.costo | currency }}</span>
+                    <span style="font-weight: bold; color: #64748b;">Costo Calculado: {{ producto.costoCalculado | currency }}</span>
                     <span *ngIf="producto.estadoActual !== 'Disponible'"><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.nombreComprador || 'Sin nombre' }}</span>
                     <span *ngIf="producto.estadoActual !== 'Disponible' && producto.lugarDestino"><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.lugarDestino }}</span>
                 </div>

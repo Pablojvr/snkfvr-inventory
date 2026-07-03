@@ -26,7 +26,7 @@ export class Ventas implements OnInit {
   usuarios: Usuario[] = [];
 
   textoFiltro: string = '';
-  estadoFiltro: string = 'Disponible';
+  estadoFiltro: string = 'Todos';
   estadoOpciones: any[] = [
     { label: 'Disponibles', value: 'Disponible' },
     { label: 'Reservados', value: 'Reservado' },
@@ -248,18 +248,55 @@ export class Ventas implements OnInit {
   toggleMenu(event: any, producto: any, menu: any) {
     event.stopPropagation();
     this.menuItems = [
-      { label: 'Ver Detalle Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', producto.id]) },
+        {
+            label: 'Ver Detalles de Producto',
+            icon: 'pi pi-eye',
+            command: () => this.router.navigate(['/productos', producto.id])
+        }
     ];
+
+    if (producto.estadoActual !== 'Disponible') {
+        this.menuItems.push({
+            label: 'Editar Venta',
+            icon: 'pi pi-pencil',
+            command: () => this.editarVenta(producto)
+        });
+    }
+
     if (producto.estadoActual === 'Disponible') {
-      this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.showDialog(producto) });
+        this.menuItems.push({
+            label: 'Registrar Venta',
+            icon: 'pi pi-shopping-cart',
+            command: () => this.showDialog(producto)
+        });
     } else if (producto.estadoActual === 'Reservado') {
       this.menuItems.push({ label: 'Marcar como Vendido', icon: 'pi pi-check', command: () => this.marcarComoVendido(producto) });
       this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
-    } else if (producto.estadoActual === 'Vendido') {
-       // Only allow "Devolución" manually or just don't show the Anular
-       // The user requested: "No se pueden anular ventas una vez de cerradas"
     }
+    
     menu.toggle(event);
+  }
+
+  editarVenta(producto: any) {
+    if (!producto.ventaAsociada) return;
+    const venta = producto.ventaAsociada;
+    
+    this.editandoVenta = true;
+    this.ventaEditId = venta.id;
+    
+    this.nuevaVentaData = {
+        productoPreseleccionado: true,
+        productoSeleccionado: producto,
+        precioVenta: venta.precioVenta,
+        costoEnvio: venta.costoEnvio,
+        costosAdicionales: venta.costosAdicionales,
+        estado: venta.estado,
+        nombreComprador: venta.nombreComprador,
+        lugarDestino: venta.lugarDestino,
+        comisionMonto: venta.comisionMonto,
+        comisionUsuarioId: venta.comisionUsuarioId
+    };
+    this.displayNuevaVenta = true;
   }
 
   marcarComoVendido(producto: any) {

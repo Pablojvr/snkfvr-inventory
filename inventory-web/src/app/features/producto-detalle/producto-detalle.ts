@@ -18,7 +18,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Producto, Movimiento, Gasto, Usuario } from '../../core/services/api';
+import { ApiService, Producto, Movimiento, Gasto, Usuario, Venta } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Location } from '@angular/common';
 
@@ -58,6 +58,7 @@ export class ProductoDetalle implements OnInit {
   movimientos: Movimiento[] = [];
   gastosProducto: (Gasto & { usuarioNombre?: string })[] = [];
   usuarios: Usuario[] = [];
+  ventaAsociada: Venta | null = null;
   costoCalculado: number = 0;
   
   menuItems: MenuItem[] = [];
@@ -75,6 +76,11 @@ export class ProductoDetalle implements OnInit {
     { label: 'Servicio', value: 'Servicio' },
     { label: 'Otro', value: 'Otro' }
   ];
+
+  // Venta edit modal
+  displayNuevaVenta: boolean = false;
+  guardandoVenta: boolean = false;
+  nuevaVentaData: any = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -97,8 +103,9 @@ export class ProductoDetalle implements OnInit {
             productos: this.api.getProductos(),
             usuarios: this.api.getUsuarios(),
             gastos: this.api.getGastos(),
-            movimientos: this.api.getMovimientosPorProducto(this.productoId)
-        }).subscribe(({ productos, usuarios, gastos, movimientos }) => {
+            movimientos: this.api.getMovimientosPorProducto(this.productoId),
+            ventas: this.api.getVentas()
+        }).subscribe(({ productos, usuarios, gastos, movimientos, ventas }) => {
             this.producto = productos.find(p => p.id === this.productoId) || null;
             if (!this.producto) {
                 this.router.navigate(['/productos']);
@@ -128,6 +135,8 @@ export class ProductoDetalle implements OnInit {
             
             const gastosActivos = this.gastosProducto.filter(g => g.activo);
             this.costoCalculado = gastosActivos.reduce((acc, curr) => acc + (curr.monto || 0), 0);
+            
+            this.ventaAsociada = ventas.find(v => v.productoId === this.productoId && v.activo) || null;
         });
     });
   }
@@ -208,5 +217,78 @@ export class ProductoDetalle implements OnInit {
         this.cargarDatos();
       });
     }
+  }
+
+  // --- Venta Edit Modal ---
+  editarVenta() {
+    if (!this.ventaAsociada) return;
+    const venta = this.ventaAsociada;
+    
+    this.nuevaVentaData = {
+        productoPreseleccionado: true,
+        productoSeleccionado: this.producto,
+        precioVenta: venta.precioVenta,
+        costoEnvio: venta.costoEnvio,
+        costosAdicionales: venta.costosAdicionales,
+        estado: venta.estado,
+        nombreComprador: venta.nombreComprador,
+        lugarDestino: venta.lugarDestino,
+        comisionMonto: venta.comisionMonto,
+        comisionUsuarioId: venta.comisionUsuarioId
+    };
+    this.displayNuevaVenta = true;
+  }
+
+  onNuevaVentaChange() {
+      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
+          const costoCalc = this.costoCalculado;
+          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
+          if (ganancia > 0) {
+              this.nuevaVentaData.comisionMonto = ganancia / 2;
+          } else {
+              this.nuevaVentaData.comisionMonto = 0;
+          }
+      } else {
+          this.nuevaVentaData.comisionMonto = null;
+      }
+  }
+
+  guardarNuevaVenta() {
+      if (!this.nuevaVentaData.productoSeleccionado || !this.ventaAsociada) return;
+
+      if (this.nuevaVentaData.estado === 'Vendido') {
+          if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
+              this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
+              return;
+          }
+      }
+
+      const v: any = {
+          productoId: this.productoId,
+          costoEnvio: this.nuevaVentaData.costoEnvio || 0,
+          costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
+          precioVenta: this.nuevaVentaData.precioVenta || 0,
+          usuarioId: Number(localStorage.getItem('userId')) || 1, 
+          estado: this.nuevaVentaData.estado,
+          nombreComprador: this.nuevaVentaData.nombreComprador,
+          lugarDestino: this.nuevaVentaData.lugarDestino,
+          fechaVenta: new Date(),
+          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
+          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
+      };
+
+      this.guardandoVenta = true;
+      this.api.editarVenta(this.ventaAsociada.id!, v).subscribe({
+          next: () => {
+              this.guardandoVenta = false;
+              this.displayNuevaVenta = false;
+              this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
+              this.cargarDatos();
+          },
+          error: (err) => {
+              this.guardandoVenta = false;
+              this.toastManager.showError('Error', 'No se pudo actualizar la venta');
+          }
+      });
   }
 }

@@ -54,9 +54,9 @@
             <p-datepicker id="fechaIngreso" [(ngModel)]="gasto.fechaIngreso" appendTo="body" dateFormat="dd/mm/yy"></p-datepicker>
         </div>
 
-        <!-- Usuario oculto: se toma de localStorage. Solo visible al editar. -->
-        <div class="field" *ngIf="editando">
-            <label for="usuarioId">Registrado por</label>
+        <!-- Usuario -->
+        <div class="field" *ngIf="editando || tipoNombreActual === 'Comisión'">
+            <label for="usuarioId">{{ tipoNombreActual === 'Comisión' ? 'Usuario Comisionista' : 'Registrado por' }}</label>
             <p-select id="usuarioId" [options]="usuarios" [(ngModel)]="gasto.usuarioId" optionLabel="nombre" optionValue="id" appendTo="body"
                       [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.usuarioId}"></p-select>
             <small class="p-error" *ngIf="submitted && !gasto.usuarioId">El usuario es obligatorio.</small>

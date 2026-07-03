@@ -161,9 +161,20 @@
             <span class="detail-label" style="font-size: 1rem; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.descripcion }}</span>
         </div>
         
-        <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
-            <span class="detail-label" style="font-size: 0.75rem;">Costo Calculado del Producto:</span>
-            <span class="detail-value" style="color: #64748b; font-weight: bold;">{{ costoCalculado | currency }}</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+            <div class="detail-row" style="padding: 0; border: none;">
+                <span class="detail-label" style="font-size: 0.75rem;">Costo Total Estimado:</span>
+                <span class="detail-value" style="color: #64748b; font-weight: bold;">
+                    {{ (costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0) | currency }}
+                </span>
+            </div>
+            <div class="detail-row" style="padding: 0; border: none;">
+                <span class="detail-label" style="font-size: 0.75rem;">Ganancia Estimada:</span>
+                <span class="detail-value" style="font-weight: bold;"
+                      [ngClass]="((nuevaVentaData.precioVenta || 0) - ((costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0))) > 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ (nuevaVentaData.precioVenta || 0) - ((costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0)) | currency }}
+                </span>
+            </div>
         </div>
 
         <div class="field">

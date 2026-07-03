@@ -1,15 +1,16 @@
-<div class="page-header-bar" style="flex-direction: column; align-items: stretch; gap: 1rem;">
-    <div class="product-search" style="width: 100%; display: flex; flex-direction: column;">
-        <span class="search-label" style="margin-bottom: 0.5rem;">Buscar Producto:</span>
-        <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Ej. Air Force 1" styleClass="w-full">
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="p-fluid">
+        <label style="font-weight: 600; color: #475569; margin-bottom: 0.5rem; display: block;"><i class="pi pi-search" style="margin-right: 0.5rem;"></i>Búsqueda Rápida</label>
+        <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Buscar producto..." styleClass="w-full" style="margin-bottom: 1.25rem;">
             <ng-template let-prod pTemplate="item">
-                <div>{{prod.descripcion}} - {{prod.estado || 'Disponible'}}</div>
+                <div>{{prod.descripcion}} <span style="color: #94a3b8; font-size: 0.8em; margin-left: 0.5rem;">({{prod.estado || 'Disponible'}})</span></div>
             </ng-template>
         </p-select>
-    </div>
-    <div class="quick-actions" style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem; align-items: stretch;">
-        <p-button label="Registrar Venta" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()" styleClass="w-full"></p-button>
-        <p-button label="Registrar Compra / Gasto" icon="pi pi-dollar" severity="warn" (onClick)="nuevoGastoRapido()" styleClass="w-full"></p-button>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem;">
+            <p-button label="Vender Producto" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()" styleClass="w-full"></p-button>
+            <p-button label="Compra / Gasto" icon="pi pi-dollar" severity="secondary" [outlined]="true" (onClick)="nuevoGastoRapido()" styleClass="w-full"></p-button>
+        </div>
     </div>
 </div>
 

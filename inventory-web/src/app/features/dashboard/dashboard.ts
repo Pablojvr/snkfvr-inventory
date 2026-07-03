@@ -198,7 +198,7 @@ export class Dashboard implements OnInit {
   }
 
   nuevoGastoRapido() {
-    this.dialogGasto.showDialog(undefined, 1, undefined, true);
+    this.dialogGasto.showDialog(undefined, 1);
   }
 
   // --- Card actions ---

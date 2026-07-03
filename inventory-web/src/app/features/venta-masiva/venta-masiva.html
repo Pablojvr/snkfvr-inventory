@@ -47,7 +47,6 @@
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: baseline;">
                     <label>Precio de Venta</label>
-                    <small *ngIf="item.costoActual !== undefined" style="color: #64748b; font-weight: 600;">(Costo actual: {{ item.costoActual | currency }})</small>
                 </div>
                 <p-inputNumber [(ngModel)]="item.venta.precioVenta" mode="currency" currency="USD" locale="en-US" styleClass="w-full"
                                [ngClass]="{'ng-invalid ng-dirty': item.submitted && (!item.venta.precioVenta || item.venta.precioVenta <= 0)}">
@@ -65,6 +64,23 @@
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <label>Costos Adicionales <small style="color: #64748b;">(Opcional)</small></label>
                 <p-inputNumber [(ngModel)]="item.venta.costosAdicionales" mode="currency" currency="USD" locale="en-US" styleClass="w-full"></p-inputNumber>
+            </div>
+        </div>
+
+        <!-- Dynamic Summary -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;" *ngIf="item.venta.productoId">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.75rem; color: #64748b;">Costo Total Estimado:</span>
+                <span style="color: #64748b; font-weight: bold;">
+                    {{ (item.costoActual || 0) + (item.venta.costoEnvio || 0) + (item.venta.costosAdicionales || 0) | currency }}
+                </span>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.75rem; color: #64748b;">Ganancia Estimada:</span>
+                <span style="font-weight: bold;"
+                      [ngClass]="((item.venta.precioVenta || 0) - ((item.costoActual || 0) + (item.venta.costoEnvio || 0) + (item.venta.costosAdicionales || 0))) > 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ (item.venta.precioVenta || 0) - ((item.costoActual || 0) + (item.venta.costoEnvio || 0) + (item.venta.costosAdicionales || 0)) | currency }}
+                </span>
             </div>
         </div>
     </div>

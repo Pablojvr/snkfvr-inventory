@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     // El modelo gemini-2.5-flash es excelente para tareas multimodales (visión + texto) rápidas
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
-      tools: [{ googleSearch: {} }]
+      tools: [{ googleSearchRetrieval: {} }]
     });
 
     const prompt = `

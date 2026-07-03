@@ -172,7 +172,7 @@
     
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayNuevaVenta = false"></p-button>
-        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="guardandoVenta || !nuevaVentaData.productoSeleccionado || nuevaVentaData.precioVenta === null || nuevaVentaData.precioVenta === undefined" [loading]="guardandoVenta"></p-button>
+        <p-button [label]="editandoVenta ? 'Guardar Cambios' : 'Registrar Venta'" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="guardandoVenta || !nuevaVentaData.productoSeleccionado || nuevaVentaData.precioVenta === null || nuevaVentaData.precioVenta === undefined" [loading]="guardandoVenta"></p-button>
     </ng-template>
 </p-dialog>
 

@@ -323,13 +323,11 @@ export class Ventas implements OnInit {
   }
 
   anularVenta(ventaId: number) {
-      if(confirm('¿Seguro que desea anular esta venta y devolver el producto a Disponible?')) {
+      if(confirm('¿Seguro que desea liberar este producto? (Significa que el usuario no recibió su producto). Se anula la venta, y el producto se habilita para otra venta, pero sus gastos asociados se mantienen incluso los de envío, porque aunque no haya recibido el envío lo pagamos nosotros.')) {
           this.api.eliminarVenta(ventaId).subscribe(() => {
               this.cargarDatos();
               this.toastManager.showSuccess('Éxito', 'Venta anulada correctamente');
           });
-      } else {
-         this.cargarDatos();
       }
   }
 

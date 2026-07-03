@@ -27,7 +27,7 @@ export class Productos implements OnInit {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
   displayDialog: boolean = false;
-  producto: Producto = { descripcion: '', fechaCompra: new Date(), costo: null };
+  producto: Producto = { descripcion: '', fechaCompra: new Date() };
   
   editando: boolean = false;
   submitted: boolean = false;
@@ -83,8 +83,8 @@ export class Productos implements OnInit {
       }).subscribe(({ productos, gastos, usuarios }) => {
         this.usuarios = usuarios;
         this.productos = productos.map(p => {
-            const gastosProducto = gastos.filter(g => g.productoId === p.id && (g.tipo === 'Comisión' || g.tipo === 'Envío'));
-            const costoCalculado = (p.costo || 0) + gastosProducto.reduce((sum, g) => sum + (g.monto || 0), 0);
+            const gastosProducto = gastos.filter(g => g.productoId === p.id && g.activo);
+            const costoCalculado = gastosProducto.reduce((sum, g) => sum + (g.monto || 0), 0);
             return {
                 ...p,
                 costoCalculado: costoCalculado
@@ -118,7 +118,7 @@ export class Productos implements OnInit {
   }
 
   showDialog() {
-    this.producto = { descripcion: '', fechaCompra: new Date(), costo: null };
+    this.producto = { descripcion: '', fechaCompra: new Date() };
     this.editando = false;
     this.submitted = false;
     this.displayDialog = true;
@@ -134,7 +134,7 @@ export class Productos implements OnInit {
   guardar() {
     this.submitted = true;
     if (this.guardando) return;
-    if (!this.producto.descripcion || this.producto.costo === null || this.producto.costo <= 0) {
+    if (!this.producto.descripcion) {
       return;
     }
 
@@ -164,7 +164,7 @@ export class Productos implements OnInit {
 
   venderProducto(prod: Producto) {
     const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
-    const suggestedPrice = (prod.costoCalculado || prod.costo || 0) + 15;
+    const suggestedPrice = (prod.costoCalculado || 0) + 15;
 
     this.nuevaVentaData = {
         productoPreseleccionado: true,

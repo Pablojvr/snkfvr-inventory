@@ -21,7 +21,6 @@ namespace Inventory.Settings.Data
             base.OnModelCreating(modelBuilder);
 
             // Precisión para decimales
-            modelBuilder.Entity<Producto>().Property(p => p.Costo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Gasto>().Property(e => e.Monto).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Venta>().Property(s => s.CostoEnvio).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Venta>().Property(s => s.CostosAdicionales).HasColumnType("decimal(18,2)");

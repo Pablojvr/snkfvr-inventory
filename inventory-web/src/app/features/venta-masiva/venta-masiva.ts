@@ -93,7 +93,7 @@ export class VentaMasivaComponent implements OnInit {
     if (productoId) {
       const p = this.productos.find(x => x.id === productoId);
       if (p) {
-        costoActual = p.costo ?? undefined;
+        costoActual = p.costoCalculado ?? undefined;
       }
     }
 
@@ -117,7 +117,7 @@ export class VentaMasivaComponent implements OnInit {
       pId = (pId as any).id;
     }
     const prod = this.productos.find(p => p.id === pId);
-    item.costoActual = prod?.costo ?? undefined;
+    item.costoActual = prod?.costoCalculado ?? undefined;
   }
 
   getNombreUsuario(id: number): string {

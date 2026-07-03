@@ -153,8 +153,7 @@ namespace Inventory.Application.UseCases
             {
                 // Calcular Ganancia y registrar Ingreso
                 var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
-                var gastosProducto = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && (g.Tipo == "Envío" || g.Tipo == "Comisión")).Sum(g => g.Monto);
-                var costoCalculado = (producto?.Costo ?? 0) + gastosProducto;
+                var costoCalculado = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && g.Activo).Sum(g => g.Monto);
                 var ganancia = ventaDto.PrecioVenta - costoCalculado;
 
                 var ingresoGanancia = new Ingreso

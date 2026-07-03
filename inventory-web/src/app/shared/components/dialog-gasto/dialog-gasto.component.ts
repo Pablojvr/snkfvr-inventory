@@ -108,7 +108,7 @@ export class DialogGastoComponent {
       const prod = this.productos.find(p => p.id === pId);
       if (prod) {
         this.productoNombre = prod.descripcion;
-        this.costoActual = prod.costo ?? undefined;
+        this.costoActual = prod.costoCalculado ?? undefined;
       }
     }
   }

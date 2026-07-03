@@ -7,7 +7,6 @@ export interface Producto {
   id?: number;
   descripcion: string;
   fechaCompra: string | Date;
-  costo: number | null;
   costoCalculado?: number;
   estado?: string;
   activo?: boolean;

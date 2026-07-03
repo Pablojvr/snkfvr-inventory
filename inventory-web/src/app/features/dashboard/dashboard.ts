@@ -69,9 +69,9 @@ export class Dashboard implements OnInit {
         }).subscribe(({ ventas, productos, usuarios, gastos, movimientos }) => {
           this.productosParaBuscador = productos;
           this.productos = productos.map(p => {
-             const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo && g.tipo !== 'Calzado');
-             const totalGastos = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
-             return { ...p, costoCalculado: (p.costo || 0) + totalGastos };
+             const gastosProducto = gastos.filter(g => g.productoId === p.id && g.activo);
+             const costoCalculado = gastosProducto.reduce((acc, curr) => acc + (curr.monto || 0), 0);
+             return { ...p, costoCalculado: costoCalculado };
           });
           this.usuarios = usuarios;
           

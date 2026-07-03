@@ -89,9 +89,8 @@ export class Ventas implements OnInit {
         this.productos = productos.map(p => {
            const venta = ventas.find(v => v.productoId === p.id && v.activo);
            
-           const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo && g.tipo !== 'Calzado');
-           const totalGastos = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
-           const costoCalculado = (p.costo || 0) + totalGastos;
+           const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo);
+           const costoCalculado = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
 
            return {
                ...p,

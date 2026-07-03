@@ -5,8 +5,7 @@
             <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
                 <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="volver()"></p-button>
                 
-                <h2 *ngIf="!editando" style="margin: 0; flex: 1;">{{ producto.descripcion }}</h2>
-                <input *ngIf="editando" pInputText [(ngModel)]="producto.descripcion" style="flex: 1; font-size: 1.5rem; font-weight: bold; padding: 0.25rem 0.5rem;" />
+                <h2 style="margin: 0; flex: 1;">{{ producto.descripcion }}</h2>
                 
                 <span class="status-badge" [ngClass]="getStatusClass(producto.estado)">{{ producto.estado || 'Disponible' }}</span>
                 
@@ -14,29 +13,18 @@
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
             </div>
             
-            <div style="color: #64748b; font-size: 0.875rem; margin-left: 3.5rem; display: flex; align-items: center;">
-                Adquirido el&nbsp;
-                <span *ngIf="!editando">{{ producto.fechaCompra | date }}</span>
-                <p-datepicker *ngIf="editando" [(ngModel)]="producto.fechaCompra" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="p-inputtext-sm"></p-datepicker>
+            <div style="color: #64748b; font-size: 0.875rem; margin-left: 3.5rem;">
+                Adquirido el {{ producto.fechaCompra | date }}
             </div>
         </div>
         
-        <div class="header-actions" *ngIf="!editando">
+        <div class="header-actions">
             <p-button label="Vender" icon="pi pi-shopping-cart" severity="success" (onClick)="venderProducto()" *ngIf="producto.estado !== 'Vendido'"></p-button>
-        </div>
-        <div class="header-actions" *ngIf="editando">
-            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancelarEdicion()"></p-button>
-            <p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="guardarEdicion()" [loading]="guardando"></p-button>
         </div>
     </div>
 
     <!-- Info Grid -->
     <div class="info-grid">
-        <div class="info-item">
-            <span class="info-label">Costo Original (Base)</span>
-            <span *ngIf="!editando" class="info-value">{{ producto.costo | currency }}</span>
-            <p-inputNumber *ngIf="editando" [(ngModel)]="producto.costo" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
-        </div>
         <div class="info-item">
             <span class="info-label">Costo Calculado</span>
             <span class="info-value" style="color: #3b82f6;">{{ costoCalculado | currency }}</span>

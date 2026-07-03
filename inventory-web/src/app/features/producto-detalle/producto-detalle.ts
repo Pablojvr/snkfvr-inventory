@@ -60,8 +60,6 @@ export class ProductoDetalle implements OnInit {
   usuarios: Usuario[] = [];
   costoCalculado: number = 0;
   
-  editando: boolean = false;
-  guardando: boolean = false;
   menuItems: MenuItem[] = [];
   activeTab: string = '0';
 
@@ -128,47 +126,29 @@ export class ProductoDetalle implements OnInit {
                     usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
                 }));
             
-            const gastosActivos = this.gastosProducto.filter(g => g.activo && g.tipo !== 'Calzado');
-            const totalGastos = gastosActivos.reduce((acc, curr) => acc + (curr.monto || 0), 0);
-            this.costoCalculado = (this.producto?.costo || 0) + totalGastos;
+            const gastosActivos = this.gastosProducto.filter(g => g.activo);
+            this.costoCalculado = gastosActivos.reduce((acc, curr) => acc + (curr.monto || 0), 0);
         });
     });
   }
 
   toggleMenu(event: any, menu: any) {
       this.menuItems = [
-          { label: 'Editar Producto', icon: 'pi pi-pencil', command: () => this.habilitarEdicion() }
+          { label: 'Eliminar Producto', icon: 'pi pi-trash', command: () => this.eliminarProducto() }
       ];
       menu.toggle(event);
   }
 
-  habilitarEdicion() {
-      this.editando = true;
-      if (this.producto) {
-          this.producto.fechaCompra = new Date(this.producto.fechaCompra);
-      }
-  }
-
-  cancelarEdicion() {
-      this.editando = false;
-      this.cargarDatos();
-  }
-
-  guardarEdicion() {
-      if (!this.producto || !this.producto.descripcion || !this.producto.costo) return;
-      this.guardando = true;
-      this.api.editarProducto(this.producto.id!, this.producto).subscribe({
-          next: () => {
-              this.toastManager.showSuccess('Éxito', 'Producto actualizado.');
-              this.editando = false;
-              this.guardando = false;
-              this.cargarDatos();
-          },
-          error: () => {
-              this.toastManager.showError('Error', 'No se pudo actualizar.');
-              this.guardando = false;
-          }
+  eliminarProducto() {
+    if (confirm('¿Seguro que desea eliminar este producto? Esto desactivará el producto y sus gastos asociados.')) {
+      this.api.eliminarProducto(this.productoId).subscribe({
+        next: () => {
+          this.toastManager.showSuccess('Éxito', 'Producto eliminado.');
+          this.router.navigate(['/productos']);
+        },
+        error: () => this.toastManager.showError('Error', 'No se pudo eliminar.')
       });
+    }
   }
 
   venderProducto() {

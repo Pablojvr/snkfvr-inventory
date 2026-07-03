@@ -47,7 +47,6 @@ namespace Inventory.Application.UseCases
                 {
                     Descripcion = gastoDto.Motivo,
                     FechaCompra = gastoDto.Fecha,
-                    Costo = gastoDto.Monto,
                     Estado = "Disponible",
                     Activo = true
                 };

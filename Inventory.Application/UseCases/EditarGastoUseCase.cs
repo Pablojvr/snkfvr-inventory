@@ -52,31 +52,9 @@ namespace Inventory.Application.UseCases
                 }
             }
 
-            // Manejar diferencia de costo si es comisión o envío
-            if (nuevoProductoId.HasValue && (nuevoTipo == "Comisión" || nuevoTipo == "Envío"))
-            {
-                var diferenciaMonto = gastoDto.Monto - gasto.Monto;
-                if (diferenciaMonto != 0)
-                {
-                    var producto = await _productoRepositorio.ObtenerPorIdAsync(nuevoProductoId.Value);
-                    if (producto != null)
-                    {
-                        producto.Costo += diferenciaMonto;
-                        await _productoRepositorio.ActualizarAsync(producto);
-
-                        var movimientoPrecio = new Movimiento
-                        {
-                            Tipo = "Edición de Precio",
-                            Fecha = DateTime.Now,
-                            Descripcion = $"Ajuste de costo del producto {producto.Id} tras editar gasto {id} de {nuevoTipo} ({gastoDto.Motivo})",
-                            MontoTotal = diferenciaMonto,
-                            ReferenciaId = producto.Id,
-                            ProductoId = producto.Id
-                        };
-                        await _movimientoRepositorio.AgregarAsync(movimientoPrecio);
-                    }
-                }
-            }
+            // La suma/resta del costo ya no se guarda en Producto.Costo,
+            // ya que el frontend y otras partes lo calculan dinámicamente
+            // sumando todos los Gastos activos.
 
             gasto.Motivo = gastoDto.Motivo;
             gasto.Monto = gastoDto.Monto;

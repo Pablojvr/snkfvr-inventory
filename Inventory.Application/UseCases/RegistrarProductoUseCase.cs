@@ -29,7 +29,7 @@ namespace Inventory.Application.UseCases
                 Tipo = "Compra",
                 Fecha = producto.FechaCompra,
                 Descripcion = $"Compra de Producto: {producto.Descripcion}",
-                MontoTotal = -producto.Costo,
+                MontoTotal = 0,
                 ReferenciaId = productoAgregado.Id,
                 ProductoId = productoAgregado.Id
             };

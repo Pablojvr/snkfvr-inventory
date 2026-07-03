@@ -32,7 +32,6 @@ namespace Inventory.Application.UseCases
             bool descChanged = producto.Descripcion != productoDto.Descripcion;
 
             producto.Descripcion = productoDto.Descripcion;
-            producto.Costo = productoDto.Costo;
             producto.FechaCompra = productoDto.FechaCompra;
 
             await _productoRepositorio.ActualizarAsync(producto);

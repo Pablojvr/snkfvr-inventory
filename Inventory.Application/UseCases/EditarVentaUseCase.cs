@@ -1,9 +1,9 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
-using System.Linq;
 
 namespace Inventory.Application.UseCases
 {
@@ -20,6 +20,7 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Usuario> _usuarioRepositorio;
         private readonly IRepositorio<Ingreso> _ingresoRepositorio;
+        private readonly IRepositorio<TipoGasto> _tipoGastoRepositorio;
 
         public EditarVentaUseCase(
             IRepositorio<Venta> ventaRepositorio,
@@ -27,7 +28,8 @@ namespace Inventory.Application.UseCases
             IRepositorio<Producto> productoRepositorio,
             IRepositorio<Gasto> gastoRepositorio,
             IRepositorio<Usuario> usuarioRepositorio,
-            IRepositorio<Ingreso> ingresoRepositorio)
+            IRepositorio<Ingreso> ingresoRepositorio,
+            IRepositorio<TipoGasto> tipoGastoRepositorio)
         {
             _ventaRepositorio = ventaRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
@@ -35,6 +37,7 @@ namespace Inventory.Application.UseCases
             _gastoRepositorio = gastoRepositorio;
             _usuarioRepositorio = usuarioRepositorio;
             _ingresoRepositorio = ingresoRepositorio;
+            _tipoGastoRepositorio = tipoGastoRepositorio;
         }
 
         public async Task<Venta> EjecutarAsync(int id, VentaDto ventaDto)
@@ -53,6 +56,10 @@ namespace Inventory.Application.UseCases
             venta.Estado = ventaDto.Estado;
 
             await _ventaRepositorio.ActualizarAsync(venta);
+
+            // Resolve TipoGasto IDs
+            var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
+            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == "Comisión")?.Id ?? 3;
 
             if (venta.Estado == "Vendido")
             {
@@ -83,7 +90,7 @@ namespace Inventory.Application.UseCases
                         
                         var gastoComisionVenta = new Gasto
                         {
-                            Tipo = "Comisión",
+                            TipoGastoId = tipoComisionId,
                             Motivo = $"COM | {nombreProducto} ({nombreUsuarioComision})",
                             Monto = ventaDto.ComisionMonto.Value,
                             Fecha = DateTime.Now,

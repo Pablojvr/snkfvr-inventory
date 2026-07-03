@@ -28,6 +28,13 @@ export interface Ingreso {
   activo?: boolean;
 }
 
+export interface TipoGasto {
+  id?: number;
+  nombre: string;
+  esSistema?: boolean;
+  activo?: boolean;
+}
+
 export interface Gasto {
   id?: number;
   motivo: string;
@@ -38,7 +45,8 @@ export interface Gasto {
   monto: number | null;
   productoId?: number;
   productoDescripcion?: string;
-  tipo?: string;
+  tipoGastoId: number;
+  tipoGastoNombre?: string;
   activo?: boolean;
   comisionMonto?: number | null;
   comisionUsuarioId?: number | null;
@@ -107,6 +115,20 @@ export class ApiService {
   }
   eliminarProducto(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/productos/${id}`);
+  }
+
+  // --- Tipos de Gasto ---
+  getTiposGasto(): Observable<TipoGasto[]> {
+    return this.http.get<TipoGasto[]>(`${this.apiUrl}/tiposgasto`);
+  }
+  crearTipoGasto(tipo: TipoGasto): Observable<TipoGasto> {
+    return this.http.post<TipoGasto>(`${this.apiUrl}/tiposgasto`, tipo);
+  }
+  editarTipoGasto(id: number, tipo: TipoGasto): Observable<TipoGasto> {
+    return this.http.put<TipoGasto>(`${this.apiUrl}/tiposgasto/${id}`, tipo);
+  }
+  eliminarTipoGasto(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/tiposgasto/${id}`);
   }
 
   // --- Gastos ---

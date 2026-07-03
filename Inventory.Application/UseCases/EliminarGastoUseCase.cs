@@ -1,7 +1,7 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
-using System.Linq;
 
 namespace Inventory.Application.UseCases
 {
@@ -15,15 +15,18 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
+        private readonly IRepositorio<TipoGasto> _tipoGastoRepositorio;
 
         public EliminarGastoUseCase(
             IRepositorio<Gasto> gastoRepositorio,
             IRepositorio<Producto> productoRepositorio,
-            IRepositorio<Movimiento> movimientoRepositorio)
+            IRepositorio<Movimiento> movimientoRepositorio,
+            IRepositorio<TipoGasto> tipoGastoRepositorio)
         {
             _gastoRepositorio = gastoRepositorio;
             _productoRepositorio = productoRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
+            _tipoGastoRepositorio = tipoGastoRepositorio;
         }
 
         public async Task EjecutarAsync(int id)
@@ -42,14 +45,14 @@ namespace Inventory.Application.UseCases
                     await _movimientoRepositorio.EliminarAsync(movAsociado.Id);
                 }
 
-                // Desactivar el producto si el gasto fue de Calzado y creó el producto
-                if (gasto.Tipo == "Calzado" && gasto.ProductoId.HasValue)
+                // Desactivar el producto si el gasto fue de tipo Producto y creó el producto
+                var tipoGasto = await _tipoGastoRepositorio.ObtenerPorIdAsync(gasto.TipoGastoId);
+                if (tipoGasto?.Nombre == "Producto" && gasto.ProductoId.HasValue)
                 {
                     await _productoRepositorio.EliminarAsync(gasto.ProductoId.Value);
                 }
                 
-                // Si fue Comisión o Envío, deberíamos restar el costo que se sumó al producto? 
-                // El requerimiento ahora dice que el "Costo Calculado" es dinámico en el Frontend.
+                // Si fue Comisión o Envío, el "Costo Calculado" es dinámico en el Frontend.
                 // Así que el Frontend simplemente sumará los Gastos activos.
             }
         }

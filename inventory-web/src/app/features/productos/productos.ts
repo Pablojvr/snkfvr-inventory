@@ -114,7 +114,7 @@ export class Productos implements OnInit {
   }
 
   agregarComision(productoId: number) {
-      this.dialogGasto.showDialog(productoId, 'Comisión');
+      this.dialogGasto.showDialog(productoId, 3);
   }
 
   showDialog() {

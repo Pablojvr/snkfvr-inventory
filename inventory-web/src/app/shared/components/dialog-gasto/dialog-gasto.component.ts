@@ -8,7 +8,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { ApiService, Gasto, Producto, Usuario } from '../../../core/services/api';
+import { ApiService, Gasto, Producto, Usuario, TipoGasto } from '../../../core/services/api';
 import { ToastManagerService } from '../../../core/services/toast-manager.service';
 
 @Component({
@@ -19,7 +19,7 @@ import { ToastManagerService } from '../../../core/services/toast-manager.servic
 })
 export class DialogGastoComponent {
   displayDialog: boolean = false;
-  gasto: Gasto = { motivo: '', fecha: new Date(), monto: null, usuarioId: 0, tipo: 'Calzado' };
+  gasto: Gasto = { motivo: '', fecha: new Date(), monto: null, usuarioId: 0, tipoGastoId: 1 };
   
   editando: boolean = false;
   submitted: boolean = false;
@@ -30,18 +30,21 @@ export class DialogGastoComponent {
   
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
-  tiposGasto = ['Calzado', 'Comisión', 'Envío'];
-  soloCalzado: boolean = false;
+  tiposGasto: TipoGasto[] = [];
+  soloProducto: boolean = false;
+  
+  // Resolved type name for logic
+  tipoNombreActual: string = 'Producto';
   
   @Output() onSaved = new EventEmitter<void>();
 
   constructor(private api: ApiService, private toastManager: ToastManagerService) {}
 
-  showDialog(productoId?: number, tipo?: string, gastoExistente?: Gasto, forceSoloCalzado: boolean = false) {
+  showDialog(productoId?: number, tipoGastoId?: number, gastoExistente?: Gasto, forceSoloProducto: boolean = false) {
     this.productoNombre = '';
     this.costoActual = undefined;
     this.prefilledProducto = !!productoId;
-    this.soloCalzado = forceSoloCalzado;
+    this.soloProducto = forceSoloProducto;
     this.cargarDatos();
     
     if (gastoExistente) {
@@ -60,16 +63,12 @@ export class DialogGastoComponent {
             fecha: new Date(), 
             monto: null, 
             usuarioId: defaultUsuarioId, 
-            tipo: tipo || 'Calzado',
+            tipoGastoId: tipoGastoId || 1, // Default: Producto
             productoId: productoId,
             comisionMonto: null,
             comisionUsuarioId: null
         };
         this.editando = false;
-        
-        if (this.gasto.tipo === 'Comisión' || this.gasto.tipo === 'Envío') {
-            this.generarMotivo();
-        }
     }
     
     this.submitted = false;
@@ -80,13 +79,17 @@ export class DialogGastoComponent {
     import('rxjs').then(({ forkJoin }) => {
       forkJoin({
         productos: this.api.getProductos(),
-        usuarios: this.api.getUsuarios()
-      }).subscribe(({ productos, usuarios }) => {
+        usuarios: this.api.getUsuarios(),
+        tiposGasto: this.api.getTiposGasto()
+      }).subscribe(({ productos, usuarios, tiposGasto }) => {
         this.productos = productos;
         this.usuarios = usuarios;
+        this.tiposGasto = tiposGasto;
+        
+        this.resolveTipoNombre();
         
         // Find Ale for default commission user
-        if (!this.editando && this.gasto.tipo === 'Calzado') {
+        if (!this.editando && this.tipoNombreActual === 'Producto') {
            const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
            if (aleUser) {
                this.gasto.comisionUsuarioId = aleUser.id;
@@ -94,11 +97,16 @@ export class DialogGastoComponent {
         }
         
         this.resolveProductoInfo();
-        if (!this.editando && (this.gasto.tipo === 'Comisión' || this.gasto.tipo === 'Envío')) {
+        if (!this.editando && (this.tipoNombreActual === 'Comisión' || this.tipoNombreActual === 'Envío')) {
             this.generarMotivo();
         }
       });
     });
+  }
+
+  resolveTipoNombre() {
+    const tipo = this.tiposGasto.find(t => t.id === this.gasto.tipoGastoId);
+    this.tipoNombreActual = tipo?.nombre || 'Producto';
   }
 
   resolveProductoInfo() {
@@ -114,12 +122,14 @@ export class DialogGastoComponent {
   }
   
   onTipoChange() {
-      if (this.gasto.tipo === 'Calzado' && !this.gasto.motivo.startsWith('COM |') && !this.gasto.motivo.startsWith('ENV |')) {
+      this.resolveTipoNombre();
+      
+      if (this.tipoNombreActual === 'Producto' && !this.gasto.motivo.startsWith('COM |') && !this.gasto.motivo.startsWith('ENV |')) {
           const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
           if (aleUser && !this.gasto.comisionUsuarioId) {
               this.gasto.comisionUsuarioId = aleUser.id;
           }
-      } else if (this.gasto.tipo === 'Comisión' || this.gasto.tipo === 'Envío') {
+      } else if (this.tipoNombreActual === 'Comisión' || this.tipoNombreActual === 'Envío') {
           this.generarMotivo();
       }
   }
@@ -136,7 +146,7 @@ export class DialogGastoComponent {
               nombreProducto = prod.descripcion;
           }
       }
-      const prefix = this.gasto.tipo === 'Comisión' ? 'COM' : 'ENV';
+      const prefix = this.tipoNombreActual === 'Comisión' ? 'COM' : 'ENV';
       this.gasto.motivo = nombreProducto ? `${prefix} | ${nombreProducto}` : `${prefix} | `;
   }
 
@@ -148,8 +158,10 @@ export class DialogGastoComponent {
       return;
     }
     
-    if (this.gasto.productoId && this.gasto.tipo !== 'Comisión' && this.gasto.tipo !== 'Envío' && this.gasto.tipo !== 'Calzado') {
-        this.toastManager.showError('Error', 'Un gasto de producto solo puede ser Comisión o Envío.');
+    this.resolveTipoNombre();
+    
+    if (this.gasto.productoId && this.tipoNombreActual !== 'Comisión' && this.tipoNombreActual !== 'Envío' && this.tipoNombreActual !== 'Producto') {
+        this.toastManager.showError('Error', 'Un gasto de producto solo puede ser Comisión, Envío o Producto.');
         return;
     }
 
@@ -157,7 +169,7 @@ export class DialogGastoComponent {
     if (pId && typeof pId === 'object') {
         this.gasto.productoId = (pId as any).id;
     }
-    if (this.gasto.tipo === 'Calzado' && !this.gasto.productoId) {
+    if (this.tipoNombreActual === 'Producto' && !this.gasto.productoId) {
         this.gasto.productoId = undefined;
     }
 

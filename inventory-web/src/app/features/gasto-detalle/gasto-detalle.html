@@ -22,7 +22,7 @@
             <div class="entity-card-header">
                 <h4 *ngIf="!editando" class="entity-card-title">{{ gasto.motivo }}</h4>
                 <input *ngIf="editando" pInputText [(ngModel)]="gasto.motivo" style="flex: 1; font-size: 1.1rem; font-weight: bold;" />
-                <span class="badge-secondary">{{ gasto.tipo }}</span>
+                <span class="badge-secondary">{{ gasto.tipoGastoNombre }}</span>
             </div>
             <div class="entity-card-body" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
                 <div class="detail-row">
@@ -32,8 +32,8 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Tipo</span>
-                    <span *ngIf="!editando" class="detail-value">{{ gasto.tipo }}</span>
-                    <p-select *ngIf="editando" [options]="tipoOpciones" [(ngModel)]="gasto.tipo" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+                    <span *ngIf="!editando" class="detail-value">{{ gasto.tipoGastoNombre }}</span>
+                    <p-select *ngIf="editando" [options]="tiposGasto" [(ngModel)]="gasto.tipoGastoId" optionLabel="nombre" optionValue="id" styleClass="w-full" appendTo="body"></p-select>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Fecha de Registro</span>

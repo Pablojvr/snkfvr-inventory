@@ -18,7 +18,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Producto, Movimiento, Gasto, Usuario, Venta } from '../../core/services/api';
+import { ApiService, Producto, Movimiento, Gasto, Usuario, Venta, TipoGasto } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Location } from '@angular/common';
 
@@ -69,13 +69,7 @@ export class ProductoDetalle implements OnInit {
   gastoEditando: Gasto | null = null;
   gastoEditFecha: Date | null = null;
   guardandoGasto: boolean = false;
-  tipoGastoOpciones = [
-    { label: 'Calzado', value: 'Calzado' },
-    { label: 'Envío', value: 'Envío' },
-    { label: 'Comisión', value: 'Comisión' },
-    { label: 'Servicio', value: 'Servicio' },
-    { label: 'Otro', value: 'Otro' }
-  ];
+  tiposGasto: TipoGasto[] = [];
 
   // Venta edit modal
   displayNuevaVenta: boolean = false;
@@ -104,14 +98,16 @@ export class ProductoDetalle implements OnInit {
             usuarios: this.api.getUsuarios(),
             gastos: this.api.getGastos(),
             movimientos: this.api.getMovimientosPorProducto(this.productoId),
-            ventas: this.api.getVentas()
-        }).subscribe(({ productos, usuarios, gastos, movimientos, ventas }) => {
+            ventas: this.api.getVentas(),
+            tiposGasto: this.api.getTiposGasto()
+        }).subscribe(({ productos, usuarios, gastos, movimientos, ventas, tiposGasto }) => {
             this.producto = productos.find(p => p.id === this.productoId) || null;
             if (!this.producto) {
                 this.router.navigate(['/productos']);
                 return;
             }
             this.usuarios = usuarios;
+            this.tiposGasto = tiposGasto;
             this.movimientos = movimientos.map(mov => {
                 let desc = mov.descripcion;
                 desc = desc.replace(/usuario con ID (\d+)/g, (match: string, p1: string) => {

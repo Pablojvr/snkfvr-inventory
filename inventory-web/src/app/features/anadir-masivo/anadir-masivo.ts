@@ -10,7 +10,7 @@ import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
-import { ApiService, Gasto, Producto, Usuario } from '../../core/services/api';
+import { ApiService, Gasto, Producto, Usuario, TipoGasto } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -43,7 +43,7 @@ export class AnadirMasivoComponent implements OnInit {
   items: GastoMasivoItem[] = [];
   nextId: number = 1;
 
-  tiposGasto: string[] = ['Calzado', 'Comisión', 'Viático', 'Envío', 'Otros'];
+  tiposGasto: TipoGasto[] = [];
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
 
@@ -60,7 +60,7 @@ export class AnadirMasivoComponent implements OnInit {
     this.defaultUsuarioId = savedUser ? parseInt(savedUser, 10) : 0;
     
     this.route.queryParams.subscribe(params => {
-      const tipoQuery = params['tipo'] || 'Calzado';
+      const tipoQuery = params['tipo'] ? parseInt(params['tipo'], 10) : 1;
       const productoIdQuery = params['productoId'] ? parseInt(params['productoId'], 10) : undefined;
       
       this.items.push({
@@ -71,7 +71,7 @@ export class AnadirMasivoComponent implements OnInit {
           fecha: new Date(),
           usuarioId: this.defaultUsuarioId,
           monto: 0,
-          tipo: tipoQuery,
+          tipoGastoId: tipoQuery,
           productoId: productoIdQuery,
           comisionMonto: null,
           comisionUsuarioId: null
@@ -83,20 +83,27 @@ export class AnadirMasivoComponent implements OnInit {
   cargarDatos() {
     forkJoin({
       productos: this.api.getProductos(),
-      usuarios: this.api.getUsuarios()
-    }).subscribe(({ productos, usuarios }) => {
+      usuarios: this.api.getUsuarios(),
+      tipos: this.api.getTiposGasto()
+    }).subscribe(({ productos, usuarios, tipos }) => {
       this.productos = productos;
       this.usuarios = usuarios;
+      this.tiposGasto = tipos;
       
       const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
       if (aleUser) {
           this.items.forEach(item => {
-              if (item.gasto.tipo === 'Calzado' && !item.gasto.comisionUsuarioId) {
+              if (this.getTipoNombre(item) === 'Producto' && !item.gasto.comisionUsuarioId) {
                   item.gasto.comisionUsuarioId = aleUser.id;
               }
           });
       }
     });
+  }
+
+  getTipoNombre(item: GastoMasivoItem): string {
+    const t = this.tiposGasto.find(tg => tg.id === item.gasto.tipoGastoId);
+    return t ? t.nombre : 'Producto';
   }
 
   agregarFila() {
@@ -109,7 +116,7 @@ export class AnadirMasivoComponent implements OnInit {
         fecha: new Date(),
         usuarioId: this.defaultUsuarioId,
         monto: 0,
-        tipo: 'Calzado',
+        tipoGastoId: 1,
         comisionMonto: null,
         comisionUsuarioId: aleUser ? aleUser.id : null
       }
@@ -125,7 +132,7 @@ export class AnadirMasivoComponent implements OnInit {
   }
 
   onTipoOProductoChange(item: GastoMasivoItem) {
-    if (item.gasto.tipo === 'Comisión' || item.gasto.tipo === 'Envío') {
+    if (this.getTipoNombre(item) === 'Comisión' || this.getTipoNombre(item) === 'Envío') {
       let nombreProducto = '';
       if (item.gasto.productoId) {
         let pId = item.gasto.productoId;
@@ -137,9 +144,9 @@ export class AnadirMasivoComponent implements OnInit {
           nombreProducto = prod.descripcion;
         }
       }
-      const prefix = item.gasto.tipo === 'Comisión' ? 'COM' : 'ENV';
+      const prefix = this.getTipoNombre(item) === 'Comisión' ? 'COM' : 'ENV';
       item.gasto.motivo = nombreProducto ? `${prefix} | ${nombreProducto}` : `${prefix} | `;
-    } else if (item.gasto.tipo === 'Calzado') {
+    } else if (this.getTipoNombre(item) === 'Producto') {
         const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
         if (aleUser && !item.gasto.comisionUsuarioId) {
             item.gasto.comisionUsuarioId = aleUser.id;
@@ -178,7 +185,7 @@ export class AnadirMasivoComponent implements OnInit {
       return false;
     }
 
-    if (item.gasto.productoId && item.gasto.tipo !== 'Comisión' && item.gasto.tipo !== 'Envío' && item.gasto.tipo !== 'Calzado') {
+    if (item.gasto.productoId && this.getTipoNombre(item) !== 'Comisión' && this.getTipoNombre(item) !== 'Envío' && this.getTipoNombre(item) !== 'Producto') {
       item.error = 'Un gasto de producto solo puede ser Comisión o Envío.';
       return false;
     }
@@ -198,7 +205,8 @@ export class AnadirMasivoComponent implements OnInit {
         gastoPayload.productoId = (gastoPayload.productoId as any).id;
       }
 
-      if (gastoPayload.tipo === 'Calzado' && !gastoPayload.productoId) {
+      const tipoNombre = this.tiposGasto.find(t => t.id === gastoPayload.tipoGastoId)?.nombre || 'Producto';
+      if (tipoNombre === 'Producto' && !gastoPayload.productoId) {
         gastoPayload.productoId = undefined;
       }
 

@@ -17,15 +17,18 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
+        private readonly IRepositorio<TipoGasto> _tipoGastoRepositorio;
 
         public EditarGastoUseCase(
             IRepositorio<Gasto> gastoRepositorio, 
             IRepositorio<Movimiento> movimientoRepositorio,
-            IRepositorio<Producto> productoRepositorio)
+            IRepositorio<Producto> productoRepositorio,
+            IRepositorio<TipoGasto> tipoGastoRepositorio)
         {
             _gastoRepositorio = gastoRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
+            _tipoGastoRepositorio = tipoGastoRepositorio;
         }
 
         public async Task<Gasto> EjecutarAsync(int id, GastoDto gastoDto)
@@ -34,15 +37,21 @@ namespace Inventory.Application.UseCases
             if (gasto == null) throw new Exception("Gasto no encontrado");
 
             int? nuevoProductoId = gastoDto.ProductoId ?? gasto.ProductoId;
-            var nuevoTipo = string.IsNullOrEmpty(gastoDto.Tipo) ? "Calzado" : gastoDto.Tipo;
 
-            if (nuevoProductoId.HasValue && nuevoTipo != "Comisión" && nuevoTipo != "Envío" && nuevoTipo != "Calzado")
+            // Resolve tipo name from FK
+            var tipoGasto = await _tipoGastoRepositorio.ObtenerPorIdAsync(gastoDto.TipoGastoId);
+            var nuevoTipoNombre = tipoGasto?.Nombre ?? "Producto";
+
+            if (nuevoProductoId.HasValue && nuevoTipoNombre != "Comisión" && nuevoTipoNombre != "Envío" && nuevoTipoNombre != "Producto")
             {
-                throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión o Envío.");
+                throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión, Envío o Producto.");
             }
 
-            // Si se edito el motivo de un calzado que generó producto, actualizamos el producto
-            if (gasto.Tipo == "Calzado" && gasto.ProductoId.HasValue && gasto.Motivo != gastoDto.Motivo)
+            // Si se editó el motivo de un Producto que generó producto, actualizamos el producto
+            var tipoAnterior = await _tipoGastoRepositorio.ObtenerPorIdAsync(gasto.TipoGastoId);
+            var tipoAnteriorNombre = tipoAnterior?.Nombre ?? "";
+
+            if (tipoAnteriorNombre == "Producto" && gasto.ProductoId.HasValue && gasto.Motivo != gastoDto.Motivo)
             {
                 var producto = await _productoRepositorio.ObtenerPorIdAsync(gasto.ProductoId.Value);
                 if (producto != null)
@@ -52,15 +61,11 @@ namespace Inventory.Application.UseCases
                 }
             }
 
-            // La suma/resta del costo ya no se guarda en Producto.Costo,
-            // ya que el frontend y otras partes lo calculan dinámicamente
-            // sumando todos los Gastos activos.
-
             gasto.Motivo = gastoDto.Motivo;
             gasto.Monto = gastoDto.Monto;
             gasto.UsuarioId = gastoDto.UsuarioId;
             gasto.Fecha = gastoDto.Fecha;
-            gasto.Tipo = nuevoTipo;
+            gasto.TipoGastoId = gastoDto.TipoGastoId;
             gasto.ProductoId = nuevoProductoId;
 
             await _gastoRepositorio.ActualizarAsync(gasto);
@@ -71,8 +76,8 @@ namespace Inventory.Application.UseCases
 
             if (mov != null)
             {
-                var descPrefix = nuevoTipo == "Comisión" ? "Comisión" : "Gasto/Compra";
-                mov.Tipo = nuevoTipo == "Comisión" ? "Comisión" : (nuevoProductoId.HasValue ? "Compra" : "Salida de dinero");
+                var descPrefix = nuevoTipoNombre == "Comisión" ? "Comisión" : "Gasto/Compra";
+                mov.Tipo = nuevoTipoNombre == "Comisión" ? "Comisión" : (nuevoProductoId.HasValue ? "Compra" : "Salida de dinero");
                 mov.MontoTotal = -gastoDto.Monto;
                 mov.Descripcion = $"{descPrefix}: {gastoDto.Motivo} por el usuario con ID {gastoDto.UsuarioId}";
                 mov.ProductoId = nuevoProductoId;

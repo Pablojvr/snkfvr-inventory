@@ -24,7 +24,7 @@
             </div>
             <div class="entity-card-body">
                 <div class="entity-card-meta">
-                    <span style="font-weight: 600; color: #3b82f6;">{{ gasto.tipo }}</span>
+                    <span style="font-weight: 600; color: #3b82f6;">{{ gasto.tipoGastoNombre }}</span>
                     <span *ngIf="gasto.productoDescripcion"><i class="pi pi-box" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.productoDescripcion }}</span>
                     <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.usuarioNombre }}</span>
                     <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.fecha | date:'dd/MM/yy' }}</span>

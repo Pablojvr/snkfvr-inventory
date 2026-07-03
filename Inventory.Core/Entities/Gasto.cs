@@ -10,7 +10,8 @@ namespace Inventory.Core.Entities
         public int UsuarioId { get; set; }
         public decimal Monto { get; set; }
         public DateTime FechaIngreso { get; set; }
-        public string Tipo { get; set; } = "Calzado";
+        public int TipoGastoId { get; set; }
+        public TipoGasto? TipoGasto { get; set; }
         public bool Activo { get; set; } = true;
         
         public int? ProductoId { get; set; }

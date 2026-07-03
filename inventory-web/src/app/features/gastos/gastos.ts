@@ -93,11 +93,11 @@ export class Gastos implements OnInit {
   }
 
   agregarComision(productoId: number) {
-    this.dialogGasto.showDialog(productoId, 'Comisión');
+    this.dialogGasto.showDialog(productoId, 3);
   }
 
   agregarEnvio(productoId: number) {
-    this.dialogGasto.showDialog(productoId, 'Envío');
+    this.dialogGasto.showDialog(productoId, 2);
   }
 
   venderProducto(productoId: number) {
@@ -116,7 +116,7 @@ export class Gastos implements OnInit {
   get gastosFiltrados() {
     let filtrados = this.gastos;
     if (this.tipoFiltro) {
-        filtrados = filtrados.filter(g => g.tipo === this.tipoFiltro);
+        filtrados = filtrados.filter(g => g.tipoGastoNombre === this.tipoFiltro);
     }
     if (this.textoFiltro) {
         const text = this.textoFiltro.toLowerCase();

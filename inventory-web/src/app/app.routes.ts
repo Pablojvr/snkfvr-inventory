@@ -14,4 +14,5 @@ export const routes: Routes = [
   { path: 'venta-masiva', loadComponent: () => import('./features/venta-masiva/venta-masiva').then(m => m.VentaMasivaComponent) },
   { path: 'movimientos', loadComponent: () => import('./features/movimientos/movimientos').then(m => m.Movimientos) },
   { path: 'usuarios', loadComponent: () => import('./features/usuarios/usuarios').then(m => m.Usuarios) },
+  { path: 'tipos-gasto', loadComponent: () => import('./features/tipos-gasto/tipos-gasto').then(m => m.TiposGastoComponent) },
 ];

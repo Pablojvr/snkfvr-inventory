@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
@@ -19,6 +20,7 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Usuario> _usuarioRepositorio;
         private readonly IRepositorio<Ingreso> _ingresoRepositorio;
+        private readonly IRepositorio<TipoGasto> _tipoGastoRepositorio;
 
         public RegistrarVentaUseCase(
             IRepositorio<Venta> ventaRepositorio, 
@@ -26,7 +28,8 @@ namespace Inventory.Application.UseCases
             IRepositorio<Producto> productoRepositorio,
             IRepositorio<Gasto> gastoRepositorio,
             IRepositorio<Usuario> usuarioRepositorio,
-            IRepositorio<Ingreso> ingresoRepositorio)
+            IRepositorio<Ingreso> ingresoRepositorio,
+            IRepositorio<TipoGasto> tipoGastoRepositorio)
         {
             _ventaRepositorio = ventaRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
@@ -34,6 +37,7 @@ namespace Inventory.Application.UseCases
             _gastoRepositorio = gastoRepositorio;
             _usuarioRepositorio = usuarioRepositorio;
             _ingresoRepositorio = ingresoRepositorio;
+            _tipoGastoRepositorio = tipoGastoRepositorio;
         }
 
         public async Task<Venta> EjecutarAsync(VentaDto ventaDto)
@@ -88,11 +92,16 @@ namespace Inventory.Application.UseCases
             await _movimientoRepositorio.AgregarAsync(movimiento);
             await _movimientoRepositorio.AgregarAsync(movimientoEstado);
 
+            // Resolve TipoGasto IDs for Envío and Comisión
+            var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
+            var tipoEnvioId = tipos.FirstOrDefault(t => t.Nombre == "Envío")?.Id ?? 2;
+            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == "Comisión")?.Id ?? 3;
+
             if (ventaDto.CostoEnvio > 0)
             {
                 var gastoEnvio = new Gasto
                 {
-                    Tipo = "Envío",
+                    TipoGastoId = tipoEnvioId,
                     Motivo = $"Envío asociado a la venta del producto {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
                     Monto = ventaDto.CostoEnvio,
                     Fecha = DateTime.Now,
@@ -107,7 +116,7 @@ namespace Inventory.Application.UseCases
             {
                 var gastoOtros = new Gasto
                 {
-                    Tipo = "Comisión",
+                    TipoGastoId = tipoComisionId,
                     Motivo = $"Otros costos/Comisión asociados a la venta del producto {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
                     Monto = ventaDto.CostosAdicionales,
                     Fecha = DateTime.Now,
@@ -127,7 +136,7 @@ namespace Inventory.Application.UseCases
                 
                 var gastoComisionVenta = new Gasto
                 {
-                    Tipo = "Comisión",
+                    TipoGastoId = tipoComisionId,
                     Motivo = $"COM | {nombreProducto} ({nombreUsuarioComision})",
                     Monto = ventaDto.ComisionMonto.Value,
                     Fecha = DateTime.Now,

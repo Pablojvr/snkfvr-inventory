@@ -9,7 +9,7 @@ import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Gasto, Producto, Usuario } from '../../core/services/api';
+import { ApiService, Usuario, Gasto, Producto, TipoGasto } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Location } from '@angular/common';
 
@@ -24,6 +24,7 @@ export class GastoDetalle implements OnInit {
   productoAsociado: Producto | null = null;
   usuarioNombre: string = '';
   usuarios: Usuario[] = [];
+  tiposGasto: TipoGasto[] = [];
   
   editando: boolean = false;
   guardando: boolean = false;
@@ -31,13 +32,7 @@ export class GastoDetalle implements OnInit {
   gastoFechaIngreso: Date | null = null;
   menuItems: MenuItem[] = [];
 
-  tipoOpciones = [
-    { label: 'Calzado', value: 'Calzado' },
-    { label: 'Envío', value: 'Envío' },
-    { label: 'Comisión', value: 'Comisión' },
-    { label: 'Servicio', value: 'Servicio' },
-    { label: 'Otro', value: 'Otro' }
-  ];
+
 
   constructor(
     private route: ActivatedRoute,
@@ -61,8 +56,9 @@ export class GastoDetalle implements OnInit {
       forkJoin({
         gastos: this.api.getGastos(),
         usuarios: this.api.getUsuarios(),
-        productos: this.api.getProductos()
-      }).subscribe(({ gastos, usuarios, productos }) => {
+        productos: this.api.getProductos(),
+        tiposGasto: this.api.getTiposGasto()
+      }).subscribe(({ gastos, usuarios, productos, tiposGasto }) => {
         const found = gastos.find(g => g.id === id);
         if (!found) {
           this.toastManager.showError('Error', 'Gasto/Compra no encontrado');
@@ -71,6 +67,7 @@ export class GastoDetalle implements OnInit {
         }
         this.gasto = found;
         this.usuarios = usuarios;
+        this.tiposGasto = tiposGasto;
         const u = usuarios.find(us => us.id === this.gasto!.usuarioId);
         this.usuarioNombre = u ? u.nombre : 'Desconocido';
         if (this.gasto!.productoId) {
@@ -131,7 +128,7 @@ export class GastoDetalle implements OnInit {
   toggleMenu(event: Event, menu: any) {
     event.stopPropagation();
     this.menuItems = [];
-    if (this.gasto?.tipo === 'Calzado' && this.productoAsociado) {
+    if (this.gasto?.tipoGastoId === 1 && this.productoAsociado) {
        this.menuItems.push({ label: 'Ir al Producto', icon: 'pi pi-arrow-right', command: () => this.irAProducto() });
     }
     if (this.gasto?.activo) {

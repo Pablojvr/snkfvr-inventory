@@ -1,6 +1,7 @@
 using Inventory.Settings.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Inventory.Proyecto.Controllers
@@ -28,6 +29,9 @@ namespace Inventory.Proyecto.Controllers
             _context.Productos.RemoveRange(await _context.Productos.IgnoreQueryFilters().ToListAsync());
             _context.Ingresos.RemoveRange(await _context.Ingresos.IgnoreQueryFilters().ToListAsync());
             // No eliminamos usuarios porque son necesarios para registrar acciones
+            // Solo eliminamos TiposGasto personalizados (no de sistema)
+            var tiposPersonalizados = await _context.TiposGasto.IgnoreQueryFilters().Where(t => !t.EsSistema).ToListAsync();
+            _context.TiposGasto.RemoveRange(tiposPersonalizados);
 
             await _context.SaveChangesAsync();
 

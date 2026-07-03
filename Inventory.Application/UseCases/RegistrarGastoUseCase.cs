@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
@@ -17,31 +18,37 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
         private readonly IRepositorio<Usuario> _usuarioRepositorio;
+        private readonly IRepositorio<TipoGasto> _tipoGastoRepositorio;
 
         public RegistrarGastoUseCase(
             IRepositorio<Gasto> gastoRepositorio, 
             IRepositorio<Movimiento> movimientoRepositorio,
             IRepositorio<Producto> productoRepositorio,
-            IRepositorio<Usuario> usuarioRepositorio)
+            IRepositorio<Usuario> usuarioRepositorio,
+            IRepositorio<TipoGasto> tipoGastoRepositorio)
         {
             _gastoRepositorio = gastoRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
             _usuarioRepositorio = usuarioRepositorio;
+            _tipoGastoRepositorio = tipoGastoRepositorio;
         }
 
         public async Task<Gasto> EjecutarAsync(GastoDto gastoDto)
         {
             int? productoId = gastoDto.ProductoId;
-            var tipo = string.IsNullOrEmpty(gastoDto.Tipo) ? "Calzado" : gastoDto.Tipo;
+            
+            // Resolve tipo name from FK
+            var tipoGasto = await _tipoGastoRepositorio.ObtenerPorIdAsync(gastoDto.TipoGastoId);
+            var tipoNombre = tipoGasto?.Nombre ?? "Producto";
 
-            if (productoId.HasValue && tipo != "Comisión" && tipo != "Envío" && tipo != "Calzado")
+            if (productoId.HasValue && tipoNombre != "Comisión" && tipoNombre != "Envío" && tipoNombre != "Producto")
             {
-                throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión o Envío.");
+                throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión, Envío o Producto.");
             }
 
-            // Creacion automatica de producto si es Calzado
-            if (tipo == "Calzado" && !productoId.HasValue)
+            // Creacion automatica de producto si es Producto (antes Calzado)
+            if (tipoNombre == "Producto" && !productoId.HasValue)
             {
                 var producto = new Producto
                 {
@@ -61,26 +68,15 @@ namespace Inventory.Application.UseCases
                 FechaIngreso = gastoDto.FechaIngreso != default ? gastoDto.FechaIngreso : DateTime.Now,
                 UsuarioId = gastoDto.UsuarioId,
                 Monto = gastoDto.Monto,
-                Tipo = tipo,
+                TipoGastoId = gastoDto.TipoGastoId,
                 ProductoId = productoId,
                 Activo = true
             };
 
             var gastoAgregado = await _gastoRepositorio.AgregarAsync(gasto);
 
-            if (productoId.HasValue && (tipo == "Comisión" || tipo == "Envío"))
-            {
-                // NOTA: Según requerimiento, el costo no se suma a la base de datos de Producto.Costo
-                // El costo calculado será dinámico en el Frontend.
-                var producto = await _productoRepositorio.ObtenerPorIdAsync(productoId.Value);
-                if (producto != null)
-                {
-                    // Ya no actualizamos producto.Costo += gastoDto.Monto;
-                }
-            }
-
-            var tipoMovimiento = tipo == "Comisión" ? "Comisión" : (productoId.HasValue ? "Compra" : "Salida de dinero");
-            var descPrefix = tipo == "Comisión" ? "Comisión" : "Gasto/Compra";
+            var tipoMovimiento = tipoNombre == "Comisión" ? "Comisión" : (productoId.HasValue ? "Compra" : "Salida de dinero");
+            var descPrefix = tipoNombre == "Comisión" ? "Comisión" : "Gasto/Compra";
 
             var movimiento = new Movimiento
             {
@@ -96,13 +92,17 @@ namespace Inventory.Application.UseCases
 
             if (gastoDto.ComisionMonto.HasValue && gastoDto.ComisionMonto.Value > 0)
             {
-                // We need the user assigned, defaults to current user if null (though frontend should send it)
                 var comisionUsuarioId = gastoDto.ComisionUsuarioId ?? gastoDto.UsuarioId;
                 
                 var usuarioComision = await _usuarioRepositorio.ObtenerPorIdAsync(comisionUsuarioId);
                 var nombreUsuarioComision = usuarioComision?.Nombre ?? comisionUsuarioId.ToString();
                 
-                var nombreProducto = gastoDto.Motivo; // For Calzado, the Gasto motivo IS the product description
+                // Resolve the "Comisión" type ID
+                var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
+                var tipoComision = tipos.FirstOrDefault(t => t.Nombre == "Comisión");
+                var comisionTipoId = tipoComision?.Id ?? 3;
+
+                var nombreProducto = gastoDto.Motivo;
                 var gastoComision = new Gasto
                 {
                     Motivo = $"COM | {nombreProducto} ({nombreUsuarioComision})",
@@ -110,7 +110,7 @@ namespace Inventory.Application.UseCases
                     FechaIngreso = gastoDto.FechaIngreso != default ? gastoDto.FechaIngreso : DateTime.Now,
                     UsuarioId = comisionUsuarioId,
                     Monto = gastoDto.ComisionMonto.Value,
-                    Tipo = "Comisión",
+                    TipoGastoId = comisionTipoId,
                     ProductoId = productoId,
                     Activo = true
                 };

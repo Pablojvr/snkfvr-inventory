@@ -79,7 +79,7 @@
                         <div class="gasto-info">
                             <span class="gasto-motivo">{{ gasto.motivo }}</span>
                             <div class="gasto-meta">
-                                <span><i class="pi pi-tag" style="font-size: 0.7rem;"></i> {{ gasto.tipo }}</span>
+                                <span><i class="pi pi-tag" style="font-size: 0.7rem;"></i> {{ gasto.tipoGastoNombre }}</span>
                                 <span><i class="pi pi-calendar" style="font-size: 0.7rem;"></i> {{ gasto.fecha | date:'dd/MM/yy' }}</span>
                                 <span><i class="pi pi-user" style="font-size: 0.7rem;"></i> {{ gasto.usuarioNombre }}</span>
                                 <span *ngIf="!gasto.activo" style="color: #dc2626; font-weight: 600;">(Inactivo)</span>
@@ -136,7 +136,7 @@
         </div>
         <div class="field">
             <label>Tipo</label>
-            <p-select [options]="tipoGastoOpciones" [(ngModel)]="gastoEditando.tipo" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+            <p-select [options]="tiposGasto" [(ngModel)]="gastoEditando.tipoGastoId" optionLabel="nombre" optionValue="id" styleClass="w-full" appendTo="body"></p-select>
         </div>
         <div class="field">
             <label>Fecha</label>

@@ -1,19 +1,24 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
-import { TableModule } from 'primeng/table';
-import { SelectModule } from 'primeng/select';
+import { Tabs } from 'primeng/tabs';
+import { TabList } from 'primeng/tabs';
+import { Tab } from 'primeng/tabs';
+import { TabPanels } from 'primeng/tabs';
+import { TabPanel } from 'primeng/tabs';
 import { MenuModule } from 'primeng/menu';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Producto, Movimiento } from '../../core/services/api';
+import { ApiService, Producto, Movimiento, Gasto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Location } from '@angular/common';
 
@@ -22,14 +27,14 @@ import { Location } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule, 
-    TableModule, SelectModule, MenuModule, FormsModule, 
-    InputTextModule, InputNumberModule, DatePickerModule
+    Tabs, TabList, Tab, TabPanels, TabPanel, MenuModule, FormsModule, 
+    InputTextModule, InputNumberModule, DatePickerModule, DialogModule, SelectModule
   ],
   templateUrl: './producto-detalle.html',
   styles: [`
     .detail-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .header-container { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
-    .header-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
     .info-item { display: flex; flex-direction: column; gap: 0.5rem; }
     .info-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
@@ -38,23 +43,39 @@ import { Location } from '@angular/common';
     .status-disponible { background-color: #dcfce7; color: #166534; }
     .status-reservado { background-color: #fef9c3; color: #854d0e; }
     .status-vendido { background-color: #f3f4f6; color: #374151; }
+    .gasto-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .gasto-card-inactive { opacity: 0.5; }
+    .gasto-info { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+    .gasto-motivo { font-weight: 600; font-size: 0.95rem; color: #1e293b; }
+    .gasto-meta { font-size: 0.8rem; color: #64748b; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .gasto-monto { font-weight: 700; font-size: 1.1rem; color: #ef4444; white-space: nowrap; }
+    .gastos-grid { display: flex; flex-direction: column; gap: 0.75rem; }
   `]
 })
 export class ProductoDetalle implements OnInit {
   productoId: number = 0;
   producto: Producto | null = null;
   movimientos: Movimiento[] = [];
-  comisiones: any[] = [];
+  gastosProducto: (Gasto & { usuarioNombre?: string })[] = [];
+  usuarios: Usuario[] = [];
   costoCalculado: number = 0;
   
   editando: boolean = false;
   guardando: boolean = false;
   menuItems: MenuItem[] = [];
+  activeTab: string = '0';
 
-  vistaBitacora: string = 'historial';
-  opcionesVistaBitacora: any[] = [
-    { label: 'Historial de Cambios', value: 'historial' },
-    { label: 'Solo Comisiones', value: 'comisiones' }
+  // Gasto edit modal
+  displayEditGasto: boolean = false;
+  gastoEditando: Gasto | null = null;
+  gastoEditFecha: Date | null = null;
+  guardandoGasto: boolean = false;
+  tipoGastoOpciones = [
+    { label: 'Calzado', value: 'Calzado' },
+    { label: 'Envío', value: 'Envío' },
+    { label: 'Comisión', value: 'Comisión' },
+    { label: 'Servicio', value: 'Servicio' },
+    { label: 'Otro', value: 'Otro' }
   ];
 
   constructor(
@@ -85,28 +106,30 @@ export class ProductoDetalle implements OnInit {
                 this.router.navigate(['/productos']);
                 return;
             }
+            this.usuarios = usuarios;
             this.movimientos = movimientos.map(mov => {
                 let desc = mov.descripcion;
-                desc = desc.replace(/usuario con ID (\d+)/g, (match, p1) => {
+                desc = desc.replace(/usuario con ID (\d+)/g, (match: string, p1: string) => {
                     const u = usuarios.find(x => x.id === parseInt(p1, 10));
                     return u ? u.nombre : match;
                 });
-                desc = desc.replace(/producto (\d+)/g, (match, p1) => {
+                desc = desc.replace(/producto (\d+)/g, (match: string, p1: string) => {
                     const p = productos.find(x => x.id === parseInt(p1, 10));
-                    return p ? `<a href="/productos/${p.id}" style="color: #3b82f6; text-decoration: none; font-weight: 600; cursor: pointer;">producto ${p.descripcion}</a>` : match;
+                    return p ? `producto ${p.descripcion}` : match;
                 });
                 return { ...mov, descripcion: desc };
             });
 
-            this.comisiones = gastos
-                .filter(g => g.productoId === this.productoId && g.tipo === 'Comisión')
+            // All gastos associated with this product
+            this.gastosProducto = gastos
+                .filter(g => g.productoId === this.productoId)
                 .map(g => ({
                     ...g,
                     usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
                 }));
             
-            const gastosProd = gastos.filter(g => g.productoId === this.productoId && g.activo && g.tipo !== 'Calzado');
-            const totalGastos = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
+            const gastosActivos = this.gastosProducto.filter(g => g.activo && g.tipo !== 'Calzado');
+            const totalGastos = gastosActivos.reduce((acc, curr) => acc + (curr.monto || 0), 0);
             this.costoCalculado = (this.producto?.costo || 0) + totalGastos;
         });
     });
@@ -114,7 +137,7 @@ export class ProductoDetalle implements OnInit {
 
   toggleMenu(event: any, menu: any) {
       this.menuItems = [
-          { label: 'Editar', icon: 'pi pi-pencil', command: () => this.habilitarEdicion() }
+          { label: 'Editar Producto', icon: 'pi pi-pencil', command: () => this.habilitarEdicion() }
       ];
       menu.toggle(event);
   }
@@ -122,14 +145,13 @@ export class ProductoDetalle implements OnInit {
   habilitarEdicion() {
       this.editando = true;
       if (this.producto) {
-          // ensure Date object
           this.producto.fechaCompra = new Date(this.producto.fechaCompra);
       }
   }
 
   cancelarEdicion() {
       this.editando = false;
-      this.cargarDatos(); // revert changes
+      this.cargarDatos();
   }
 
   guardarEdicion() {
@@ -165,5 +187,46 @@ export class ProductoDetalle implements OnInit {
           case 'vendido': return 'status-vendido';
           default: return 'status-disponible';
       }
+  }
+
+  // --- Gasto Edit Modal ---
+  abrirEditarGasto(gasto: Gasto) {
+    this.gastoEditando = { ...gasto };
+    this.gastoEditFecha = gasto.fecha ? new Date(gasto.fecha) : null;
+    this.displayEditGasto = true;
+  }
+
+  guardarGasto() {
+    if (!this.gastoEditando) return;
+    this.guardandoGasto = true;
+    const toSave: any = {
+      ...this.gastoEditando,
+      fecha: this.gastoEditFecha || this.gastoEditando.fecha
+    };
+    // Clean up computed fields
+    delete toSave.usuarioNombre;
+    delete toSave.productoDescripcion;
+
+    this.api.editarGasto(this.gastoEditando.id!, toSave).subscribe({
+      next: () => {
+        this.toastManager.showSuccess('Éxito', 'Gasto actualizado.');
+        this.displayEditGasto = false;
+        this.guardandoGasto = false;
+        this.cargarDatos();
+      },
+      error: () => {
+        this.toastManager.showError('Error', 'No se pudo actualizar el gasto.');
+        this.guardandoGasto = false;
+      }
+    });
+  }
+
+  desactivarGasto(gasto: Gasto) {
+    if (confirm('¿Seguro que desea desactivar este gasto? Esto afectará el costo calculado del producto.')) {
+      this.api.eliminarGasto(gasto.id!).subscribe(() => {
+        this.toastManager.showSuccess('Éxito', 'Gasto desactivado.');
+        this.cargarDatos();
+      });
+    }
   }
 }

@@ -5,41 +5,63 @@
             <h2>Detalle de Gasto / Compra</h2>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-            <p-button icon="pi pi-ellipsis-v" [text]="true" (onClick)="toggleMenu($event, menu)"></p-button>
+            <ng-container *ngIf="!editando">
+                <p-button icon="pi pi-pencil" label="Editar" severity="secondary" [text]="true" (onClick)="habilitarEdicion()"></p-button>
+                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                <p-button icon="pi pi-ellipsis-v" [text]="true" (onClick)="toggleMenu($event, menu)"></p-button>
+            </ng-container>
+            <ng-container *ngIf="editando">
+                <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancelarEdicion()"></p-button>
+                <p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="guardarEdicion()" [loading]="guardando"></p-button>
+            </ng-container>
         </div>
     </div>
 
     <div class="entity-cards-grid" style="grid-template-columns: 1fr;">
         <div class="entity-card" style="cursor: default;">
             <div class="entity-card-header">
-                <h4 class="entity-card-title">{{ gasto.motivo }}</h4>
+                <h4 *ngIf="!editando" class="entity-card-title">{{ gasto.motivo }}</h4>
+                <input *ngIf="editando" pInputText [(ngModel)]="gasto.motivo" style="flex: 1; font-size: 1.1rem; font-weight: bold;" />
                 <span class="badge-secondary">{{ gasto.tipo }}</span>
             </div>
             <div class="entity-card-body" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
                 <div class="detail-row">
                     <span class="detail-label">Monto (Costo)</span>
-                    <span class="detail-value" style="color: #ef4444; font-size: 1.25rem;">- {{ gasto.monto | currency }}</span>
+                    <span *ngIf="!editando" class="detail-value" style="color: #ef4444; font-size: 1.25rem;">- {{ gasto.monto | currency }}</span>
+                    <p-inputNumber *ngIf="editando" [(ngModel)]="gasto.monto" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tipo</span>
+                    <span *ngIf="!editando" class="detail-value">{{ gasto.tipo }}</span>
+                    <p-select *ngIf="editando" [options]="tipoOpciones" [(ngModel)]="gasto.tipo" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Fecha de Registro</span>
-                    <span class="detail-value">{{ gasto.fecha | date:'dd/MM/yyyy' }}</span>
+                    <span *ngIf="!editando" class="detail-value">{{ gasto.fecha | date:'dd/MM/yyyy' }}</span>
+                    <p-datepicker *ngIf="editando" [(ngModel)]="gastoFecha" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="w-full"></p-datepicker>
                 </div>
                 <div class="detail-row" *ngIf="gasto.fechaIngreso">
                     <span class="detail-label">Fecha de Ingreso del Calzado</span>
-                    <span class="detail-value">{{ gasto.fechaIngreso | date:'dd/MM/yyyy' }}</span>
+                    <span *ngIf="!editando" class="detail-value">{{ gasto.fechaIngreso | date:'dd/MM/yyyy' }}</span>
+                    <p-datepicker *ngIf="editando" [(ngModel)]="gastoFechaIngreso" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="w-full"></p-datepicker>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Registrado Por</span>
-                    <span class="detail-value">{{ usuarioNombre }}</span>
+                    <span *ngIf="!editando" class="detail-value">{{ usuarioNombre }}</span>
+                    <p-select *ngIf="editando" [options]="usuarios" [(ngModel)]="gasto.usuarioId" optionLabel="nombre" optionValue="id" styleClass="w-full" appendTo="body"></p-select>
                 </div>
                 <div class="detail-row" *ngIf="productoAsociado">
                     <span class="detail-label">Producto Asociado</span>
-                    <span class="detail-value">{{ productoAsociado.descripcion }}</span>
+                    <span class="detail-value" style="color: #3b82f6; cursor: pointer;" (click)="irAProducto()">{{ productoAsociado.descripcion }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estado</span>
+                    <span class="detail-value">
+                        <span *ngIf="gasto.activo" style="color: #16a34a;">Activo</span>
+                        <span *ngIf="!gasto.activo" style="color: #dc2626;">Inactivo</span>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<app-dialog-gasto (onSaved)="onSaved()"></app-dialog-gasto>

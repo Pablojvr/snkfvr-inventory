@@ -13,7 +13,7 @@ import { TimelineModule } from 'primeng/timeline';
 import { TooltipModule } from 'primeng/tooltip';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Producto, Movimiento } from '../../core/services/api';
+import { ApiService, Producto, Movimiento, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 
@@ -25,6 +25,7 @@ import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialo
 })
 export class Productos implements OnInit {
   productos: Producto[] = [];
+  usuarios: Usuario[] = [];
   displayDialog: boolean = false;
   producto: Producto = { descripcion: '', fechaCompra: new Date(), costo: 0 };
   
@@ -34,6 +35,14 @@ export class Productos implements OnInit {
 
   textoFiltro: string = '';
   menuItems: MenuItem[] = [];
+
+  // Venta Modal
+  displayNuevaVenta: boolean = false;
+  nuevaVentaData: any = {};
+  estadoVentaOpciones: any[] = [
+    { label: 'Vendido (Entregado)', value: 'Vendido' },
+    { label: 'Reservado (Pendiente)', value: 'Reservado' }
+  ];
 
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
@@ -66,8 +75,10 @@ export class Productos implements OnInit {
     import('rxjs').then(({ forkJoin }) => {
       forkJoin({
         productos: this.api.getProductos(),
-        gastos: this.api.getGastos()
-      }).subscribe(({ productos, gastos }) => {
+        gastos: this.api.getGastos(),
+        usuarios: this.api.getUsuarios()
+      }).subscribe(({ productos, gastos, usuarios }) => {
+        this.usuarios = usuarios;
         this.productos = productos.map(p => {
             const gastosProducto = gastos.filter(g => g.productoId === p.id && (g.tipo === 'Comisión' || g.tipo === 'Envío'));
             const costoCalculado = p.costo + gastosProducto.reduce((sum, g) => sum + g.monto, 0);
@@ -148,8 +159,62 @@ export class Productos implements OnInit {
     }
   }
 
-  venderProducto(id: number) {
-    this.router.navigate(['/venta-masiva'], { queryParams: { productoId: id } });
+  venderProducto(prod: Producto) {
+    const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
+    this.nuevaVentaData = {
+        productoPreseleccionado: true,
+        productoSeleccionado: prod,
+        precioVenta: prod.costoCalculado || prod.costo || 0,
+        costoEnvio: 0,
+        costosAdicionales: 0,
+        estado: 'Reservado',
+        nombreComprador: '',
+        lugarDestino: '',
+        comisionMonto: null,
+        comisionUsuarioId: fabriUser ? fabriUser.id : null
+    };
+    this.displayNuevaVenta = true;
+  }
+
+  onNuevaVentaChange() {
+      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
+          const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
+          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
+          if (ganancia > 0) {
+              this.nuevaVentaData.comisionMonto = ganancia / 2;
+          } else {
+              this.nuevaVentaData.comisionMonto = 0;
+          }
+      } else {
+          this.nuevaVentaData.comisionMonto = null;
+      }
+  }
+
+  guardarNuevaVenta() {
+      if (!this.nuevaVentaData.productoSeleccionado) return;
+
+      const v: any = {
+          productoId: this.nuevaVentaData.productoSeleccionado.id!,
+          costoEnvio: this.nuevaVentaData.costoEnvio || 0,
+          costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
+          precioVenta: this.nuevaVentaData.precioVenta || 0,
+          usuarioId: Number(localStorage.getItem('usuarioActivoId')) || 1, 
+          estado: this.nuevaVentaData.estado,
+          nombreComprador: this.nuevaVentaData.nombreComprador,
+          lugarDestino: this.nuevaVentaData.lugarDestino,
+          fechaVenta: new Date(),
+          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
+          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
+      };
+
+      this.api.crearVenta(v).subscribe({
+          next: () => {
+              this.displayNuevaVenta = false;
+              this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
+              this.cargarDatos();
+          },
+          error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
+      });
   }
 
   eliminar(id: number) {

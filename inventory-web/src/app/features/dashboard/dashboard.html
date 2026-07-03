@@ -13,48 +13,41 @@
     </div>
 </div>
 
-
-
+<!-- Ventas Pendientes: Tarjetas -->
 <div class="card">
     <h3 class="section-title-warn">
-        <i class="pi pi-clock"></i> Ventas Pendientes (Reservadas)
+        <i class="pi pi-clock"></i> Ventas Pendientes ({{ ventasReservadas.length }})
     </h3>
-    <div class="table-scroll-wrapper">
-        <p-table [value]="ventasReservadas" [paginator]="true" [rows]="5">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Fecha</th>
-                    <th>Vendedor</th>
-                    <th>Monto</th>
-                    <th>Estado</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-venta>
-                <tr>
-                    <td>{{ venta.id }}</td>
-                    <td>{{ venta.productoDescripcion }}</td>
-                    <td>{{ venta.fechaRegistro | date }}</td>
-                    <td>{{ venta.usuarioNombre }}</td>
-                    <td>{{ venta.precioVenta | currency }}</td>
-                    <td>
-                        <span class="badge-warn">{{ venta.estado }}</span>
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="6" class="empty-msg">No hay ventas reservadas o pendientes.</td>
-                </tr>
-            </ng-template>
-        </p-table>
+    
+    <div class="entity-cards-grid" *ngIf="ventasReservadas.length > 0">
+        <div class="entity-card" *ngFor="let venta of ventasReservadas" (click)="abrirDetalle(venta)">
+            <div class="entity-card-header">
+                <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
+                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                <button class="entity-card-menu-btn" (click)="toggleMenuVenta($event, venta, menu)" pTooltip="Acciones" tooltipPosition="left">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+            </div>
+            <div class="entity-card-body">
+                <div class="entity-card-meta">
+                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.usuarioNombre }}</span>
+                    <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.fechaRegistro | date:'dd/MM/yy' }}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                    <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
+                    <span class="badge-warn">{{ venta.estado }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div *ngIf="ventasReservadas.length === 0" class="empty-msg">
+        No hay ventas reservadas o pendientes.
     </div>
 </div>
 
+<!-- Actividad Reciente -->
 <div class="dashboard-bottom">
-
-
     <div class="card timeline-card">
         <h3 class="section-title-dark">
             <i class="pi pi-list"></i> Actividad Reciente
@@ -73,3 +66,43 @@
     </div>
 </div>
 
+<!-- Modal Detalle de Venta (Read-Only) -->
+<p-dialog [(visible)]="displayDetalleVenta" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Venta" [draggable]="false" [resizable]="false">
+    <div *ngIf="ventaSeleccionada" style="display: flex; flex-direction: column; gap: 0;">
+        <div class="detail-row">
+            <span class="detail-label">Producto</span>
+            <span class="detail-value">{{ ventaSeleccionada.productoDescripcion }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Precio de Venta</span>
+            <span class="detail-value" style="color: #10b981;">{{ ventaSeleccionada.precioVenta | currency }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Costo de Envío</span>
+            <span class="detail-value">{{ ventaSeleccionada.costoEnvio | currency }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Costos Adicionales</span>
+            <span class="detail-value">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Vendedor</span>
+            <span class="detail-value">{{ ventaSeleccionada.usuarioNombre }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Fecha Registro</span>
+            <span class="detail-value">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Estado</span>
+            <span class="badge-warn">{{ ventaSeleccionada.estado }}</span>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+            <p-button label="Liberar" icon="pi pi-undo" severity="secondary" [text]="true" (onClick)="liberarProducto(ventaSeleccionada)"></p-button>
+            <p-button label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
+        </div>
+    </ng-template>
+</p-dialog>

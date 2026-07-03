@@ -1,37 +1,49 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TimelineModule } from 'primeng/timeline';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+import { MenuModule } from 'primeng/menu';
+import { TooltipModule } from 'primeng/tooltip';
+import { MenuItem } from 'primeng/api';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
+import { ToastManagerService } from '../../core/services/toast-manager.service';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, TimelineModule, SelectModule, FormsModule],
+  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
   
   ventasReservadas: any[] = [];
   movimientos: any[] = [];
+  productos: Producto[] = [];
+  usuarios: Usuario[] = [];
   
   productosParaBuscador: Producto[] = [];
   productosFiltrados: Producto[] = [];
   productoBuscado: any;
 
+  // Detail modal
+  displayDetalleVenta: boolean = false;
+  ventaSeleccionada: any = null;
+
+  // Menu
+  menuItems: MenuItem[] = [];
   
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(private api: ApiService, private router: Router, private toastManager: ToastManagerService) {}
 
   ngOnInit() {
     this.cargarDatos();
   }
   
   cargarDatos() {
-
     import('rxjs').then(({ forkJoin }) => {
         forkJoin({
           ventas: this.api.getVentas(),
@@ -40,6 +52,8 @@ export class Dashboard implements OnInit {
           movimientos: this.api.getMovimientos()
         }).subscribe(({ ventas, productos, usuarios, movimientos }) => {
           this.productosParaBuscador = productos;
+          this.productos = productos;
+          this.usuarios = usuarios;
           
           this.ventasReservadas = ventas
             .filter(v => v.estado === 'Reservado')
@@ -65,11 +79,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  filtrarProductos(event: any) {
-    let query = event.query;
-    this.productosFiltrados = this.productosParaBuscador.filter(p => p.descripcion.toLowerCase().includes(query.toLowerCase()));
-  }
-
   onProductoSeleccionado(event: any) {
     if (event.value && event.value.id) {
         this.router.navigate(['/productos', event.value.id]);
@@ -82,5 +91,43 @@ export class Dashboard implements OnInit {
 
   nuevoGastoRapido() {
     this.router.navigate(['/anadir-masivo']);
+  }
+
+  // --- Card actions ---
+  abrirDetalle(venta: any) {
+    this.ventaSeleccionada = venta;
+    this.displayDetalleVenta = true;
+  }
+
+  toggleMenuVenta(event: Event, venta: any, menu: any) {
+    event.stopPropagation(); // Don't open detail modal
+    this.menuItems = [
+      { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', venta.productoId]) },
+      { label: 'Marcar como Entregado', icon: 'pi pi-check-circle', command: () => this.marcarEntregado(venta) },
+      { label: 'Liberar Producto', icon: 'pi pi-undo', command: () => this.liberarProducto(venta) },
+    ];
+    menu.toggle(event);
+  }
+
+  marcarEntregado(venta: any) {
+    const ventaActualizada = { ...venta, estado: 'Vendido', fechaVenta: new Date() };
+    delete ventaActualizada.productoDescripcion;
+    delete ventaActualizada.usuarioNombre;
+    this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
+      this.cargarDatos();
+      this.displayDetalleVenta = false;
+      this.toastManager.showSuccess('Éxito', 'Venta marcada como entregada.');
+    });
+  }
+
+  liberarProducto(venta: any) {
+    const ventaActualizada = { ...venta, estado: 'Disponible' };
+    delete ventaActualizada.productoDescripcion;
+    delete ventaActualizada.usuarioNombre;
+    this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
+      this.cargarDatos();
+      this.displayDetalleVenta = false;
+      this.toastManager.showSuccess('Producto Liberado', 'El producto vuelve a estar disponible para venta.');
+    });
   }
 }

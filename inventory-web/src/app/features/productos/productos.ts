@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
@@ -14,11 +13,12 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { ApiService, Producto, Movimiento } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
+import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule],
+  imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent],
   templateUrl: './productos.html',
 })
 export class Productos implements OnInit {
@@ -32,7 +32,10 @@ export class Productos implements OnInit {
   submitted: boolean = false;
   guardando: boolean = false;
 
+  textoFiltro: string = '';
   menuItems: MenuItem[] = [];
+
+  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
@@ -45,19 +48,33 @@ export class Productos implements OnInit {
     this.api.getProductos().subscribe(data => this.productos = data);
   }
 
+  get productosFiltrados() {
+    if (!this.textoFiltro) return this.productos;
+    const text = this.textoFiltro.toLowerCase();
+    return this.productos.filter(p => 
+      p.descripcion.toLowerCase().includes(text) ||
+      (p.estado && p.estado.toLowerCase().includes(text))
+    );
+  }
+
   toggleMenu(event: any, prod: Producto, menu: any) {
+      event.stopPropagation();
       this.menuItems = [
           { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', prod.id]) },
           { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(prod) },
-          { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(prod.id!) }
       ];
       
       if (prod.estado !== 'Vendido') {
-          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: prod.id, tipo: 'Comisión' } }) });
+          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.agregarComision(prod.id!) });
           this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.venderProducto(prod.id!) });
       }
+      this.menuItems.push({ label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(prod.id!) });
       
       menu.toggle(event);
+  }
+
+  agregarComision(productoId: number) {
+      this.dialogGasto.showDialog(productoId, 'Comisión');
   }
 
   verTimeline(prod: Producto) {
@@ -128,19 +145,6 @@ export class Productos implements OnInit {
         error: () => this.guardando = false
       });
     }
-  }
-
-  verHistorial(id: number) {
-    this.api.getMovimientosPorProducto(id).subscribe(movimientos => {
-        // En el backend, getMovimientosPorProducto ya debe devolver las descripciones
-        // Pero por si acaso, lo dejamos preparado.
-        this.movimientosProducto = movimientos;
-        this.displayTimeline = true;
-    });
-  }
-
-  generarGasto(id: number) {
-    this.router.navigate(['/anadir-masivo'], { queryParams: { productoId: id, tipo: 'Calzado' } });
   }
 
   venderProducto(id: number) {

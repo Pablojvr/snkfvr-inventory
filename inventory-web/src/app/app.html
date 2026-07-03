@@ -1,55 +1,75 @@
 <div class="layout-wrapper">
   <aside class="sidebar" [class.active]="sidebarVisible()">
     <div class="logo">
-      <h2>Inventario SNKFVR</h2>
+      <h2>SNKFVR</h2>
       <button class="close-sidebar-btn" (click)="toggleSidebar()">
         <i class="pi pi-times"></i>
       </button>
     </div>
     <nav class="nav-menu">
-      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-home"></i> Inicio
-      </a>
-      
-      <a routerLink="/gastos" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-dollar"></i> Compras / Gastos
-      </a>
-      <a routerLink="/ventas" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-shopping-cart"></i> Ventas
-      </a>
-      <a routerLink="/ingresos" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-arrow-down-left"></i> Ingresos
-      </a>
-      <a routerLink="/productos" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-box"></i> Productos
-      </a>
-      <a routerLink="/estadisticas" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-chart-bar"></i> Estadísticas
-      </a>
+      <span class="nav-section-label">Accesos Directos</span>
       <a routerLink="/anadir-masivo" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-plus-circle"></i> Añadir Masivo
+        <i class="pi pi-plus-circle"></i> Añadir Masivo (Compras)
       </a>
+      <a routerLink="/venta-masiva" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="pi pi-cart-plus"></i> Venta Masiva
+      </a>
+
+      <span class="nav-section-label">Configuración</span>
       <a routerLink="/usuarios" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-users"></i> Usuarios
       </a>
       <a routerLink="/movimientos" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-list"></i> Bitácora
       </a>
+      <a routerLink="/ingresos" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="pi pi-arrow-down-left"></i> Ingresos
+      </a>
     </nav>
   </aside>
 
   <div class="main-content">
     <header class="topbar">
-      <button class="menu-toggle" (click)="toggleSidebar()">
+      <!-- The hamburger menu is now hidden entirely on mobile as per requirements -->
+      <button class="menu-toggle" (click)="toggleSidebar()" style="display: none;">
         <i class="pi pi-bars"></i>
       </button>
+      <div class="topbar-title">Inventario SNKFVR</div>
       <div class="topbar-right">
-        <span>Bienvenido, Admin</span>
+        <button class="sidebar-toggle-btn" (click)="toggleSidebar()" pTooltip="Menú" tooltipPosition="bottom">
+          <i class="pi pi-cog"></i>
+        </button>
       </div>
     </header>
     <main class="content" (click)="closeSidebar()">
       <router-outlet></router-outlet>
     </main>
+
+    <nav class="bottom-bar">
+      <a routerLink="/dashboard" routerLinkActive="active-tab" [routerLinkActiveOptions]="{exact: true}">
+        <i class="pi pi-home"></i>
+        <span>Inicio</span>
+      </a>
+      <a routerLink="/gastos" routerLinkActive="active-tab">
+        <i class="pi pi-dollar"></i>
+        <span>Compras</span>
+      </a>
+      <a routerLink="/ventas" routerLinkActive="active-tab">
+        <i class="pi pi-shopping-cart"></i>
+        <span>Ventas</span>
+      </a>
+      <a routerLink="/productos" routerLinkActive="active-tab">
+        <i class="pi pi-box"></i>
+        <span>Productos</span>
+      </a>
+      
+      <!-- More Options Button for Mobile -->
+      <a (click)="mobileMenu.toggle($event)" class="bottom-bar-more-btn" style="cursor: pointer;">
+        <i class="pi pi-ellipsis-h"></i>
+        <span>Más</span>
+      </a>
+    </nav>
+    <p-menu #mobileMenu [popup]="true" [model]="mobileMenuOptions" appendTo="body"></p-menu>
   </div>
 </div>
 <p-toast position="bottom-center"></p-toast>

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
@@ -8,13 +7,16 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { ApiService, Ingreso, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 
 @Component({
   selector: 'app-ingresos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, SelectModule],
+  imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, SelectModule, TooltipModule, MenuModule],
   templateUrl: './ingresos.html',
 })
 export class Ingresos implements OnInit {
@@ -26,6 +28,9 @@ export class Ingresos implements OnInit {
   editando: boolean = false;
   submitted: boolean = false;
   guardando: boolean = false;
+
+  textoFiltro: string = '';
+  menuItems: MenuItem[] = [];
 
   constructor(private api: ApiService, private toastManager: ToastManagerService) {}
 
@@ -46,6 +51,23 @@ export class Ingresos implements OnInit {
         }));
       });
     });
+  }
+
+  get ingresosFiltrados() {
+    if (!this.textoFiltro) return this.ingresos;
+    const text = this.textoFiltro.toLowerCase();
+    return this.ingresos.filter(i => 
+      i.motivo.toLowerCase().includes(text) ||
+      (i.usuarioNombre && i.usuarioNombre.toLowerCase().includes(text))
+    );
+  }
+
+  toggleMenu(event: any, ingreso: Ingreso, menu: any) {
+    this.menuItems = [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(ingreso) },
+      { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(ingreso.id!) }
+    ];
+    menu.toggle(event);
   }
 
   showDialog() {

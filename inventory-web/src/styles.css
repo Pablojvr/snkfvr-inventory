@@ -68,14 +68,25 @@ body {
   overflow-y: auto;
 }
 
+.nav-section-label {
+  padding: 0.75rem 1.5rem 0.25rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
 .nav-menu a {
-  padding: 1rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   color: var(--sidebar-text);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   transition: background-color 0.2s;
+  font-size: 0.9rem;
 }
 
 .nav-menu a:hover, .nav-menu a.active {
@@ -92,15 +103,37 @@ body {
 }
 
 .topbar {
-  height: 60px;
+  height: 56px;
   background-color: var(--surface-section);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 1.25rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   flex-shrink: 0;
+}
+
+.topbar-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .menu-toggle {
@@ -115,8 +148,53 @@ body {
 
 .content {
   flex: 1;
-  padding: 2rem;
+  padding: 1.25rem;
+  padding-bottom: 80px; /* space for bottom bar */
   overflow-y: auto;
+}
+
+/* ===== BOTTOM NAVIGATION BAR ===== */
+.bottom-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.4rem 0 env(safe-area-inset-bottom, 0.35rem);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+}
+
+.bottom-bar a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 500;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+  min-width: 50px;
+}
+
+.bottom-bar a i {
+  font-size: 1.25rem;
+}
+
+.bottom-bar a.active-tab {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.bottom-bar a:active {
+  background: #f1f5f9;
 }
 
 /* ===== CARD ===== */
@@ -125,7 +203,90 @@ body {
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== ENTITY CARDS (replaces tables) ===== */
+.entity-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.entity-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #f1f5f9;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.entity-card:active {
+  transform: scale(0.98);
+}
+
+.entity-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.entity-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+.entity-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0.5rem;
+}
+
+.entity-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.entity-card-meta span {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.entity-card-amount {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.entity-card-amount.negative {
+  color: #ef4444;
+}
+
+.entity-card-menu-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+  font-size: 1rem;
+}
+
+.entity-card-menu-btn:hover {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 /* ===== PAGE HEADER ===== */
@@ -224,7 +385,7 @@ body {
 
 .dashboard-bottom {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
@@ -280,8 +441,29 @@ body {
   color: #92400e;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   white-space: nowrap;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.badge-secondary {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  font-weight: 600;
 }
 
 /* ===== TOAST ===== */
@@ -334,6 +516,33 @@ body {
   to   { transform: translateY(-100%); opacity: 0; }
 }
 
+/* ===== DETAIL MODAL READ-ONLY ===== */
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   /* Sidebar */
@@ -345,10 +554,6 @@ body {
 
   .sidebar.active {
     transform: translateX(0);
-  }
-
-  .menu-toggle {
-    display: block;
   }
 
   .close-sidebar-btn {
@@ -367,6 +572,7 @@ body {
   /* Content */
   .content {
     padding: 1rem;
+    padding-bottom: 80px;
   }
 
   /* Cards */
@@ -420,11 +626,12 @@ body {
     grid-template-columns: 1fr;
   }
 
-  /* Toast */
+  /* Toast - above bottom bar */
   .p-toast {
     width: calc(100vw - 2rem) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
+    bottom: 70px !important;
   }
 
   /* Dialogs */
@@ -440,6 +647,17 @@ body {
 
   .table-caption input {
     width: 100%;
+  }
+}
+
+/* Desktop: hide bottom bar, show sidebar normally */
+@media (min-width: 769px) {
+  .bottom-bar {
+    display: none;
+  }
+
+  .sidebar {
+    display: flex;
   }
 }
 

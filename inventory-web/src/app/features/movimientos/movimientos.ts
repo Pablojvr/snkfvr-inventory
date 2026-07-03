@@ -1,17 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
+import { TimelineModule } from 'primeng/timeline';
 import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { ApiService, Movimiento } from '../../core/services/api';
 
 @Component({
   selector: 'app-movimientos',
   standalone: true,
-  imports: [CommonModule, TableModule, InputTextModule],
+  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule],
   templateUrl: './movimientos.html',
+  styles: [`
+    :host ::ng-deep .p-timeline-event-content {
+      padding-bottom: 2rem;
+    }
+  `]
 })
 export class Movimientos implements OnInit {
   movimientos: Movimiento[] = [];
+  textoFiltro: string = '';
 
   constructor(private api: ApiService) {}
 
@@ -22,9 +29,9 @@ export class Movimientos implements OnInit {
             productos: this.api.getProductos(),
             usuarios: this.api.getUsuarios()
         }).subscribe(({ movs, productos, usuarios }) => {
-            let movimientos = movs.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+            let movimientosList = movs.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
             
-            this.movimientos = movimientos.map(mov => {
+            this.movimientos = movimientosList.map(mov => {
                 let desc = mov.descripcion;
                 desc = desc.replace(/usuario con ID (\d+)/g, (match, p1) => {
                     const u = usuarios.find(x => x.id === parseInt(p1, 10));
@@ -38,5 +45,14 @@ export class Movimientos implements OnInit {
             });
         });
     });
+  }
+
+  get movimientosFiltrados() {
+    if (!this.textoFiltro) return this.movimientos;
+    const text = this.textoFiltro.toLowerCase();
+    return this.movimientos.filter(m => 
+      m.descripcion.toLowerCase().includes(text) ||
+      m.tipo.toLowerCase().includes(text)
+    );
   }
 }

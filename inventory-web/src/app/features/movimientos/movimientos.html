@@ -1,45 +1,37 @@
 <div class="card">
-    <div style="margin-bottom: 2rem;">
-        <h2 style="margin: 0;">Bitácora de Movimientos</h2>
-        <p style="color: #64748b;">Registro histórico de todas las entradas y salidas de dinero.</p>
+    <div class="page-header">
+        <div class="header-left">
+            <h2>Bitácora de Movimientos</h2>
+            <div class="product-search" style="width: 100%;">
+                <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar movimientos..." style="width: 100%; padding-left: 2.5rem;" />
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="table-scroll-wrapper">
-        <p-table #dt [value]="movimientos" [paginator]="true" [rows]="15" [globalFilterFields]="['descripcion', 'tipo']">
-            <ng-template pTemplate="caption">
-                <div class="table-caption">
-                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar..." />
+    <div style="margin-top: 1rem; padding: 1rem;">
+        <p-timeline [value]="movimientosFiltrados" align="left">
+            <ng-template pTemplate="content" let-mov>
+                <div class="entity-card" style="margin-bottom: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <div class="entity-card-header">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span [ngClass]="mov.montoTotal > 0 ? 'badge-success' : 'badge-secondary'" style="background: {{ mov.montoTotal > 0 ? '#d1fae5' : '#fee2e2' }}; color: {{ mov.montoTotal > 0 ? '#065f46' : '#991b1b' }}">
+                                {{ mov.tipo }}
+                            </span>
+                        </div>
+                        <small style="color: #64748b;"><i class="pi pi-clock" style="font-size: 0.75rem;"></i> {{ mov.fecha | date:'medium' }}</small>
+                    </div>
+                    <div class="entity-card-body" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+                        <div [innerHTML]="mov.descripcion" style="font-size: 0.95rem; color: #334155; line-height: 1.4;"></div>
+                        <div [style.color]="mov.montoTotal > 0 ? '#10b981' : '#ef4444'" style="font-weight: 700; align-self: flex-end;">
+                            {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
+                        </div>
+                    </div>
                 </div>
             </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Descripción</th>
-                    <th>Monto Total</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-mov>
-                <tr>
-                    <td>{{ mov.id }}</td>
-                    <td>{{ mov.fecha | date:'medium' }}</td>
-                    <td>
-                        <span [ngStyle]="{'background': mov.montoTotal > 0 ? '#10b981' : '#ef4444', 'color': 'white', 'padding': '0.25rem 0.5rem', 'border-radius': '4px', 'font-size': '0.875rem'}">
-                            {{ mov.tipo }}
-                        </span>
-                    </td>
-                    <td [innerHTML]="mov.descripcion"></td>
-                    <td [ngStyle]="{'color': mov.montoTotal > 0 ? '#10b981' : '#ef4444', 'font-weight': 'bold'}">
-                        {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="5" class="empty-msg">No hay movimientos registrados.</td>
-                </tr>
-            </ng-template>
-        </p-table>
+        </p-timeline>
+        <div *ngIf="movimientosFiltrados.length === 0" class="empty-msg">No hay movimientos registrados.</div>
     </div>
 </div>

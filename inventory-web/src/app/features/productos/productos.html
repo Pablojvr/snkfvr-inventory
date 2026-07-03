@@ -1,84 +1,86 @@
 <div class="card">
     <div class="page-header">
-        <h2>Productos</h2>
-        <p-button label="Nuevo Producto" icon="pi pi-plus" (onClick)="showDialog()"></p-button>
+        <div class="header-left">
+            <h2>Inventario de Productos</h2>
+            <div class="product-search" style="width: 100%;">
+                <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar producto o estado..." style="width: 100%; padding-left: 2.5rem;" />
+                </div>
+            </div>
+        </div>
+        <p-button label="Nuevo Producto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
     </div>
 
-    <div class="table-scroll-wrapper">
-        <p-table #dt [value]="productos" [paginator]="true" [rows]="10" [globalFilterFields]="['descripcion']">
-            <ng-template pTemplate="caption">
-                <div class="table-caption">
-                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar por descripción..." />
+    <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
+        <div class="entity-card" *ngFor="let prod of productosFiltrados" (click)="verTimeline(prod)">
+            <div class="entity-card-header">
+                <h4 class="entity-card-title">{{ prod.descripcion }}</h4>
+                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                <button class="entity-card-menu-btn" (click)="toggleMenu($event, prod, menu)" pTooltip="Acciones" tooltipPosition="left">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+            </div>
+            <div class="entity-card-body">
+                <div class="entity-card-meta">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">ID: {{ prod.id }}</span>
+                    <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ prod.fechaCompra | date:'dd/MM/yy' }}</span>
                 </div>
-            </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>ID</th>
-                    <th>Descripción</th>
-                    <th>Fecha Compra</th>
-                    <th>Costo</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-prod>
-                <tr>
-                    <td>{{ prod.id }}</td>
-                    <td>{{ prod.descripcion }}</td>
-                    <td>{{ prod.fechaCompra | date }}</td>
-                    <td>{{ prod.costo | currency }}</td>
-                    <td>{{ prod.estado || 'Disponible' }}</td>
-                    <td>
-                        <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" (onClick)="toggleMenu($event, prod, menu)" pTooltip="Acciones" tooltipPosition="top"></p-button>
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="6" class="empty-msg">No hay productos registrados.</td>
-                </tr>
-            </ng-template>
-        </p-table>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.25rem;">
+                    <span class="entity-card-amount">{{ prod.costo | currency }}</span>
+                    <span [ngClass]="{'badge-success': prod.estado === 'Disponible', 'badge-warn': prod.estado === 'Reservado', 'badge-secondary': prod.estado === 'Vendido'}">
+                        {{ prod.estado || 'Disponible' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div *ngIf="productosFiltrados.length === 0" class="empty-msg">
+        No hay productos registrados.
     </div>
 </div>
 
-<p-dialog header="Historial del Producto" [(visible)]="displayTimeline" [modal]="true" [style]="{ width: 'min(500px, 95vw)' }">
-    <div style="padding: 1rem 0;">
-        <p-timeline [value]="movimientosProducto">
-            <ng-template pTemplate="content" let-mov>
-                <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
-                <div style="font-weight: bold;">{{ mov.tipo }}</div>
-                <div>{{ mov.descripcion }}</div>
-                <div *ngIf="mov.montoTotal !== 0" [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
-                    {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
-                </div>
-            </ng-template>
-        </p-timeline>
-        <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay historia registrada para este producto.</div>
-    </div>
-</p-dialog>
-
-<p-dialog [header]="editando ? 'Editar Producto' : 'Nuevo Producto'" [(visible)]="displayDialog" [modal]="true" [style]="{ width: 'min(450px, 95vw)' }">
-    <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label for="desc">Descripción</label>
-            <input pInputText id="desc" [(ngModel)]="producto.descripcion" style="width: 100%" [ngClass]="{'ng-invalid ng-dirty': submitted && !producto.descripcion}" />
+<p-dialog [(visible)]="displayDialog" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" [header]="editando ? 'Editar Producto' : 'Nuevo Producto'" [draggable]="false" [resizable]="false">
+    <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        <div class="field">
+            <label for="descripcion">Descripción</label>
+            <input pInputText id="descripcion" [(ngModel)]="producto.descripcion" required autofocus 
+                   [ngClass]="{'ng-invalid ng-dirty': submitted && !producto.descripcion}" />
             <small class="p-error" *ngIf="submitted && !producto.descripcion">La descripción es obligatoria.</small>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label for="costo">Costo</label>
-            <p-inputNumber inputId="costo" [(ngModel)]="producto.costo" mode="currency" currency="USD" locale="en-US" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': submitted && (!producto.costo || producto.costo <= 0)}"></p-inputNumber>
-            <small class="p-error" *ngIf="submitted && (!producto.costo || producto.costo <= 0)">El costo debe ser mayor a 0.</small>
+        <div class="field">
+            <label for="fechaCompra">Fecha de Compra</label>
+            <p-datepicker id="fechaCompra" [(ngModel)]="producto.fechaCompra" appendTo="body" dateFormat="dd/mm/yy"></p-datepicker>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label for="fecha">Fecha Compra</label>
-            <p-datepicker id="fecha" [(ngModel)]="producto.fechaCompra" appendTo="body" styleClass="w-full"></p-datepicker>
+        <div class="field">
+            <label for="costo">Costo (Monto)</label>
+            <p-inputNumber id="costo" [(ngModel)]="producto.costo" mode="currency" currency="USD" locale="en-US" 
+                           [ngClass]="{'ng-invalid ng-dirty': submitted && (!producto.costo || producto.costo <= 0)}"></p-inputNumber>
+            <small class="p-error" *ngIf="submitted && (!producto.costo || producto.costo <= 0)">El costo es obligatorio y mayor a 0.</small>
         </div>
     </div>
+    
     <ng-template pTemplate="footer">
-        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="displayDialog = false"></p-button>
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayDialog = false"></p-button>
         <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
     </ng-template>
 </p-dialog>
 
+<!-- Timeline Dialog -->
+<p-dialog [(visible)]="displayTimeline" [modal]="true" [style]="{width: 'min(600px, 95vw)'}" header="Bitácora del Producto" [draggable]="false" [resizable]="false">
+    <p-timeline [value]="movimientosProducto">
+        <ng-template pTemplate="content" let-mov>
+            <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
+            <div style="font-weight: bold;">{{ mov.tipo }}</div>
+            <div [innerHTML]="mov.descripcion"></div>
+            <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
+                {{ mov.montoTotal | currency }}
+            </div>
+        </ng-template>
+    </p-timeline>
+    <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay movimientos para este producto.</div>
+</p-dialog>
+
+<!-- Gasto Modal -->
+<app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>

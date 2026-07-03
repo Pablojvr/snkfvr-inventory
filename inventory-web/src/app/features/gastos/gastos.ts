@@ -24,6 +24,7 @@ export class Gastos implements OnInit {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
 
+  textoFiltro: string = '';
   tipoFiltro: string | null = null;
   opcionesFiltro: any[] = [
     { label: 'Todos', value: null },
@@ -108,9 +109,17 @@ export class Gastos implements OnInit {
   }
 
   get gastosFiltrados() {
+    let filtrados = this.gastos;
     if (this.tipoFiltro) {
-        return this.gastos.filter(g => g.tipo === this.tipoFiltro);
+        filtrados = filtrados.filter(g => g.tipo === this.tipoFiltro);
     }
-    return this.gastos;
+    if (this.textoFiltro) {
+        const text = this.textoFiltro.toLowerCase();
+        filtrados = filtrados.filter(g => 
+          g.motivo.toLowerCase().includes(text) || 
+          (g.productoDescripcion && g.productoDescripcion.toLowerCase().includes(text))
+        );
+    }
+    return filtrados;
   }
 }

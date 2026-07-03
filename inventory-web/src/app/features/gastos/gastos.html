@@ -2,53 +2,42 @@
     <div class="page-header">
         <div class="header-left">
             <h2>Gastos y Compras</h2>
-            <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full"></p-select>
+            <div class="product-search" style="width: 100%;">
+                <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full"></p-select>
+                <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar por motivo..." style="width: 100%; padding-left: 2.5rem;" />
+                </div>
+            </div>
         </div>
-        <p-button label="Registrar Gasto" icon="pi pi-plus" (onClick)="showDialog()"></p-button>
+        <p-button label="Registrar Gasto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
     </div>
 
-    <div class="table-scroll-wrapper">
-        <p-table #dt [value]="gastosFiltrados" [paginator]="true" [rows]="10" [globalFilterFields]="['motivo']">
-            <ng-template pTemplate="caption">
-                <div class="table-caption">
-                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar por motivo..." />
+    <div class="entity-cards-grid" *ngIf="gastosFiltrados.length > 0">
+        <div class="entity-card" *ngFor="let gasto of gastosFiltrados">
+            <div class="entity-card-header">
+                <h4 class="entity-card-title">{{ gasto.motivo }}</h4>
+                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                <button class="entity-card-menu-btn" (click)="toggleMenu($event, gasto, menu)" pTooltip="Acciones" tooltipPosition="left">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+            </div>
+            <div class="entity-card-body">
+                <div class="entity-card-meta">
+                    <span style="font-weight: 600; color: #3b82f6;">{{ gasto.tipo }}</span>
+                    <span *ngIf="gasto.productoDescripcion"><i class="pi pi-box" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.productoDescripcion }}</span>
+                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.usuarioNombre }}</span>
+                    <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ gasto.fecha | date:'dd/MM/yy' }}</span>
                 </div>
-            </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>ID</th>
-                    <th>Motivo</th>
-                    <th>Tipo</th>
-                    <th>Producto</th>
-                    <th>F. Ingreso</th>
-                    <th>F. Gasto</th>
-                    <th>Responsable</th>
-                    <th>Monto</th>
-                    <th>Acciones</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-gasto>
-                <tr>
-                    <td>{{ gasto.id }}</td>
-                    <td>{{ gasto.motivo }}</td>
-                    <td>{{ gasto.tipo }}</td>
-                    <td>{{ gasto.productoDescripcion }}</td>
-                    <td>{{ gasto.fechaIngreso | date }}</td>
-                    <td>{{ gasto.fecha | date }}</td>
-                    <td>{{ gasto.usuarioNombre }}</td>
-                    <td>{{ gasto.monto | currency }}</td>
-                    <td>
-                        <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-                        <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" (onClick)="toggleMenu($event, gasto, menu)" pTooltip="Acciones" tooltipPosition="top"></p-button>
-                    </td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="9" class="empty-msg">No hay gastos registrados.</td>
-                </tr>
-            </ng-template>
-        </p-table>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;">
+                    <span class="entity-card-amount">{{ gasto.monto | currency }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div *ngIf="gastosFiltrados.length === 0" class="empty-msg">
+        No hay gastos registrados.
     </div>
 </div>
 

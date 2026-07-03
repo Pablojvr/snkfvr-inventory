@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { ToolbarModule } from 'primeng/toolbar';
 import { TooltipModule } from 'primeng/tooltip';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { ApiService, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 
@@ -16,12 +16,11 @@ import { ToastManagerService } from '../../core/services/toast-manager.service';
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
-    ToolbarModule,
-    TooltipModule
+    TooltipModule,
+    MenuModule
   ],
   templateUrl: './usuarios.html'
 })
@@ -34,6 +33,8 @@ export class Usuarios implements OnInit {
   editando: boolean = false;
   submitted: boolean = false;
   guardando: boolean = false;
+
+  menuItems: MenuItem[] = [];
 
   constructor(private apiService: ApiService, private toastManager: ToastManagerService) {}
 
@@ -59,6 +60,15 @@ export class Usuarios implements OnInit {
     this.editando = false;
     this.submitted = false;
     this.displayModal = true;
+  }
+
+  toggleMenu(event: any, usuario: Usuario, menu: any) {
+    this.menuItems = [
+      { label: 'Establecer Predeterminado', icon: 'pi pi-check', command: () => this.setUsuarioActivo(usuario) },
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(usuario) },
+      { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminarUsuario(usuario.id!) }
+    ];
+    menu.toggle(event);
   }
 
   editar(usuario: Usuario) {

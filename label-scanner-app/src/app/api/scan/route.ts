@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400 });
     }
 
-    // El modelo gemini-1.5-flash es excelente para tareas multimodales (visión + texto) rápidas
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // El modelo gemini-2.5-flash es excelente para tareas multimodales (visión + texto) rápidas
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
       Eres un experto identificador de calzado y extractor de datos de etiquetas (viñetas).

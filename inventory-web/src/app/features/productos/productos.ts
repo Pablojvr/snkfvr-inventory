@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TableModule } from 'primeng/table';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -18,7 +20,7 @@ import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialo
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent],
+  imports: [CommonModule, ButtonModule, DialogModule, TableModule, SelectModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent],
   templateUrl: './productos.html',
 })
 export class Productos implements OnInit {
@@ -34,6 +36,14 @@ export class Productos implements OnInit {
 
   textoFiltro: string = '';
   menuItems: MenuItem[] = [];
+
+  vistaBitacora: string = 'historial';
+  opcionesVistaBitacora: any[] = [
+    { label: 'Historial de Cambios', value: 'historial' },
+    { label: 'Solo Comisiones', value: 'comisiones' }
+  ];
+  comisionesProducto: any[] = [];
+  productoSeleccionadoId: number | null = null;
 
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
@@ -79,11 +89,14 @@ export class Productos implements OnInit {
 
   verTimeline(prod: Producto) {
     if (prod.id) {
+        this.productoSeleccionadoId = prod.id;
+        this.vistaBitacora = 'historial';
         import('rxjs').then(({ forkJoin }) => {
             forkJoin({
                 movimientos: this.api.getMovimientosPorProducto(prod.id!),
-                usuarios: this.api.getUsuarios()
-            }).subscribe(({ movimientos, usuarios }) => {
+                usuarios: this.api.getUsuarios(),
+                gastos: this.api.getGastos()
+            }).subscribe(({ movimientos, usuarios, gastos }) => {
                 this.movimientosProducto = movimientos.map(mov => {
                     let desc = mov.descripcion;
                     desc = desc.replace(/usuario con ID (\d+)/g, (match, p1) => {
@@ -96,10 +109,23 @@ export class Productos implements OnInit {
                     });
                     return { ...mov, descripcion: desc };
                 });
+                
+                // Extraer comisiones
+                this.comisionesProducto = gastos
+                    .filter(g => g.productoId === prod.id && g.tipo === 'Comisión')
+                    .map(g => ({
+                        ...g,
+                        usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
+                    }));
+
                 this.displayTimeline = true;
             });
         });
     }
+  }
+
+  cambiarVistaBitacora() {
+      // Logic handled via bindings, UI will just show the correct section based on this.vistaBitacora
   }
 
   showDialog() {

@@ -9,7 +9,9 @@
                 </div>
             </div>
         </div>
-        <p-button label="Nuevo Producto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
+        <div class="header-right" style="display: flex; gap: 0.5rem; align-items: center;">
+            <p-button label="Nuevo Producto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
+        </div>
     </div>
 
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
@@ -32,6 +34,11 @@
                         {{ prod.estado || 'Disponible' }}
                     </span>
                 </div>
+            </div>
+            
+            <div class="entity-card-actions" *ngIf="prod.estado !== 'Vendido'" style="display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9;">
+                <p-button label="Vender" icon="pi pi-shopping-cart" size="small" [outlined]="true" (onClick)="venderProducto(prod.id!); $event.stopPropagation()" styleClass="w-full"></p-button>
+                <p-button label="Comisión" icon="pi pi-dollar" size="small" [outlined]="true" severity="secondary" (onClick)="agregarComision(prod.id!); $event.stopPropagation()" styleClass="w-full"></p-button>
             </div>
         </div>
     </div>
@@ -68,18 +75,53 @@
 </p-dialog>
 
 <!-- Timeline Dialog -->
-<p-dialog [(visible)]="displayTimeline" [modal]="true" [style]="{width: 'min(600px, 95vw)'}" header="Bitácora del Producto" [draggable]="false" [resizable]="false">
-    <p-timeline [value]="movimientosProducto">
-        <ng-template pTemplate="content" let-mov>
-            <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
-            <div style="font-weight: bold;">{{ mov.tipo }}</div>
-            <div [innerHTML]="mov.descripcion"></div>
-            <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
-                {{ mov.montoTotal | currency }}
-            </div>
-        </ng-template>
-    </p-timeline>
-    <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay movimientos para este producto.</div>
+<p-dialog [(visible)]="displayTimeline" [modal]="true" [style]="{width: 'min(650px, 95vw)'}" header="Bitácora del Producto" [draggable]="false" [resizable]="false">
+    
+    <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <p-select [options]="opcionesVistaBitacora" [(ngModel)]="vistaBitacora" optionLabel="label" optionValue="value" (onChange)="cambiarVistaBitacora()"></p-select>
+    </div>
+
+    <!-- Vista Historial Completo (Timeline) -->
+    <div *ngIf="vistaBitacora === 'historial'">
+        <p-timeline [value]="movimientosProducto">
+            <ng-template pTemplate="content" let-mov>
+                <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
+                <div style="font-weight: bold;">{{ mov.tipo }}</div>
+                <div [innerHTML]="mov.descripcion"></div>
+                <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
+                    {{ mov.montoTotal | currency }}
+                </div>
+            </ng-template>
+        </p-timeline>
+        <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay movimientos para este producto.</div>
+    </div>
+
+    <!-- Vista Comisiones (Tabla pequeña) -->
+    <div *ngIf="vistaBitacora === 'comisiones'">
+        <p-table [value]="comisionesProducto" [scrollable]="true" scrollHeight="300px">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Motivo</th>
+                    <th>Usuario</th>
+                    <th style="text-align: right;">Monto</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-com>
+                <tr>
+                    <td>{{ com.fecha | date:'dd/MM/yy' }}</td>
+                    <td>{{ com.motivo }}</td>
+                    <td><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ com.usuarioNombre }}</td>
+                    <td style="text-align: right; color: #ef4444; font-weight: 600;">{{ com.monto | currency }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="4" class="empty-msg">No hay comisiones registradas para este producto.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </p-dialog>
 
 <!-- Gasto Modal -->

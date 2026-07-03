@@ -24,6 +24,7 @@ export interface Ingreso {
   monto: number;
   fecha: string | Date;
   usuarioId: number;
+  usuarioNombre?: string;
   activo?: boolean;
 }
 
@@ -33,6 +34,7 @@ export interface Gasto {
   fecha: string | Date;
   fechaIngreso?: string | Date;
   usuarioId: number;
+  usuarioNombre?: string;
   monto: number;
   productoId?: number;
   productoDescripcion?: string;
@@ -48,6 +50,8 @@ export interface Venta {
   fechaVenta?: string | Date;
   precioVenta: number;
   usuarioId: number;
+  usuarioNombre?: string;
+  productoDescripcion?: string;
   fechaRegistro?: string | Date;
   estado?: string;
   activo?: boolean;

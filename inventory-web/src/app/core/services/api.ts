@@ -41,6 +41,8 @@ export interface Gasto {
   productoDescripcion?: string;
   tipo?: string;
   activo?: boolean;
+  comisionMonto?: number | null;
+  comisionUsuarioId?: number | null;
 }
 
 export interface Venta {
@@ -58,6 +60,8 @@ export interface Venta {
   activo?: boolean;
   nombreComprador?: string;
   lugarDestino?: string;
+  comisionMonto?: number | null;
+  comisionUsuarioId?: number | null;
 }
 
 export interface Movimiento {

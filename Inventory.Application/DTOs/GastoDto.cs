@@ -11,5 +11,7 @@ namespace Inventory.Application.DTOs
         public DateTime FechaIngreso { get; set; }
         public string Tipo { get; set; } = "Calzado";
         public int? ProductoId { get; set; }
+        public decimal? ComisionMonto { get; set; }
+        public int? ComisionUsuarioId { get; set; }
     }
 }

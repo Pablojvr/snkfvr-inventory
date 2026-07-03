@@ -14,5 +14,7 @@ namespace Inventory.Application.DTOs
         public string? LugarDestino { get; set; }
         public DateTime FechaRegistro { get; set; }
         public string Estado { get; set; } = "Reservado";
+        public decimal? ComisionMonto { get; set; }
+        public int? ComisionUsuarioId { get; set; }
     }
 }

@@ -16,15 +16,18 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
+        private readonly IRepositorio<Usuario> _usuarioRepositorio;
 
         public RegistrarGastoUseCase(
             IRepositorio<Gasto> gastoRepositorio, 
             IRepositorio<Movimiento> movimientoRepositorio,
-            IRepositorio<Producto> productoRepositorio)
+            IRepositorio<Producto> productoRepositorio,
+            IRepositorio<Usuario> usuarioRepositorio)
         {
             _gastoRepositorio = gastoRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
+            _usuarioRepositorio = usuarioRepositorio;
         }
 
         public async Task<Gasto> EjecutarAsync(GastoDto gastoDto)
@@ -91,6 +94,40 @@ namespace Inventory.Application.UseCases
             };
 
             await _movimientoRepositorio.AgregarAsync(movimiento);
+
+            if (gastoDto.ComisionMonto.HasValue && gastoDto.ComisionMonto.Value > 0)
+            {
+                // We need the user assigned, defaults to current user if null (though frontend should send it)
+                var comisionUsuarioId = gastoDto.ComisionUsuarioId ?? gastoDto.UsuarioId;
+                
+                var usuarioComision = await _usuarioRepositorio.ObtenerPorIdAsync(comisionUsuarioId);
+                var nombreUsuarioComision = usuarioComision?.Nombre ?? comisionUsuarioId.ToString();
+                
+                var nombreProducto = gastoDto.Motivo; // For Calzado, the Gasto motivo IS the product description
+                var gastoComision = new Gasto
+                {
+                    Motivo = $"COM | {nombreProducto} ({nombreUsuarioComision})",
+                    Fecha = gastoDto.Fecha,
+                    FechaIngreso = gastoDto.FechaIngreso != default ? gastoDto.FechaIngreso : DateTime.Now,
+                    UsuarioId = comisionUsuarioId,
+                    Monto = gastoDto.ComisionMonto.Value,
+                    Tipo = "Comisión",
+                    ProductoId = productoId,
+                    Activo = true
+                };
+                var comisionAgregada = await _gastoRepositorio.AgregarAsync(gastoComision);
+
+                var movimientoComision = new Movimiento
+                {
+                    Tipo = "Comisión",
+                    Fecha = gastoDto.Fecha,
+                    Descripcion = $"Comisión: COM | {nombreProducto} asignada al usuario con ID {comisionUsuarioId}",
+                    MontoTotal = -gastoDto.ComisionMonto.Value,
+                    ReferenciaId = comisionAgregada.Id,
+                    ProductoId = productoId
+                };
+                await _movimientoRepositorio.AgregarAsync(movimientoComision);
+            }
 
             return gastoAgregado;
         }

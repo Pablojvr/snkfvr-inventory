@@ -72,7 +72,9 @@ export class AnadirMasivoComponent implements OnInit {
           usuarioId: this.defaultUsuarioId,
           monto: 0,
           tipo: tipoQuery,
-          productoId: productoIdQuery
+          productoId: productoIdQuery,
+          comisionMonto: null,
+          comisionUsuarioId: null
         }
       });
     });
@@ -85,10 +87,20 @@ export class AnadirMasivoComponent implements OnInit {
     }).subscribe(({ productos, usuarios }) => {
       this.productos = productos;
       this.usuarios = usuarios;
+      
+      const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
+      if (aleUser) {
+          this.items.forEach(item => {
+              if (item.gasto.tipo === 'Calzado' && !item.gasto.comisionUsuarioId) {
+                  item.gasto.comisionUsuarioId = aleUser.id;
+              }
+          });
+      }
     });
   }
 
   agregarFila() {
+    const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
     this.items.push({
       idLocal: this.nextId++,
       submitted: false,
@@ -97,7 +109,9 @@ export class AnadirMasivoComponent implements OnInit {
         fecha: new Date(),
         usuarioId: this.defaultUsuarioId,
         monto: 0,
-        tipo: 'Calzado'
+        tipo: 'Calzado',
+        comisionMonto: null,
+        comisionUsuarioId: aleUser ? aleUser.id : null
       }
     });
   }
@@ -125,9 +139,13 @@ export class AnadirMasivoComponent implements OnInit {
       }
       const prefix = item.gasto.tipo === 'Comisión' ? 'COM' : 'ENV';
       item.gasto.motivo = nombreProducto ? `${prefix} | ${nombreProducto}` : `${prefix} | `;
+    } else if (item.gasto.tipo === 'Calzado') {
+        const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
+        if (aleUser && !item.gasto.comisionUsuarioId) {
+            item.gasto.comisionUsuarioId = aleUser.id;
+        }
     } else if (!item.gasto.motivo.startsWith('COM |') && !item.gasto.motivo.startsWith('ENV |')) {
-      // Si cambia a Calzado y no había un motivo específico, no hacemos nada, pero si venia de COM/ENV se lo podemos borrar o dejar
-      // Dejémoslo si ya el usuario escribió algo
+      // Si cambia a otra cosa que no sea comision/envio/calzado
     }
   }
 

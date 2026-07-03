@@ -61,6 +61,22 @@
                       [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.usuarioId}"></p-select>
             <small class="p-error" *ngIf="submitted && !gasto.usuarioId">El usuario es obligatorio.</small>
         </div>
+        
+        <!-- COMISION PARA ALE (Opcional) solo en compra de Calzado -->
+        <div class="field" *ngIf="gasto.tipo === 'Calzado'" style="background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 0.5rem;">
+            <label style="color: #f59e0b; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión Asignada (Opcional)</label>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+                <div>
+                    <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; display: block;">Usuario Responsable</label>
+                    <p-select [options]="usuarios" [(ngModel)]="gasto.comisionUsuarioId" optionLabel="nombre" optionValue="id" appendTo="body" styleClass="w-full"></p-select>
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; display: block;">Monto de Comisión</label>
+                    <p-inputNumber [(ngModel)]="gasto.comisionMonto" mode="currency" currency="USD" locale="en-US" styleClass="w-full" placeholder="Ej. $10.00"></p-inputNumber>
+                </div>
+            </div>
+        </div>
     </div>
     
     <ng-template pTemplate="footer">

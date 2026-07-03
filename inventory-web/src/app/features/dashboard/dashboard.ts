@@ -61,21 +61,26 @@ export class Dashboard implements OnInit {
           ventas: this.api.getVentas(),
           productos: this.api.getProductos(),
           usuarios: this.api.getUsuarios(),
+          gastos: this.api.getGastos(),
           movimientos: this.api.getMovimientos()
-        }).subscribe(({ ventas, productos, usuarios, movimientos }) => {
+        }).subscribe(({ ventas, productos, usuarios, gastos, movimientos }) => {
           this.productosParaBuscador = productos;
-          this.productos = productos;
+          this.productos = productos.map(p => {
+             const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo && g.tipo !== 'Calzado');
+             const totalGastos = gastosProd.reduce((acc, curr) => acc + curr.monto, 0);
+             return { ...p, costoCalculado: (p.costo || 0) + totalGastos };
+          });
           this.usuarios = usuarios;
           
           this.ventasReservadas = ventas
             .filter(v => v.estado === 'Reservado')
             .map(v => ({
               ...v,
-              productoDescripcion: productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
+              productoDescripcion: this.productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
               usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido'
             }));
 
-          this.productosDisponibles = productos.filter(p => p.estado === 'Disponible' || !p.estado);
+          this.productosDisponibles = this.productos.filter(p => p.estado === 'Disponible' || !p.estado);
             
             
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
@@ -101,6 +106,7 @@ export class Dashboard implements OnInit {
   }
 
   nuevaVentaRapida() {
+      const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
       this.nuevaVentaData = { 
           productoSeleccionado: null, 
           precioVenta: null, 
@@ -108,15 +114,31 @@ export class Dashboard implements OnInit {
           costoEnvio: 0,
           costosAdicionales: 0,
           nombreComprador: '',
-          lugarDestino: ''
+          lugarDestino: '',
+          comisionMonto: null,
+          comisionUsuarioId: fabriUser ? fabriUser.id : null
       };
       this.displayNuevaVenta = true;
+  }
+  
+  onNuevaVentaChange() {
+      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
+          const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
+          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
+          if (ganancia > 0) {
+              this.nuevaVentaData.comisionMonto = ganancia / 2;
+          } else {
+              this.nuevaVentaData.comisionMonto = 0;
+          }
+      } else {
+          this.nuevaVentaData.comisionMonto = null;
+      }
   }
 
   guardarNuevaVenta() {
       if (!this.nuevaVentaData.productoSeleccionado || !this.nuevaVentaData.precioVenta) return;
       
-      const venta: Venta = {
+      const venta: any = {
           productoId: this.nuevaVentaData.productoSeleccionado.id!,
           usuarioId: parseInt(localStorage.getItem('usuarioActivoId') || '0', 10),
           precioVenta: this.nuevaVentaData.precioVenta,
@@ -126,7 +148,9 @@ export class Dashboard implements OnInit {
           costoEnvio: this.nuevaVentaData.costoEnvio,
           costosAdicionales: this.nuevaVentaData.costosAdicionales,
           nombreComprador: this.nuevaVentaData.nombreComprador,
-          lugarDestino: this.nuevaVentaData.lugarDestino
+          lugarDestino: this.nuevaVentaData.lugarDestino,
+          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
+          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
 
       this.api.crearVenta(venta).subscribe(() => {

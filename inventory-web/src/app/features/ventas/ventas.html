@@ -58,7 +58,7 @@
         
         <div class="field" *ngIf="!nuevaVentaData.productoPreseleccionado">
             <label>Seleccionar Producto Disponible</label>
-            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onProductoSeleccionadoModal($event.value)">
+            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onNuevaVentaChange()">
                 <ng-template let-prod pTemplate="item">
                     <div>{{prod.descripcion}} - {{prod.costoCalculado | currency}}</div>
                 </ng-template>
@@ -78,17 +78,17 @@
 
             <div class="field">
                 <label>Precio de Venta</label>
-                <p-inputNumber [(ngModel)]="nuevaVentaData.precioVenta" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                <p-inputNumber [(ngModel)]="nuevaVentaData.precioVenta" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.precioVenta = $event.value; onNuevaVentaChange()"></p-inputNumber>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="field">
                     <label>Envío (Costo)</label>
-                    <p-inputNumber [(ngModel)]="nuevaVentaData.costoEnvio" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costoEnvio" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.costoEnvio = $event.value; onNuevaVentaChange()"></p-inputNumber>
                 </div>
                 <div class="field">
                     <label>Otros Costos</label>
-                    <p-inputNumber [(ngModel)]="nuevaVentaData.costosAdicionales" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costosAdicionales" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.costosAdicionales = $event.value; onNuevaVentaChange()"></p-inputNumber>
                 </div>
             </div>
 
@@ -104,7 +104,13 @@
 
             <div class="field">
                 <label>Estado de Venta</label>
-                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" (onChange)="onNuevaVentaChange()"></p-select>
+            </div>
+            
+            <div class="field" *ngIf="nuevaVentaData.estado === 'Vendido'" style="background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="color: #3b82f6; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión de venta asignada a Fabri</label>
+                <p-inputNumber [(ngModel)]="nuevaVentaData.comisionMonto" mode="currency" currency="USD" locale="en-US" class="w-full mt-2"></p-inputNumber>
+                <small class="block mt-1" style="color: #64748b;">Calculada automáticamente como la mitad de la ganancia, pero puedes editarla.</small>
             </div>
         </div>
     </div>

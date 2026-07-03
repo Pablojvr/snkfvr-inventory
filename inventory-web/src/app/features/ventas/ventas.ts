@@ -128,6 +128,7 @@ export class Ventas implements OnInit {
   }
 
   showDialog(producto: any) {
+    const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
     this.nuevaVentaData = {
         productoPreseleccionado: true,
         productoSeleccionado: producto,
@@ -136,12 +137,15 @@ export class Ventas implements OnInit {
         costosAdicionales: 0,
         estado: 'Reservado',
         nombreComprador: '',
-        lugarDestino: ''
+        lugarDestino: '',
+        comisionMonto: null,
+        comisionUsuarioId: fabriUser ? fabriUser.id : null
     };
     this.displayNuevaVenta = true;
   }
 
   nuevaVentaRapida() {
+    const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
     this.nuevaVentaData = {
         productoPreseleccionado: false,
         productoSeleccionado: null,
@@ -150,7 +154,9 @@ export class Ventas implements OnInit {
         costosAdicionales: 0,
         estado: 'Reservado',
         nombreComprador: '',
-        lugarDestino: ''
+        lugarDestino: '',
+        comisionMonto: null,
+        comisionUsuarioId: fabriUser ? fabriUser.id : null
     };
     this.displayNuevaVenta = true;
   }
@@ -158,13 +164,28 @@ export class Ventas implements OnInit {
   onProductoSeleccionadoModal(producto: any) {
       if (producto) {
           this.nuevaVentaData.precioVenta = producto.costoCalculado || producto.costo || 0;
+          this.onNuevaVentaChange();
+      }
+  }
+
+  onNuevaVentaChange() {
+      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
+          const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
+          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
+          if (ganancia > 0) {
+              this.nuevaVentaData.comisionMonto = ganancia / 2;
+          } else {
+              this.nuevaVentaData.comisionMonto = 0;
+          }
+      } else {
+          this.nuevaVentaData.comisionMonto = null;
       }
   }
 
   guardarNuevaVenta() {
       if (!this.nuevaVentaData.productoSeleccionado) return;
 
-      const v: Venta = {
+      const v: any = {
           productoId: this.nuevaVentaData.productoSeleccionado.id!,
           costoEnvio: this.nuevaVentaData.costoEnvio || 0,
           costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
@@ -173,7 +194,9 @@ export class Ventas implements OnInit {
           estado: this.nuevaVentaData.estado,
           nombreComprador: this.nuevaVentaData.nombreComprador,
           lugarDestino: this.nuevaVentaData.lugarDestino,
-          fechaVenta: new Date()
+          fechaVenta: new Date(),
+          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
+          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
 
       this.api.crearVenta(v).subscribe({
@@ -197,8 +220,8 @@ export class Ventas implements OnInit {
       this.menuItems.push({ label: 'Marcar como Vendido', icon: 'pi pi-check', command: () => this.marcarComoVendido(producto) });
       this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
     } else if (producto.estadoActual === 'Vendido') {
-       // Si es vendido, la unica accion sobre la venta podría ser anularla para volver a disponible. 
-       this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
+       // Only allow "Devolución" manually or just don't show the Anular
+       // The user requested: "No se pueden anular ventas una vez de cerradas"
     }
     menu.toggle(event);
   }

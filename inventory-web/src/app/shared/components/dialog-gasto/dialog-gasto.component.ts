@@ -61,7 +61,9 @@ export class DialogGastoComponent {
             monto: 0, 
             usuarioId: defaultUsuarioId, 
             tipo: tipo || 'Calzado',
-            productoId: productoId
+            productoId: productoId,
+            comisionMonto: null,
+            comisionUsuarioId: null
         };
         this.editando = false;
         
@@ -82,6 +84,15 @@ export class DialogGastoComponent {
       }).subscribe(({ productos, usuarios }) => {
         this.productos = productos;
         this.usuarios = usuarios;
+        
+        // Find Ale for default commission user
+        if (!this.editando && this.gasto.tipo === 'Calzado') {
+           const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
+           if (aleUser) {
+               this.gasto.comisionUsuarioId = aleUser.id;
+           }
+        }
+        
         this.resolveProductoInfo();
         if (!this.editando && (this.gasto.tipo === 'Comisión' || this.gasto.tipo === 'Envío')) {
             this.generarMotivo();
@@ -104,7 +115,10 @@ export class DialogGastoComponent {
   
   onTipoChange() {
       if (this.gasto.tipo === 'Calzado' && !this.gasto.motivo.startsWith('COM |') && !this.gasto.motivo.startsWith('ENV |')) {
-          // Do nothing
+          const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
+          if (aleUser && !this.gasto.comisionUsuarioId) {
+              this.gasto.comisionUsuarioId = aleUser.id;
+          }
       } else if (this.gasto.tipo === 'Comisión' || this.gasto.tipo === 'Envío') {
           this.generarMotivo();
       }

@@ -65,6 +65,21 @@
                 <p-select [options]="usuarios" [(ngModel)]="item.gasto.usuarioId" optionLabel="nombre" optionValue="id" appendTo="body" styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': item.submitted && !item.gasto.usuarioId}"></p-select>
                 <small class="p-error" *ngIf="item.submitted && !item.gasto.usuarioId">Obligatorio.</small>
             </div>
+            
+            <!-- Comision (Opcional, solo si es Calzado) -->
+            <div *ngIf="item.gasto.tipo === 'Calzado'" style="display: flex; flex-direction: column; gap: 0.5rem; background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; grid-column: 1 / -1;">
+                <label style="color: #f59e0b; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión Asignada (Opcional)</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; display: block;">Usuario Responsable</label>
+                        <p-select [options]="usuarios" [(ngModel)]="item.gasto.comisionUsuarioId" optionLabel="nombre" optionValue="id" appendTo="body" styleClass="w-full"></p-select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; display: block;">Monto de Comisión</label>
+                        <p-inputNumber [(ngModel)]="item.gasto.comisionMonto" mode="currency" currency="USD" locale="en-US" styleClass="w-full" placeholder="Ej. $10.00"></p-inputNumber>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

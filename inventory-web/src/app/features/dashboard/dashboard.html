@@ -111,7 +111,7 @@
 <p-dialog [(visible)]="displayNuevaVenta" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Venta" [draggable]="false" [resizable]="false">
     <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
         
-        <div class="field">
+        <div class="field" *ngIf="!nuevaVentaData.productoPreseleccionado">
             <label>Seleccionar Producto Disponible</label>
             <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onNuevaVentaChange()">
                 <ng-template let-prod pTemplate="item">
@@ -121,6 +121,11 @@
         </div>
 
         <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;" *ngIf="nuevaVentaData.productoPreseleccionado">
+                <span class="detail-label" style="font-size: 1rem; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.descripcion }}</span>
+            </div>
+            
             <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
                 <span class="detail-label" style="font-size: 0.75rem;">Costo Calculado del Producto:</span>
                 <span class="detail-value" style="color: #64748b; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.costoCalculado | currency }}</span>

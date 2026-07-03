@@ -228,13 +228,19 @@ export class Dashboard implements OnInit {
   }
 
   liberarProducto(venta: any) {
-    const ventaActualizada = { ...venta, estado: 'Disponible' };
-    delete ventaActualizada.productoDescripcion;
-    delete ventaActualizada.usuarioNombre;
-    this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
-      this.cargarDatos();
-      this.displayDetalleVenta = false;
-      this.toastManager.showSuccess('Producto Liberado', 'El producto vuelve a estar disponible para venta.');
-    });
+    const msg = '¿Seguro que desea liberar este producto?\n\n' +
+                'Esto significa que el usuario no recibió su producto. Se anulará la venta y el producto se habilitará para otra venta. ' +
+                'Sin embargo, sus gastos asociados se mantienen (incluso los de envío), porque aunque no haya recibido el envío lo pagamos nosotros.';
+    
+    if (confirm(msg)) {
+        const ventaActualizada = { ...venta, estado: 'Disponible' };
+        delete ventaActualizada.productoDescripcion;
+        delete ventaActualizada.usuarioNombre;
+        this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
+          this.cargarDatos();
+          this.displayDetalleVenta = false;
+          this.toastManager.showSuccess('Producto Liberado', 'El producto vuelve a estar disponible para venta.');
+        });
+    }
   }
 }

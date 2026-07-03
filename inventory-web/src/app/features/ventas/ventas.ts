@@ -1,23 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { ActivatedRoute } from '@angular/router';
+import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule],
+  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent],
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit {
@@ -42,12 +42,8 @@ export class Ventas implements OnInit {
 
   menuItems: MenuItem[] = [];
 
-  // New Sale modal
-  displayNuevaVenta: boolean = false;
-  editandoVenta: boolean = false;
-  ventaEditId?: number;
-  guardandoVenta: boolean = false;
-  nuevaVentaData: any = {};
+  // Dialog Venta
+  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
   
   constructor(private api: ApiService, private toastManager: ToastManagerService, public router: Router, private route: ActivatedRoute) {}
 
@@ -130,119 +126,11 @@ export class Ventas implements OnInit {
   }
 
   showDialog(producto: any) {
-    const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
-    const suggestedPrice = (producto.costoCalculado || producto.costo || 0) + 15;
-    
-    this.editandoVenta = false;
-    this.ventaEditId = undefined;
-    this.nuevaVentaData = {
-        productoPreseleccionado: true,
-        productoSeleccionado: producto,
-        precioVenta: suggestedPrice,
-        costoEnvio: null,
-        costosAdicionales: null,
-        estado: 'Reservado',
-        nombreComprador: '',
-        lugarDestino: '',
-        comisionMonto: null,
-        comisionUsuarioId: fabriUser ? fabriUser.id : null
-    };
-    this.displayNuevaVenta = true;
+    this.dialogVenta.showDialog(producto);
   }
 
   nuevaVentaRapida() {
-    const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
-    this.editandoVenta = false;
-    this.ventaEditId = undefined;
-    this.nuevaVentaData = {
-        productoPreseleccionado: false,
-        productoSeleccionado: null,
-        precioVenta: null,
-        costoEnvio: null,
-        costosAdicionales: null,
-        estado: 'Reservado',
-        nombreComprador: '',
-        lugarDestino: '',
-        comisionMonto: null,
-        comisionUsuarioId: fabriUser ? fabriUser.id : null
-    };
-    this.displayNuevaVenta = true;
-  }
-
-  onProductoSeleccionadoModal(producto: any) {
-      if (producto) {
-          this.nuevaVentaData.precioVenta = (producto.costoCalculado || producto.costo || 0) + 15;
-          this.onNuevaVentaChange();
-      }
-  }
-
-  onNuevaVentaChange() {
-      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
-          const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
-          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
-          if (ganancia > 0) {
-              this.nuevaVentaData.comisionMonto = ganancia / 2;
-          } else {
-              this.nuevaVentaData.comisionMonto = 0;
-          }
-      } else {
-          this.nuevaVentaData.comisionMonto = null;
-      }
-  }
-
-  guardarNuevaVenta() {
-      if (!this.nuevaVentaData.productoSeleccionado) return;
-
-      // Validation
-      if (this.nuevaVentaData.estado === 'Vendido') {
-          if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
-              this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
-              return;
-          }
-      }
-
-      const v: any = {
-          productoId: this.nuevaVentaData.productoSeleccionado.id!,
-          costoEnvio: this.nuevaVentaData.costoEnvio || 0,
-          costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
-          precioVenta: this.nuevaVentaData.precioVenta || 0,
-          usuarioId: Number(localStorage.getItem('userId')) || 1, 
-          estado: this.nuevaVentaData.estado,
-          nombreComprador: this.nuevaVentaData.nombreComprador,
-          lugarDestino: this.nuevaVentaData.lugarDestino,
-          fechaVenta: new Date(),
-          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
-          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
-      };
-
-      this.guardandoVenta = true;
-      if (this.editandoVenta && this.ventaEditId) {
-          this.api.editarVenta(this.ventaEditId, v).subscribe({
-              next: () => {
-                  this.guardandoVenta = false;
-                  this.displayNuevaVenta = false;
-                  this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
-                  this.cargarDatos();
-              },
-              error: (err) => {
-                  this.guardandoVenta = false;
-                  this.toastManager.showError('Error', 'No se pudo actualizar la venta');
-              }
-          });
-      } else {
-          this.api.crearVenta(v).subscribe({
-              next: () => {
-                  this.guardandoVenta = false;
-                  this.displayNuevaVenta = false;
-                  this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
-                  this.cargarDatos();
-              },
-              error: (err) => {
-                  this.guardandoVenta = false;
-                  this.toastManager.showError('Error', 'No se pudo registrar la venta');
-              }
-          });
-      }
+    this.dialogVenta.showDialog();
   }
 
   toggleMenu(event: any, producto: any, menu: any) {
@@ -279,46 +167,12 @@ export class Ventas implements OnInit {
 
   editarVenta(producto: any) {
     if (!producto.ventaAsociada) return;
-    const venta = producto.ventaAsociada;
-    
-    this.editandoVenta = true;
-    this.ventaEditId = venta.id;
-    
-    this.nuevaVentaData = {
-        productoPreseleccionado: true,
-        productoSeleccionado: producto,
-        precioVenta: venta.precioVenta,
-        costoEnvio: venta.costoEnvio,
-        costosAdicionales: venta.costosAdicionales,
-        estado: venta.estado,
-        nombreComprador: venta.nombreComprador,
-        lugarDestino: venta.lugarDestino,
-        comisionMonto: venta.comisionMonto,
-        comisionUsuarioId: venta.comisionUsuarioId
-    };
-    this.displayNuevaVenta = true;
+    this.dialogVenta.showDialog(producto, producto.ventaAsociada);
   }
 
   marcarComoVendido(producto: any) {
       if (producto.ventaAsociada) {
-          const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
-          
-          this.editandoVenta = true;
-          this.ventaEditId = producto.ventaAsociada.id;
-          this.nuevaVentaData = {
-              productoPreseleccionado: true,
-              productoSeleccionado: producto,
-              precioVenta: producto.ventaAsociada.precioVenta,
-              costoEnvio: producto.ventaAsociada.costoEnvio || null,
-              costosAdicionales: producto.ventaAsociada.costosAdicionales || null,
-              estado: 'Vendido',
-              nombreComprador: producto.ventaAsociada.nombreComprador || '',
-              lugarDestino: producto.ventaAsociada.lugarDestino || '',
-              comisionMonto: null,
-              comisionUsuarioId: fabriUser ? fabriUser.id : null
-          };
-          this.onNuevaVentaChange();
-          this.displayNuevaVenta = true;
+          this.dialogVenta.showDialog(producto, producto.ventaAsociada, 'Vendido');
       }
   }
 

@@ -21,6 +21,9 @@ import { MenuItem } from 'primeng/api';
 import { ApiService, Producto, Movimiento, Gasto, Usuario, Venta, TipoGasto } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Location } from '@angular/common';
+import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
+import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
+import { ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-producto-detalle',
@@ -28,7 +31,8 @@ import { Location } from '@angular/common';
   imports: [
     CommonModule, ButtonModule, TimelineModule, CardModule, TooltipModule, 
     Tabs, TabList, Tab, TabPanels, TabPanel, MenuModule, FormsModule, 
-    InputTextModule, InputNumberModule, DatePickerModule, DialogModule, SelectModule
+    InputTextModule, InputNumberModule, DatePickerModule, DialogModule, SelectModule,
+    DialogGastoComponent, DialogVentaComponent
   ],
   templateUrl: './producto-detalle.html',
   styles: [`
@@ -71,10 +75,8 @@ export class ProductoDetalle implements OnInit {
   guardandoGasto: boolean = false;
   tiposGasto: TipoGasto[] = [];
 
-  // Venta edit modal
-  displayNuevaVenta: boolean = false;
-  guardandoVenta: boolean = false;
-  nuevaVentaData: any = {};
+  @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
+  @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -215,76 +217,11 @@ export class ProductoDetalle implements OnInit {
     }
   }
 
-  // --- Venta Edit Modal ---
-  editarVenta() {
-    if (!this.ventaAsociada) return;
-    const venta = this.ventaAsociada;
-    
-    this.nuevaVentaData = {
-        productoPreseleccionado: true,
-        productoSeleccionado: this.producto,
-        precioVenta: venta.precioVenta,
-        costoEnvio: venta.costoEnvio,
-        costosAdicionales: venta.costosAdicionales,
-        estado: venta.estado,
-        nombreComprador: venta.nombreComprador,
-        lugarDestino: venta.lugarDestino,
-        comisionMonto: venta.comisionMonto,
-        comisionUsuarioId: venta.comisionUsuarioId
-    };
-    this.displayNuevaVenta = true;
+  abrirGasto() {
+    this.dialogGasto.showDialog(this.productoId);
   }
 
-  onNuevaVentaChange() {
-      if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
-          const costoCalc = this.costoCalculado;
-          const ganancia = this.nuevaVentaData.precioVenta - costoCalc;
-          if (ganancia > 0) {
-              this.nuevaVentaData.comisionMonto = ganancia / 2;
-          } else {
-              this.nuevaVentaData.comisionMonto = 0;
-          }
-      } else {
-          this.nuevaVentaData.comisionMonto = null;
-      }
-  }
-
-  guardarNuevaVenta() {
-      if (!this.nuevaVentaData.productoSeleccionado || !this.ventaAsociada) return;
-
-      if (this.nuevaVentaData.estado === 'Vendido') {
-          if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
-              this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
-              return;
-          }
-      }
-
-      const v: any = {
-          productoId: this.productoId,
-          costoEnvio: this.nuevaVentaData.costoEnvio || 0,
-          costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
-          precioVenta: this.nuevaVentaData.precioVenta || 0,
-          usuarioId: Number(localStorage.getItem('userId')) || 1, 
-          estado: this.nuevaVentaData.estado,
-          nombreComprador: this.nuevaVentaData.nombreComprador,
-          lugarDestino: this.nuevaVentaData.lugarDestino,
-          fechaVenta: new Date(),
-          comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
-          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
-      };
-
-      this.guardandoVenta = true;
-      this.api.editarVenta(this.ventaAsociada.id!, v).subscribe({
-          next: () => {
-              this.guardandoVenta = false;
-              this.displayNuevaVenta = false;
-              this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
-              this.cargarDatos();
-          },
-          error: (err) => {
-              this.guardandoVenta = false;
-              this.toastManager.showError('Error', 'No se pudo actualizar la venta');
-          }
-      });
+  abrirVenta() {
+    this.dialogVenta.showDialog(this.producto, this.ventaAsociada || undefined);
   }
 }

@@ -1,0 +1,78 @@
+<p-dialog [(visible)]="display" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Venta" [draggable]="false" [resizable]="false">
+    <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        
+        <div class="field" *ngIf="!nuevaVentaData.productoPreseleccionado">
+            <label>Seleccionar Producto Disponible</label>
+            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onProductoSeleccionadoModal()">
+                <ng-template let-prod pTemplate="item">
+                    <div>{{prod.descripcion}} - {{prod.costoCalculado | currency}}</div>
+                </ng-template>
+            </p-select>
+        </div>
+
+        <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;" *ngIf="nuevaVentaData.productoPreseleccionado">
+                <span class="detail-label" style="font-size: 1rem; font-weight: bold; text-transform: uppercase;">{{ nuevaVentaData.productoSeleccionado.descripcion }}</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+                <div class="detail-row" style="padding: 0; border: none;">
+                    <span class="detail-label" style="font-size: 0.75rem;">COSTO TOTAL ESTIMADO:</span>
+                    <span class="detail-value" style="color: #64748b; font-weight: bold; font-size: 1.1rem;">
+                        {{ (nuevaVentaData.productoSeleccionado.costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0) | currency }}
+                    </span>
+                </div>
+                <div class="detail-row" style="padding: 0; border: none;">
+                    <span class="detail-label" style="font-size: 0.75rem;">GANANCIA ESTIMADA:</span>
+                    <span class="detail-value" style="font-weight: bold; font-size: 1.1rem;"
+                          [ngClass]="((nuevaVentaData.precioVenta || 0) - ((nuevaVentaData.productoSeleccionado.costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0))) > 0 ? 'text-green-600' : 'text-red-600'">
+                        {{ (nuevaVentaData.precioVenta || 0) - ((nuevaVentaData.productoSeleccionado.costoCalculado || 0) + (nuevaVentaData.costoEnvio || 0) + (nuevaVentaData.costosAdicionales || 0)) | currency }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Precio de Venta</label>
+                <p-inputNumber [(ngModel)]="nuevaVentaData.precioVenta" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.precioVenta = $event.value; onNuevaVentaChange()"></p-inputNumber>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field">
+                    <label>Envío (Costo)</label>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costoEnvio" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.costoEnvio = $event.value; onNuevaVentaChange()"></p-inputNumber>
+                </div>
+                <div class="field">
+                    <label>Otros Costos</label>
+                    <p-inputNumber [(ngModel)]="nuevaVentaData.costosAdicionales" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.costosAdicionales = $event.value; onNuevaVentaChange()"></p-inputNumber>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Nombre Comprador <span *ngIf="nuevaVentaData.estado === 'Vendido'" style="color: red;">*</span><span *ngIf="nuevaVentaData.estado !== 'Vendido'"> (Opcional)</span></label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.nombreComprador" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label>Lugar Destino <span *ngIf="nuevaVentaData.estado === 'Vendido'" style="color: red;">*</span><span *ngIf="nuevaVentaData.estado !== 'Vendido'"> (Opcional)</span></label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.lugarDestino" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label>Estado de Venta</label>
+                <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" (onChange)="onNuevaVentaChange()"></p-select>
+            </div>
+            
+            <div class="field" *ngIf="nuevaVentaData.estado === 'Vendido'" style="background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="color: #3b82f6; font-weight: 600;"><i class="pi pi-money-bill" style="margin-right: 0.25rem;"></i> Comisión de venta asignada a Fabri</label>
+                <p-inputNumber [(ngModel)]="nuevaVentaData.comisionMonto" mode="currency" currency="USD" locale="en-US" class="w-full mt-2"></p-inputNumber>
+                <small class="block mt-1" style="color: #64748b;">Calculada automáticamente como la mitad de la ganancia, pero puedes editarla.</small>
+            </div>
+        </div>
+    </div>
+    
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="display = false"></p-button>
+        <p-button [label]="editando ? 'Guardar Cambios' : 'Registrar Venta'" icon="pi pi-check" severity="success" (onClick)="guardar()" [disabled]="guardando || !nuevaVentaData.productoSeleccionado || nuevaVentaData.precioVenta === null || nuevaVentaData.precioVenta === undefined" [loading]="guardando"></p-button>
+    </ng-template>
+</p-dialog>

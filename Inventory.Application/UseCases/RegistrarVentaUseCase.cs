@@ -18,19 +18,22 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Producto> _productoRepositorio;
         private readonly IRepositorio<Gasto> _gastoRepositorio;
         private readonly IRepositorio<Usuario> _usuarioRepositorio;
+        private readonly IRepositorio<Ingreso> _ingresoRepositorio;
 
         public RegistrarVentaUseCase(
             IRepositorio<Venta> ventaRepositorio, 
             IRepositorio<Movimiento> movimientoRepositorio,
             IRepositorio<Producto> productoRepositorio,
             IRepositorio<Gasto> gastoRepositorio,
-            IRepositorio<Usuario> usuarioRepositorio)
+            IRepositorio<Usuario> usuarioRepositorio,
+            IRepositorio<Ingreso> ingresoRepositorio)
         {
             _ventaRepositorio = ventaRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
             _gastoRepositorio = gastoRepositorio;
             _usuarioRepositorio = usuarioRepositorio;
+            _ingresoRepositorio = ingresoRepositorio;
         }
 
         public async Task<Venta> EjecutarAsync(VentaDto ventaDto)
@@ -52,9 +55,11 @@ namespace Inventory.Application.UseCases
             var ventaAgregada = await _ventaRepositorio.AgregarAsync(venta);
 
             var producto = await _productoRepositorio.ObtenerPorIdAsync(ventaDto.ProductoId);
+            var estadoDeseado = !string.IsNullOrEmpty(ventaDto.Estado) ? ventaDto.Estado : "Reservado";
+
             if (producto != null)
             {
-                producto.Estado = "Reservado";
+                producto.Estado = estadoDeseado;
                 await _productoRepositorio.ActualizarAsync(producto);
             }
 
@@ -63,7 +68,7 @@ namespace Inventory.Application.UseCases
                 Tipo = "Venta",
                 Fecha = ventaDto.FechaVenta ?? DateTime.Now,
                 Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
-                MontoTotal = ventaDto.PrecioVenta - ventaDto.CostoEnvio - ventaDto.CostosAdicionales,
+                MontoTotal = ventaDto.PrecioVenta, // La venta completa
                 ReferenciaId = ventaAgregada.Id,
                 ProductoId = ventaDto.ProductoId
             };
@@ -72,7 +77,7 @@ namespace Inventory.Application.UseCases
             {
                 Tipo = "Cambio de Estado",
                 Fecha = DateTime.Now,
-                Descripcion = $"El producto {ventaDto.ProductoId} cambió a Reservado",
+                Descripcion = $"El producto {ventaDto.ProductoId} cambió a {estadoDeseado}",
                 MontoTotal = 0,
                 ReferenciaId = ventaAgregada.Id,
                 ProductoId = ventaDto.ProductoId
@@ -140,6 +145,25 @@ namespace Inventory.Application.UseCases
                     ProductoId = ventaDto.ProductoId
                 };
                 await _movimientoRepositorio.AgregarAsync(movComisionVenta);
+            }
+
+            if (estadoDeseado == "Vendido")
+            {
+                // Calcular Ganancia y registrar Ingreso
+                var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
+                var gastosProducto = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && (g.Tipo == "Envío" || g.Tipo == "Comisión")).Sum(g => g.Monto);
+                var costoCalculado = (producto?.Costo ?? 0) + gastosProducto;
+                var ganancia = ventaDto.PrecioVenta - costoCalculado;
+
+                var ingresoGanancia = new Ingreso
+                {
+                    Motivo = $"Ganancia Venta | {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
+                    Monto = ganancia,
+                    Fecha = DateTime.Now,
+                    UsuarioId = ventaDto.UsuarioId,
+                    Activo = true
+                };
+                await _ingresoRepositorio.AgregarAsync(ingresoGanancia);
             }
 
             return ventaAgregada;

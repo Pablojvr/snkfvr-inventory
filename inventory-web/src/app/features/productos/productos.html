@@ -117,12 +117,12 @@
             </div>
 
             <div class="field">
-                <label>Nombre Comprador (Opcional)</label>
+                <label>Nombre Comprador <span *ngIf="nuevaVentaData.estado === 'Vendido'" style="color: red;">*</span><span *ngIf="nuevaVentaData.estado !== 'Vendido'"> (Opcional)</span></label>
                 <input pInputText type="text" [(ngModel)]="nuevaVentaData.nombreComprador" class="w-full" />
             </div>
 
             <div class="field">
-                <label>Lugar Destino (Opcional)</label>
+                <label>Lugar Destino <span *ngIf="nuevaVentaData.estado === 'Vendido'" style="color: red;">*</span><span *ngIf="nuevaVentaData.estado !== 'Vendido'"> (Opcional)</span></label>
                 <input pInputText type="text" [(ngModel)]="nuevaVentaData.lugarDestino" class="w-full" />
             </div>
 

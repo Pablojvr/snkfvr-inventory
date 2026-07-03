@@ -17,15 +17,24 @@ namespace Inventory.Application.UseCases
         private readonly IRepositorio<Venta> _ventaRepositorio;
         private readonly IRepositorio<Movimiento> _movimientoRepositorio;
         private readonly IRepositorio<Producto> _productoRepositorio;
+        private readonly IRepositorio<Gasto> _gastoRepositorio;
+        private readonly IRepositorio<Usuario> _usuarioRepositorio;
+        private readonly IRepositorio<Ingreso> _ingresoRepositorio;
 
         public EditarVentaUseCase(
             IRepositorio<Venta> ventaRepositorio,
             IRepositorio<Movimiento> movimientoRepositorio,
-            IRepositorio<Producto> productoRepositorio)
+            IRepositorio<Producto> productoRepositorio,
+            IRepositorio<Gasto> gastoRepositorio,
+            IRepositorio<Usuario> usuarioRepositorio,
+            IRepositorio<Ingreso> ingresoRepositorio)
         {
             _ventaRepositorio = ventaRepositorio;
             _movimientoRepositorio = movimientoRepositorio;
             _productoRepositorio = productoRepositorio;
+            _gastoRepositorio = gastoRepositorio;
+            _usuarioRepositorio = usuarioRepositorio;
+            _ingresoRepositorio = ingresoRepositorio;
         }
 
         public async Task<Venta> EjecutarAsync(int id, VentaDto ventaDto)
@@ -63,6 +72,54 @@ namespace Inventory.Application.UseCases
                         ProductoId = venta.ProductoId
                     };
                     await _movimientoRepositorio.AgregarAsync(movimientoEstado);
+
+                    // Create Commission if provided
+                    if (ventaDto.ComisionMonto.HasValue && ventaDto.ComisionMonto.Value > 0)
+                    {
+                        var comisionUsuarioId = ventaDto.ComisionUsuarioId ?? ventaDto.UsuarioId;
+                        var usuarioComision = await _usuarioRepositorio.ObtenerPorIdAsync(comisionUsuarioId);
+                        var nombreUsuarioComision = usuarioComision?.Nombre ?? comisionUsuarioId.ToString();
+                        var nombreProducto = producto?.Descripcion ?? ventaDto.ProductoId.ToString();
+                        
+                        var gastoComisionVenta = new Gasto
+                        {
+                            Tipo = "Comisión",
+                            Motivo = $"COM | {nombreProducto} ({nombreUsuarioComision})",
+                            Monto = ventaDto.ComisionMonto.Value,
+                            Fecha = DateTime.Now,
+                            UsuarioId = comisionUsuarioId,
+                            ProductoId = ventaDto.ProductoId,
+                            Activo = true
+                        };
+                        var comAgregada = await _gastoRepositorio.AgregarAsync(gastoComisionVenta);
+
+                        var movComisionVenta = new Movimiento
+                        {
+                            Tipo = "Comisión",
+                            Fecha = DateTime.Now,
+                            Descripcion = $"Comisión de venta: COM | {nombreProducto} asignada a {nombreUsuarioComision}",
+                            MontoTotal = -ventaDto.ComisionMonto.Value,
+                            ReferenciaId = comAgregada.Id,
+                            ProductoId = ventaDto.ProductoId
+                        };
+                        await _movimientoRepositorio.AgregarAsync(movComisionVenta);
+                    }
+
+                    // Calcular Ganancia y registrar Ingreso
+                    var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
+                    var gastosProducto = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && (g.Tipo == "Envío" || g.Tipo == "Comisión")).Sum(g => g.Monto);
+                    var costoCalculado = (producto?.Costo ?? 0) + gastosProducto;
+                    var ganancia = ventaDto.PrecioVenta - costoCalculado;
+
+                    var ingresoGanancia = new Ingreso
+                    {
+                        Motivo = $"Ganancia Venta | {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
+                        Monto = ganancia,
+                        Fecha = DateTime.Now,
+                        UsuarioId = ventaDto.UsuarioId,
+                        Activo = true
+                    };
+                    await _ingresoRepositorio.AgregarAsync(ingresoGanancia);
                 }
             }
 
@@ -71,7 +128,7 @@ namespace Inventory.Application.UseCases
 
             if (mov != null)
             {
-                mov.MontoTotal = ventaDto.PrecioVenta - ventaDto.CostoEnvio - ventaDto.CostosAdicionales;
+                mov.MontoTotal = ventaDto.PrecioVenta; // La venta completa
                 mov.Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}";
                 mov.ProductoId = ventaDto.ProductoId;
                 if (venta.FechaVenta.HasValue) mov.Fecha = venta.FechaVenta.Value;

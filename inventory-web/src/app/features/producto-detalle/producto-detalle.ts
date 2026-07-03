@@ -106,8 +106,8 @@ export class ProductoDetalle implements OnInit {
                 }));
             
             const gastosProd = gastos.filter(g => g.productoId === this.productoId && g.activo && g.tipo !== 'Calzado');
-            const totalGastos = gastosProd.reduce((acc, curr) => acc + curr.monto, 0);
-            this.costoCalculado = (this.producto.costo || 0) + totalGastos;
+            const totalGastos = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
+            this.costoCalculado = (this.producto?.costo || 0) + totalGastos;
         });
     });
   }

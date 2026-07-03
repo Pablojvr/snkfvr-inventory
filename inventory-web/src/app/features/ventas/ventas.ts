@@ -44,6 +44,8 @@ export class Ventas implements OnInit {
 
   // New Sale modal
   displayNuevaVenta: boolean = false;
+  editandoVenta: boolean = false;
+  ventaEditId?: number;
   nuevaVentaData: any = {};
   
   constructor(private api: ApiService, private toastManager: ToastManagerService, public router: Router, private route: ActivatedRoute) {}
@@ -87,7 +89,7 @@ export class Ventas implements OnInit {
            const venta = ventas.find(v => v.productoId === p.id && v.activo);
            
            const gastosProd = gastos.filter(g => g.productoId === p.id && g.activo && g.tipo !== 'Calzado');
-           const totalGastos = gastosProd.reduce((acc, curr) => acc + curr.monto, 0);
+           const totalGastos = gastosProd.reduce((acc, curr) => acc + (curr.monto || 0), 0);
            const costoCalculado = (p.costo || 0) + totalGastos;
 
            return {
@@ -129,12 +131,16 @@ export class Ventas implements OnInit {
 
   showDialog(producto: any) {
     const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
+    const suggestedPrice = (producto.costoCalculado || producto.costo || 0) + 15;
+    
+    this.editandoVenta = false;
+    this.ventaEditId = undefined;
     this.nuevaVentaData = {
         productoPreseleccionado: true,
         productoSeleccionado: producto,
-        precioVenta: producto.costoCalculado || producto.costo || 0,
-        costoEnvio: 0,
-        costosAdicionales: 0,
+        precioVenta: suggestedPrice,
+        costoEnvio: null,
+        costosAdicionales: null,
         estado: 'Reservado',
         nombreComprador: '',
         lugarDestino: '',
@@ -146,12 +152,14 @@ export class Ventas implements OnInit {
 
   nuevaVentaRapida() {
     const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
+    this.editandoVenta = false;
+    this.ventaEditId = undefined;
     this.nuevaVentaData = {
         productoPreseleccionado: false,
         productoSeleccionado: null,
-        precioVenta: 0,
-        costoEnvio: 0,
-        costosAdicionales: 0,
+        precioVenta: null,
+        costoEnvio: null,
+        costosAdicionales: null,
         estado: 'Reservado',
         nombreComprador: '',
         lugarDestino: '',
@@ -163,7 +171,7 @@ export class Ventas implements OnInit {
 
   onProductoSeleccionadoModal(producto: any) {
       if (producto) {
-          this.nuevaVentaData.precioVenta = producto.costoCalculado || producto.costo || 0;
+          this.nuevaVentaData.precioVenta = (producto.costoCalculado || producto.costo || 0) + 15;
           this.onNuevaVentaChange();
       }
   }
@@ -185,6 +193,14 @@ export class Ventas implements OnInit {
   guardarNuevaVenta() {
       if (!this.nuevaVentaData.productoSeleccionado) return;
 
+      // Validation
+      if (this.nuevaVentaData.estado === 'Vendido') {
+          if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
+              this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
+              return;
+          }
+      }
+
       const v: any = {
           productoId: this.nuevaVentaData.productoSeleccionado.id!,
           costoEnvio: this.nuevaVentaData.costoEnvio || 0,
@@ -199,14 +215,25 @@ export class Ventas implements OnInit {
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
 
-      this.api.crearVenta(v).subscribe({
-          next: () => {
-              this.displayNuevaVenta = false;
-              this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
-              this.cargarDatos();
-          },
-          error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
-      });
+      if (this.editandoVenta && this.ventaEditId) {
+          this.api.editarVenta(this.ventaEditId, v).subscribe({
+              next: () => {
+                  this.displayNuevaVenta = false;
+                  this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
+                  this.cargarDatos();
+              },
+              error: (err) => this.toastManager.showError('Error', 'No se pudo actualizar la venta')
+          });
+      } else {
+          this.api.crearVenta(v).subscribe({
+              next: () => {
+                  this.displayNuevaVenta = false;
+                  this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
+                  this.cargarDatos();
+              },
+              error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
+          });
+      }
   }
 
   toggleMenu(event: any, producto: any, menu: any) {
@@ -228,11 +255,24 @@ export class Ventas implements OnInit {
 
   marcarComoVendido(producto: any) {
       if (producto.ventaAsociada) {
-          const ventaActualizada = { ...producto.ventaAsociada, estado: 'Vendido' };
-          this.api.editarVenta(producto.ventaAsociada.id, ventaActualizada).subscribe(() => {
-              this.toastManager.showSuccess('Éxito', 'El producto ahora está Vendido');
-              this.cargarDatos();
-          });
+          const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
+          
+          this.editandoVenta = true;
+          this.ventaEditId = producto.ventaAsociada.id;
+          this.nuevaVentaData = {
+              productoPreseleccionado: true,
+              productoSeleccionado: producto,
+              precioVenta: producto.ventaAsociada.precioVenta,
+              costoEnvio: producto.ventaAsociada.costoEnvio || null,
+              costosAdicionales: producto.ventaAsociada.costosAdicionales || null,
+              estado: 'Vendido',
+              nombreComprador: producto.ventaAsociada.nombreComprador || '',
+              lugarDestino: producto.ventaAsociada.lugarDestino || '',
+              comisionMonto: null,
+              comisionUsuarioId: fabriUser ? fabriUser.id : null
+          };
+          this.onNuevaVentaChange();
+          this.displayNuevaVenta = true;
       }
   }
 

@@ -7,7 +7,7 @@ export interface Producto {
   id?: number;
   descripcion: string;
   fechaCompra: string | Date;
-  costo: number;
+  costo: number | null;
   costoCalculado?: number;
   estado?: string;
   activo?: boolean;
@@ -22,7 +22,7 @@ export interface Usuario {
 export interface Ingreso {
   id?: number;
   motivo: string;
-  monto: number;
+  monto: number | null;
   fecha: string | Date;
   usuarioId: number;
   usuarioNombre?: string;
@@ -36,7 +36,7 @@ export interface Gasto {
   fechaIngreso?: string | Date;
   usuarioId: number;
   usuarioNombre?: string;
-  monto: number;
+  monto: number | null;
   productoId?: number;
   productoDescripcion?: string;
   tipo?: string;
@@ -48,10 +48,10 @@ export interface Gasto {
 export interface Venta {
   id?: number;
   productoId: number;
-  costoEnvio: number;
-  costosAdicionales: number;
+  costoEnvio: number | null;
+  costosAdicionales: number | null;
   fechaVenta?: string | Date;
-  precioVenta: number;
+  precioVenta: number | null;
   usuarioId: number;
   usuarioNombre?: string;
   productoDescripcion?: string;

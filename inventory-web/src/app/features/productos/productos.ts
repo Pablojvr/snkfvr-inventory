@@ -27,7 +27,7 @@ export class Productos implements OnInit {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
   displayDialog: boolean = false;
-  producto: Producto = { descripcion: '', fechaCompra: new Date(), costo: 0 };
+  producto: Producto = { descripcion: '', fechaCompra: new Date(), costo: null };
   
   editando: boolean = false;
   submitted: boolean = false;
@@ -81,7 +81,7 @@ export class Productos implements OnInit {
         this.usuarios = usuarios;
         this.productos = productos.map(p => {
             const gastosProducto = gastos.filter(g => g.productoId === p.id && (g.tipo === 'Comisión' || g.tipo === 'Envío'));
-            const costoCalculado = p.costo + gastosProducto.reduce((sum, g) => sum + g.monto, 0);
+            const costoCalculado = (p.costo || 0) + gastosProducto.reduce((sum, g) => sum + (g.monto || 0), 0);
             return {
                 ...p,
                 costoCalculado: costoCalculado
@@ -115,7 +115,7 @@ export class Productos implements OnInit {
   }
 
   showDialog() {
-    this.producto = { descripcion: '', fechaCompra: new Date(), costo: 0 };
+    this.producto = { descripcion: '', fechaCompra: new Date(), costo: null };
     this.editando = false;
     this.submitted = false;
     this.displayDialog = true;
@@ -131,7 +131,7 @@ export class Productos implements OnInit {
   guardar() {
     this.submitted = true;
     if (this.guardando) return;
-    if (!this.producto.descripcion || !this.producto.costo || this.producto.costo <= 0) {
+    if (!this.producto.descripcion || this.producto.costo === null || this.producto.costo <= 0) {
       return;
     }
 
@@ -161,12 +161,14 @@ export class Productos implements OnInit {
 
   venderProducto(prod: Producto) {
     const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
+    const suggestedPrice = (prod.costoCalculado || prod.costo || 0) + 15;
+
     this.nuevaVentaData = {
         productoPreseleccionado: true,
         productoSeleccionado: prod,
-        precioVenta: prod.costoCalculado || prod.costo || 0,
-        costoEnvio: 0,
-        costosAdicionales: 0,
+        precioVenta: suggestedPrice,
+        costoEnvio: null,
+        costosAdicionales: null,
         estado: 'Reservado',
         nombreComprador: '',
         lugarDestino: '',
@@ -192,6 +194,14 @@ export class Productos implements OnInit {
 
   guardarNuevaVenta() {
       if (!this.nuevaVentaData.productoSeleccionado) return;
+
+      // Validation
+      if (this.nuevaVentaData.estado === 'Vendido') {
+          if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
+              this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
+              return;
+          }
+      }
 
       const v: any = {
           productoId: this.nuevaVentaData.productoSeleccionado.id!,

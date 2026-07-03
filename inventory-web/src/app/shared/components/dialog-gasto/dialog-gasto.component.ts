@@ -19,7 +19,7 @@ import { ToastManagerService } from '../../../core/services/toast-manager.servic
 })
 export class DialogGastoComponent {
   displayDialog: boolean = false;
-  gasto: Gasto = { motivo: '', fecha: new Date(), monto: 0, usuarioId: 0, tipo: 'Calzado' };
+  gasto: Gasto = { motivo: '', fecha: new Date(), monto: null, usuarioId: 0, tipo: 'Calzado' };
   
   editando: boolean = false;
   submitted: boolean = false;
@@ -58,7 +58,7 @@ export class DialogGastoComponent {
         this.gasto = { 
             motivo: '', 
             fecha: new Date(), 
-            monto: 0, 
+            monto: null, 
             usuarioId: defaultUsuarioId, 
             tipo: tipo || 'Calzado',
             productoId: productoId,
@@ -108,7 +108,7 @@ export class DialogGastoComponent {
       const prod = this.productos.find(p => p.id === pId);
       if (prod) {
         this.productoNombre = prod.descripcion;
-        this.costoActual = prod.costo;
+        this.costoActual = prod.costo ?? undefined;
       }
     }
   }
@@ -144,7 +144,7 @@ export class DialogGastoComponent {
     this.submitted = true;
     if (this.guardando) return;
     
-    if (!this.gasto.motivo || !this.gasto.usuarioId || !this.gasto.monto || this.gasto.monto <= 0) {
+    if (!this.gasto.motivo || !this.gasto.usuarioId || this.gasto.monto === null || this.gasto.monto <= 0) {
       return;
     }
     

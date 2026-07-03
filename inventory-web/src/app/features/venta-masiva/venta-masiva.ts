@@ -89,10 +89,12 @@ export class VentaMasivaComponent implements OnInit {
       estado: 'Reservado'
     };
 
-    let costoActual = undefined;
+    let costoActual: number | undefined = undefined;
     if (productoId) {
       const p = this.productos.find(x => x.id === productoId);
-      if (p) costoActual = p.costo;
+      if (p) {
+        costoActual = p.costo ?? undefined;
+      }
     }
 
     this.items.push({
@@ -115,7 +117,7 @@ export class VentaMasivaComponent implements OnInit {
       pId = (pId as any).id;
     }
     const prod = this.productos.find(p => p.id === pId);
-    item.costoActual = prod ? prod.costo : undefined;
+    item.costoActual = prod?.costo ?? undefined;
   }
 
   getNombreUsuario(id: number): string {

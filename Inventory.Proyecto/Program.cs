@@ -60,29 +60,16 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<Inventory.Settings.Data.InventarioDbContext>();
     dbContext.Database.Migrate();
 
-    // WARNING: Limpieza total de base de datos solicitada por el usuario
-    // NOTA: Para desactivar este comportamiento en el futuro, eliminar o comentar este bloque
-    var env = app.Environment;
-    if (true) // Se ejecuta siempre para limpiar local y remota según requerimiento
+    // La lógica de limpieza automática ha sido removida por seguridad.
+    // Ahora se debe usar el endpoint de limpieza (SystemController) si se requiere limpiar la base de datos.
+    if (!dbContext.Usuarios.Any())
     {
-        try 
-        {
-            dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE \"Ventas\", \"Gastos\", \"Productos\", \"Usuarios\", \"Movimientos\", \"Ingresos\" RESTART IDENTITY CASCADE;");
-        } 
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error al limpiar BD: " + ex.Message);
-        }
-
-        if (!dbContext.Usuarios.Any())
-        {
-            dbContext.Usuarios.AddRange(
-                new Inventory.Core.Entities.Usuario { Nombre = "Javier" },
-                new Inventory.Core.Entities.Usuario { Nombre = "Fabri" },
-                new Inventory.Core.Entities.Usuario { Nombre = "Alesito" }
-            );
-            dbContext.SaveChanges();
-        }
+        dbContext.Usuarios.AddRange(
+            new Inventory.Core.Entities.Usuario { Nombre = "Javier" },
+            new Inventory.Core.Entities.Usuario { Nombre = "Fabri" },
+            new Inventory.Core.Entities.Usuario { Nombre = "Alesito" }
+        );
+        dbContext.SaveChanges();
     }
 }
 

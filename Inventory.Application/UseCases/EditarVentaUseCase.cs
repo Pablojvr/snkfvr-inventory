@@ -39,6 +39,8 @@ namespace Inventory.Application.UseCases
             venta.FechaVenta = ventaDto.FechaVenta;
             venta.PrecioVenta = ventaDto.PrecioVenta;
             venta.UsuarioId = ventaDto.UsuarioId;
+            venta.NombreComprador = ventaDto.NombreComprador;
+            venta.LugarDestino = ventaDto.LugarDestino;
             venta.Estado = ventaDto.Estado;
 
             await _ventaRepositorio.ActualizarAsync(venta);

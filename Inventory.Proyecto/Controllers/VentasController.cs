@@ -35,6 +35,34 @@ namespace Inventory.Proyecto.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarVenta(int id)
         {
+            var venta = await _ventaRepositorio.ObtenerPorIdAsync(id);
+            if (venta != null)
+            {
+                var prodRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.Producto>)) as IRepositorio<Inventory.Core.Entities.Producto>;
+                var movRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.Movimiento>)) as IRepositorio<Inventory.Core.Entities.Movimiento>;
+
+                if (prodRepo != null && movRepo != null)
+                {
+                    var producto = await prodRepo.ObtenerPorIdAsync(venta.ProductoId);
+                    if (producto != null)
+                    {
+                        producto.Estado = "Disponible";
+                        await prodRepo.ActualizarAsync(producto);
+
+                        var movimientoEstado = new Inventory.Core.Entities.Movimiento
+                        {
+                            Tipo = "Cambio de Estado",
+                            Fecha = DateTime.Now,
+                            Descripcion = $"El producto {venta.ProductoId} cambió a Disponible tras anular venta",
+                            MontoTotal = 0,
+                            ReferenciaId = venta.Id,
+                            ProductoId = venta.ProductoId
+                        };
+                        await movRepo.AgregarAsync(movimientoEstado);
+                    }
+                }
+            }
+
             await _ventaRepositorio.EliminarAsync(id);
             return Ok(new { message = "Venta desactivada correctamente." });
         }

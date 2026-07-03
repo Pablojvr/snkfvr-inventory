@@ -38,6 +38,8 @@ namespace Inventory.Application.UseCases
                 FechaRegistro = ventaDto.FechaRegistro != default ? ventaDto.FechaRegistro : DateTime.Now,
                 PrecioVenta = ventaDto.PrecioVenta,
                 UsuarioId = ventaDto.UsuarioId,
+                NombreComprador = ventaDto.NombreComprador,
+                LugarDestino = ventaDto.LugarDestino,
                 Activo = true
             };
 

@@ -55,6 +55,8 @@ export interface Venta {
   fechaRegistro?: string | Date;
   estado?: string;
   activo?: boolean;
+  nombreComprador?: string;
+  lugarDestino?: string;
 }
 
 export interface Movimiento {

@@ -21,29 +21,37 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit {
-  ventas: Venta[] = [];
-  productos: Producto[] = [];
+  productos: any[] = [];
+  ventasRaw: Venta[] = [];
   usuarios: Usuario[] = [];
 
   textoFiltro: string = '';
-  estadoFiltro: string = 'Todos'; // 'Todos', 'Reservado', 'Vendido'
-  menuItems: MenuItem[] = [];
+  estadoFiltro: string = 'Disponible';
+  estadoOpciones: any[] = [
+    { label: 'Disponibles', value: 'Disponible' },
+    { label: 'Reservados', value: 'Reservado' },
+    { label: 'Vendidos', value: 'Vendido' },
+    { label: 'Todos', value: 'Todos' }
+  ];
 
-  // Detail modal
-  displayDetalleVenta: boolean = false;
-  ventaSeleccionada: any = null;
+  estadoVentaOpciones: any[] = [
+    { label: 'Reservado', value: 'Reservado' },
+    { label: 'Vendido', value: 'Vendido' },
+    { label: 'Disponible (Anular)', value: 'Disponible' }
+  ];
+
+  menuItems: MenuItem[] = [];
 
   // New Sale modal
   displayNuevaVenta: boolean = false;
   nuevaVentaData: any = {};
-  productosDisponibles: Producto[] = [];
-
+  
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
         this.textoFiltro = params['search'] || '';
-        this.estadoFiltro = params['estado'] || 'Todos';
+        this.estadoFiltro = params['estado'] || 'Disponible';
     });
     this.cargarDatos();
   }
@@ -53,15 +61,10 @@ export class Ventas implements OnInit {
           relativeTo: this.route,
           queryParams: {
               search: this.textoFiltro || null,
-              estado: this.estadoFiltro !== 'Todos' ? this.estadoFiltro : null
+              estado: this.estadoFiltro !== 'Disponible' ? this.estadoFiltro : null
           },
           queryParamsHandling: 'merge'
       });
-  }
-
-  setEstadoFiltro(estado: string) {
-      this.estadoFiltro = estado;
-      this.onFilterChange();
   }
 
   cargarDatos() {
@@ -71,25 +74,52 @@ export class Ventas implements OnInit {
         productos: this.api.getProductos(),
         usuarios: this.api.getUsuarios()
       }).subscribe(({ ventas, productos, usuarios }) => {
-        this.productos = productos;
+        this.ventasRaw = ventas;
         this.usuarios = usuarios;
-        this.productosDisponibles = this.productos.filter(p => p.estado !== 'Vendido');
-        this.ventas = ventas.map(v => ({
-          ...v,
-          productoDescripcion: productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
-          usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido'
-        }));
+        
+        this.productos = productos.map(p => {
+           const venta = ventas.find(v => v.productoId === p.id && v.activo);
+           return {
+               ...p,
+               ventaAsociada: venta,
+               estadoActual: venta ? venta.estado : 'Disponible',
+               nombreComprador: venta?.nombreComprador || '',
+               lugarDestino: venta?.lugarDestino || '',
+               precioVenta: venta?.precioVenta || 0
+           };
+        });
       });
     });
   }
 
-  showDialog() {
+  get productosFiltrados() {
+    let filtradas = this.productos;
+    
+    if (this.estadoFiltro !== 'Todos') {
+        filtradas = filtradas.filter(p => p.estadoActual === this.estadoFiltro);
+    }
+    
+    if (this.textoFiltro) {
+        const text = this.textoFiltro.toLowerCase();
+        filtradas = filtradas.filter(p => 
+          (p.descripcion && p.descripcion.toLowerCase().includes(text)) ||
+          (p.nombreComprador && p.nombreComprador.toLowerCase().includes(text)) ||
+          (p.lugarDestino && p.lugarDestino.toLowerCase().includes(text)) ||
+          (p.estadoActual && p.estadoActual.toLowerCase().includes(text))
+        );
+    }
+    return filtradas;
+  }
+
+  showDialog(producto: any) {
     this.nuevaVentaData = {
-        productoSeleccionado: null,
-        precioVenta: 0,
+        productoSeleccionado: producto,
+        precioVenta: producto.costo || 0,
         costoEnvio: 0,
         costosAdicionales: 0,
-        estado: 'Vendido'
+        estado: 'Vendido',
+        nombreComprador: '',
+        lugarDestino: ''
     };
     this.displayNuevaVenta = true;
   }
@@ -102,8 +132,10 @@ export class Ventas implements OnInit {
           costoEnvio: this.nuevaVentaData.costoEnvio || 0,
           costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
           precioVenta: this.nuevaVentaData.precioVenta || 0,
-          usuarioId: Number(localStorage.getItem('userId')) || 1, // Fallback
+          usuarioId: Number(localStorage.getItem('userId')) || 1, 
           estado: this.nuevaVentaData.estado,
+          nombreComprador: this.nuevaVentaData.nombreComprador,
+          lugarDestino: this.nuevaVentaData.lugarDestino,
           fechaVenta: new Date()
       };
 
@@ -117,68 +149,51 @@ export class Ventas implements OnInit {
       });
   }
 
-  get ventasFiltradas() {
-    let filtradas = this.ventas;
-    
-    if (this.estadoFiltro !== 'Todos') {
-        filtradas = filtradas.filter(v => v.estado === this.estadoFiltro);
-    }
-    
-    if (this.textoFiltro) {
-        const text = this.textoFiltro.toLowerCase();
-        filtradas = filtradas.filter(v => 
-          (v.productoDescripcion && v.productoDescripcion.toLowerCase().includes(text)) ||
-          (v.usuarioNombre && v.usuarioNombre.toLowerCase().includes(text)) ||
-          (v.estado && v.estado.toLowerCase().includes(text))
-        );
-    }
-    return filtradas;
-  }
-
-  abrirDetalle(venta: any) {
-    this.ventaSeleccionada = venta;
-    this.displayDetalleVenta = true;
-  }
-
-  toggleMenu(event: any, venta: Venta, menu: any) {
+  toggleMenu(event: any, producto: any, menu: any) {
     event.stopPropagation();
     this.menuItems = [
-      { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', venta.productoId]) },
+      { label: 'Ver Detalle Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', producto.id]) },
     ];
-    if (venta.estado === 'Reservado') {
-      this.menuItems.push({ label: 'Marcar Entregado', icon: 'pi pi-check-circle', command: () => this.marcarEntregado(venta) });
-      this.menuItems.push({ label: 'Liberar Producto', icon: 'pi pi-undo', command: () => this.liberarProducto(venta) });
+    if (producto.estadoActual === 'Disponible') {
+      this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.showDialog(producto) });
+    } else if (producto.ventaAsociada) {
+       this.menuItems.push({ label: 'Anular Venta', icon: 'pi pi-trash', command: () => this.anularVenta(producto.ventaAsociada.id) });
     }
-    this.menuItems.push({ label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(venta.id!) });
-    
     menu.toggle(event);
   }
 
-  marcarEntregado(venta: Venta) {
-    const ventaActualizada = { ...venta, estado: 'Vendido', fechaVenta: new Date() };
-    this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
-        this.cargarDatos();
-        this.displayDetalleVenta = false;
-        this.toastManager.showSuccess('Éxito', 'Venta marcada como entregada.');
-    });
+  onEstadoChange(producto: any) {
+      if (producto.estadoActual === 'Disponible') {
+          if (producto.ventaAsociada) {
+              this.anularVenta(producto.ventaAsociada.id);
+          }
+      } else if (producto.estadoActual === 'Vendido' || producto.estadoActual === 'Reservado') {
+          if (producto.ventaAsociada) {
+              const ventaActualizada = { ...producto.ventaAsociada, estado: producto.estadoActual };
+              this.api.editarVenta(producto.ventaAsociada.id, ventaActualizada).subscribe(() => {
+                  this.toastManager.showSuccess('Éxito', 'Estado actualizado');
+                  this.cargarDatos();
+              });
+          }
+      }
   }
 
-  liberarProducto(venta: Venta) {
-    const ventaActualizada = { ...venta, estado: 'Disponible' };
-    this.api.editarVenta(venta.id!, ventaActualizada).subscribe(() => {
-      this.cargarDatos();
-      this.displayDetalleVenta = false;
-      this.toastManager.showSuccess('Producto Liberado', 'El producto vuelve a estar disponible para venta.');
-    });
+  anularVenta(ventaId: number) {
+      if(confirm('¿Seguro que desea anular esta venta y devolver el producto a Disponible?')) {
+          this.api.eliminarVenta(ventaId).subscribe(() => {
+              this.cargarDatos();
+              this.toastManager.showSuccess('Éxito', 'Venta anulada correctamente');
+          });
+      } else {
+         this.cargarDatos();
+      }
   }
 
-  eliminar(id: number) {
-    if(confirm('¿Seguro que desea desactivar esta venta?')) {
-      this.api.eliminarVenta(id).subscribe(() => {
-        this.cargarDatos();
-        this.displayDetalleVenta = false;
-        this.toastManager.showSuccess('Éxito', `Se eliminó la venta con ID ${id}`);
-      });
-    }
+  abrirDetalle(producto: any) {
+    // Si clickean la card, abrimos el menú (o si está disponible abrimos modal, depende de la lógica del template)
+    // El template puede llamar a toggleMenu directamente o a abrirDetalle.
+    // Si la idea es que el click en tarjeta muestre el menu (3 puntos):
+    // El template pasará el click al menu.
   }
+
 }

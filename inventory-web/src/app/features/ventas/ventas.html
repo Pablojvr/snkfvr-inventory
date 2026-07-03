@@ -1,111 +1,62 @@
 <div class="card">
     <div class="page-header">
         <div class="header-left">
-            <h2>Historial de Ventas</h2>
+            <h2>Ventas (Inventario)</h2>
             <div class="product-search" style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem;">
                 <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
                     <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar venta..." style="width: 100%; padding-left: 2.5rem;" />
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar producto o comprador..." style="width: 100%; padding-left: 2.5rem;" />
                 </div>
                 <div style="display: flex; gap: 0.5rem; width: 100%; overflow-x: auto;">
-                    <p-button [label]="'Todos'" size="small" [severity]="estadoFiltro === 'Todos' ? 'primary' : 'secondary'" [outlined]="estadoFiltro !== 'Todos'" (onClick)="setEstadoFiltro('Todos')"></p-button>
-                    <p-button [label]="'Reservados'" size="small" [severity]="estadoFiltro === 'Reservado' ? 'warn' : 'secondary'" [outlined]="estadoFiltro !== 'Reservado'" (onClick)="setEstadoFiltro('Reservado')"></p-button>
-                    <p-button [label]="'Vendidos'" size="small" [severity]="estadoFiltro === 'Vendido' ? 'success' : 'secondary'" [outlined]="estadoFiltro !== 'Vendido'" (onClick)="setEstadoFiltro('Vendido')"></p-button>
+                    <p-select [options]="estadoOpciones" [(ngModel)]="estadoFiltro" optionLabel="label" optionValue="value" (ngModelChange)="onFilterChange()" styleClass="w-full"></p-select>
                 </div>
             </div>
         </div>
-        <p-button label="Nueva Venta" icon="pi pi-shopping-cart" (onClick)="showDialog()" severity="success" styleClass="w-full"></p-button>
     </div>
 
-    <div class="entity-cards-grid" *ngIf="ventasFiltradas.length > 0">
-        <div class="entity-card" *ngFor="let venta of ventasFiltradas" (click)="abrirDetalle(venta)">
+    <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
+        <div class="entity-card" *ngFor="let producto of productosFiltrados" (click)="toggleMenu($event, producto, menu)">
             <div class="entity-card-header">
-                <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
+                <h4 class="entity-card-title">{{ producto.descripcion }}</h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-                <button class="entity-card-menu-btn" (click)="toggleMenu($event, venta, menu)" pTooltip="Acciones" tooltipPosition="left">
+                <button class="entity-card-menu-btn" (click)="toggleMenu($event, producto, menu)" pTooltip="Acciones" tooltipPosition="left">
                     <i class="pi pi-ellipsis-v"></i>
                 </button>
             </div>
             <div class="entity-card-body">
                 <div class="entity-card-meta">
-                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.usuarioNombre }}</span>
-                    <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.fechaRegistro | date:'dd/MM/yy' }}</span>
+                    <span style="font-weight: bold; color: #64748b;">Costo: {{ producto.costo | currency }}</span>
+                    <span *ngIf="producto.estadoActual !== 'Disponible'"><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.nombreComprador || 'Sin nombre' }}</span>
+                    <span *ngIf="producto.estadoActual !== 'Disponible' && producto.lugarDestino"><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.lugarDestino }}</span>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.25rem;">
-                    <span class="entity-card-amount" style="color: #3b82f6;">{{ venta.precioVenta | currency }}</span>
-                    <span [ngClass]="venta.estado === 'Reservado' ? 'badge-warn' : 'badge-success'">{{ venta.estado }}</span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.5rem;">
+                    <span *ngIf="producto.estadoActual !== 'Disponible'" class="entity-card-amount" style="color: #3b82f6;">{{ producto.precioVenta | currency }}</span>
+                    
+                    <div *ngIf="producto.estadoActual === 'Reservado'" (click)="$event.stopPropagation()">
+                         <p-select [options]="estadoVentaOpciones" [(ngModel)]="producto.estadoActual" optionLabel="label" optionValue="value" (ngModelChange)="onEstadoChange(producto)" styleClass="w-full"></p-select>
+                    </div>
+
+                    <span *ngIf="producto.estadoActual !== 'Reservado'" [ngClass]="producto.estadoActual === 'Vendido' ? 'badge-success' : 'badge-primary'">{{ producto.estadoActual }}</span>
                 </div>
             </div>
         </div>
     </div>
     
-    <div *ngIf="ventasFiltradas.length === 0" class="empty-msg">
-        No hay ventas registradas.
+    <div *ngIf="productosFiltrados.length === 0" class="empty-msg">
+        No hay productos encontrados en este estado.
     </div>
 </div>
 
-<!-- Modal Detalle de Venta (Read-Only) -->
-<p-dialog [(visible)]="displayDetalleVenta" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Venta" [draggable]="false" [resizable]="false">
-    <div *ngIf="ventaSeleccionada" style="display: flex; flex-direction: column; gap: 0;">
-        <div class="detail-row">
-            <span class="detail-label">Producto</span>
-            <span class="detail-value">{{ ventaSeleccionada.productoDescripcion }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Precio de Venta</span>
-            <span class="detail-value" style="color: #3b82f6;">{{ ventaSeleccionada.precioVenta | currency }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Costo de Envío</span>
-            <span class="detail-value">{{ ventaSeleccionada.costoEnvio | currency }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Costos Adicionales</span>
-            <span class="detail-value">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Vendedor</span>
-            <span class="detail-value">{{ ventaSeleccionada.usuarioNombre }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Fecha Registro</span>
-            <span class="detail-value">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="ventaSeleccionada.estado === 'Vendido' && ventaSeleccionada.fechaVenta">
-            <span class="detail-label">Fecha Entrega</span>
-            <span class="detail-value">{{ ventaSeleccionada.fechaVenta | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Estado</span>
-            <span [ngClass]="ventaSeleccionada.estado === 'Reservado' ? 'badge-warn' : 'badge-success'">{{ ventaSeleccionada.estado }}</span>
-        </div>
-    </div>
-
-    <ng-template pTemplate="footer">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;" *ngIf="ventaSeleccionada?.estado === 'Reservado'">
-            <p-button label="Liberar" icon="pi pi-undo" severity="secondary" [text]="true" (onClick)="liberarProducto(ventaSeleccionada)"></p-button>
-            <p-button label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
-        </div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;" *ngIf="ventaSeleccionada?.estado !== 'Reservado'">
-             <p-button label="Cerrar" icon="pi pi-times" [text]="true" (onClick)="displayDetalleVenta = false"></p-button>
-        </div>
-    </ng-template>
-</p-dialog>
-
-<!-- Modal Nueva Venta -->
-<p-dialog [(visible)]="displayNuevaVenta" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Nueva Venta" [draggable]="false" [resizable]="false">
+<!-- Modal Registrar Venta -->
+<p-dialog [(visible)]="displayNuevaVenta" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Registrar Venta" [draggable]="false" [resizable]="false">
     <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
         
-        <div class="field">
-            <label>Seleccionar Producto Disponible</label>
-            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full">
-                <ng-template let-prod pTemplate="item">
-                    <div>{{prod.descripcion}} - {{prod.costo | currency}}</div>
-                </ng-template>
-            </p-select>
-        </div>
-
         <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
+                <span class="detail-label" style="font-size: 1rem; font-weight: bold;">{{ nuevaVentaData.productoSeleccionado.descripcion }}</span>
+            </div>
+            
             <div class="detail-row" style="padding: 0; border: none; margin-bottom: 0.5rem;">
                 <span class="detail-label" style="font-size: 0.75rem;">Costo Actual del Producto:</span>
                 <span class="detail-value" style="color: #64748b;">{{ nuevaVentaData.productoSeleccionado.costo | currency }}</span>
@@ -128,6 +79,16 @@
             </div>
 
             <div class="field">
+                <label>Nombre Comprador (Opcional)</label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.nombreComprador" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label>Lugar Destino (Opcional)</label>
+                <input pInputText type="text" [(ngModel)]="nuevaVentaData.lugarDestino" class="w-full" />
+            </div>
+
+            <div class="field">
                 <label>Estado de Venta</label>
                 <p-select [options]="[{label: 'Vendido (Entregado)', value: 'Vendido'}, {label: 'Reservado (Pendiente)', value: 'Reservado'}]" [(ngModel)]="nuevaVentaData.estado" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
             </div>
@@ -136,7 +97,6 @@
     
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayNuevaVenta = false"></p-button>
-        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="!nuevaVentaData.productoSeleccionado || !nuevaVentaData.precioVenta"></p-button>
+        <p-button label="Registrar Venta" icon="pi pi-check" (onClick)="guardarNuevaVenta()" [disabled]="!nuevaVentaData.precioVenta"></p-button>
     </ng-template>
 </p-dialog>
-

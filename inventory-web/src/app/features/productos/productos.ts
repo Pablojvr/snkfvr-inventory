@@ -38,6 +38,9 @@ export class Productos implements OnInit {
 
   // Venta Modal
   displayNuevaVenta: boolean = false;
+  guardandoVenta: boolean = false;
+  editandoVenta: boolean = false;
+  ventaEditId: number | null = null;
   nuevaVentaData: any = {};
   estadoVentaOpciones: any[] = [
     { label: 'Vendido (Entregado)', value: 'Vendido' },
@@ -216,15 +219,34 @@ export class Productos implements OnInit {
           comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
-
-      this.api.crearVenta(v).subscribe({
-          next: () => {
-              this.displayNuevaVenta = false;
-              this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
-              this.cargarDatos();
-          },
-          error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
-      });
+      this.guardandoVenta = true;
+      if (this.editandoVenta && this.ventaEditId) {
+          this.api.editarVenta(this.ventaEditId, v).subscribe({
+              next: () => {
+                  this.guardandoVenta = false;
+                  this.displayNuevaVenta = false;
+                  this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
+                  this.cargarDatos();
+              },
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo actualizar la venta');
+              }
+          });
+      } else {
+          this.api.crearVenta(v).subscribe({
+              next: () => {
+                  this.guardandoVenta = false;
+                  this.displayNuevaVenta = false;
+                  this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
+                  this.cargarDatos();
+              },
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo registrar la venta');
+              }
+          });
+      }
   }
 
   eliminar(id: number) {

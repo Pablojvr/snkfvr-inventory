@@ -46,6 +46,7 @@ export class Dashboard implements OnInit {
 
   // Dialog Nueva Venta
   displayNuevaVenta: boolean = false;
+  guardandoVenta: boolean = false;
   editandoVenta: boolean = false;
   ventaEditId?: number;
   nuevaVentaData: any = {};
@@ -166,20 +167,32 @@ export class Dashboard implements OnInit {
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
 
+      this.guardandoVenta = true;
       if (this.editandoVenta && this.ventaEditId) {
           this.api.editarVenta(this.ventaEditId, venta).subscribe({
               next: () => {
+                  this.guardandoVenta = false;
                   this.displayNuevaVenta = false;
                   this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
                   this.cargarDatos();
               },
-              error: (err) => this.toastManager.showError('Error', 'No se pudo actualizar la venta')
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo actualizar la venta');
+              }
           });
       } else {
-          this.api.crearVenta(venta).subscribe(() => {
-              this.displayNuevaVenta = false;
-              this.toastManager.showSuccess('Éxito', 'Venta registrada desde el Dashboard.');
-              this.cargarDatos();
+          this.api.crearVenta(venta).subscribe({
+              next: () => {
+                  this.guardandoVenta = false;
+                  this.displayNuevaVenta = false;
+                  this.toastManager.showSuccess('Éxito', 'Venta registrada desde el Dashboard.');
+                  this.cargarDatos();
+              },
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo registrar la venta');
+              }
           });
       }
   }

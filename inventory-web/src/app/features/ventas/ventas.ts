@@ -46,6 +46,7 @@ export class Ventas implements OnInit {
   displayNuevaVenta: boolean = false;
   editandoVenta: boolean = false;
   ventaEditId?: number;
+  guardandoVenta: boolean = false;
   nuevaVentaData: any = {};
   
   constructor(private api: ApiService, private toastManager: ToastManagerService, public router: Router, private route: ActivatedRoute) {}
@@ -215,23 +216,32 @@ export class Ventas implements OnInit {
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
       };
 
+      this.guardandoVenta = true;
       if (this.editandoVenta && this.ventaEditId) {
           this.api.editarVenta(this.ventaEditId, v).subscribe({
               next: () => {
+                  this.guardandoVenta = false;
                   this.displayNuevaVenta = false;
                   this.toastManager.showSuccess('Éxito', 'Venta actualizada correctamente');
                   this.cargarDatos();
               },
-              error: (err) => this.toastManager.showError('Error', 'No se pudo actualizar la venta')
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo actualizar la venta');
+              }
           });
       } else {
           this.api.crearVenta(v).subscribe({
               next: () => {
+                  this.guardandoVenta = false;
                   this.displayNuevaVenta = false;
                   this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
                   this.cargarDatos();
               },
-              error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
+              error: (err) => {
+                  this.guardandoVenta = false;
+                  this.toastManager.showError('Error', 'No se pudo registrar la venta');
+              }
           });
       }
   }

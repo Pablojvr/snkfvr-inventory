@@ -12,6 +12,7 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-gastos',
@@ -27,8 +28,8 @@ export class Gastos implements OnInit {
   textoFiltro: string = '';
   tipoFiltro: string | null = null;
   opcionesFiltro: any[] = [
-    { label: 'Todos', value: null },
-    { label: 'Solo Calzado', value: 'Calzado' }
+    { label: 'Seleccionar todo', value: null },
+    { label: 'Calzado', value: 'Calzado' }
   ];
   
   menuItems: MenuItem[] = [];
@@ -36,10 +37,25 @@ export class Gastos implements OnInit {
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
 
-  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
+  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+        this.textoFiltro = params['search'] || '';
+        this.tipoFiltro = params['tipo'] || null;
+    });
     this.cargarDatos();
+  }
+
+  onFilterChange() {
+      this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+              search: this.textoFiltro || null,
+              tipo: this.tipoFiltro || null
+          },
+          queryParamsHandling: 'merge'
+      });
   }
 
   cargarDatos() {

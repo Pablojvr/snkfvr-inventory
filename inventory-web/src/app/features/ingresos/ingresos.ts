@@ -12,6 +12,7 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { ApiService, Ingreso, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-ingresos',
@@ -32,10 +33,23 @@ export class Ingresos implements OnInit {
   textoFiltro: string = '';
   menuItems: MenuItem[] = [];
 
-  constructor(private api: ApiService, private toastManager: ToastManagerService) {}
+  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.textoFiltro = params['search'] || '';
+    });
     this.cargarDatos();
+  }
+
+  onFilterChange() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.textoFiltro || null
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   cargarDatos() {

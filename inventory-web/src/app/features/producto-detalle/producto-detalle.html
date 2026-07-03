@@ -1,35 +1,51 @@
 <div class="detail-card" *ngIf="producto">
     <div class="header-container">
-        <div>
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
                 <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" severity="secondary" (onClick)="volver()"></p-button>
-                <h2 style="margin: 0;">{{ producto.descripcion }}</h2>
+                
+                <h2 *ngIf="!editando" style="margin: 0; flex: 1;">{{ producto.descripcion }}</h2>
+                <input *ngIf="editando" pInputText [(ngModel)]="producto.descripcion" style="flex: 1; font-size: 1.5rem; font-weight: bold; padding: 0.25rem 0.5rem;" />
+                
                 <span class="status-badge" [ngClass]="getStatusClass(producto.estado)">{{ producto.estado || 'Disponible' }}</span>
+                
+                <!-- 3 dots menu -->
+                <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" severity="secondary" (onClick)="toggleMenu($event, menu)"></p-button>
+                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
             </div>
-            <div style="color: #64748b; font-size: 0.875rem; margin-left: 3rem;">
-                Adquirido el {{ producto.fechaCompra | date }}
+            
+            <div style="color: #64748b; font-size: 0.875rem; margin-left: 3.5rem; display: flex; align-items: center;">
+                Adquirido el&nbsp;
+                <span *ngIf="!editando">{{ producto.fechaCompra | date }}</span>
+                <p-datepicker *ngIf="editando" [(ngModel)]="producto.fechaCompra" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" styleClass="p-inputtext-sm"></p-datepicker>
             </div>
         </div>
         
-        <div class="header-actions">
-            <p-button label="Generar Comisión" icon="pi pi-dollar" severity="warn" (onClick)="agregarComision()" *ngIf="producto.estado !== 'Vendido'"></p-button>
+        <div class="header-actions" *ngIf="!editando">
             <p-button label="Vender" icon="pi pi-shopping-cart" severity="success" (onClick)="venderProducto()" *ngIf="producto.estado !== 'Vendido'"></p-button>
-            <p-button label="Generar Gasto" icon="pi pi-receipt" severity="secondary" (onClick)="generarGasto()" *ngIf="producto.estado !== 'Vendido'"></p-button>
+        </div>
+        <div class="header-actions" *ngIf="editando">
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancelarEdicion()"></p-button>
+            <p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="guardarEdicion()" [loading]="guardando"></p-button>
         </div>
     </div>
 
     <div class="info-grid">
         <div class="info-item">
             <span class="info-label">Costo Base</span>
-            <span class="info-value">{{ producto.costo | currency }}</span>
+            <span *ngIf="!editando" class="info-value">{{ producto.costo | currency }}</span>
+            <p-inputNumber *ngIf="editando" [(ngModel)]="producto.costo" mode="currency" currency="USD" locale="en-US" class="w-full"></p-inputNumber>
         </div>
     </div>
 
     <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
 
-    <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Línea de Tiempo del Producto</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h3 style="margin: 0;">Bitácora del Producto</h3>
+        <p-select [options]="opcionesVistaBitacora" [(ngModel)]="vistaBitacora" optionLabel="label" optionValue="value"></p-select>
+    </div>
     
-    <div style="padding-left: 1rem;">
+    <div style="padding-left: 1rem;" *ngIf="vistaBitacora === 'historial'">
         <p-timeline [value]="movimientos">
             <ng-template pTemplate="content" let-mov>
                 <small class="p-text-secondary">{{ mov.fecha | date:'medium' }}</small>
@@ -43,6 +59,32 @@
         <div *ngIf="movimientos.length === 0" style="text-align: center; color: #64748b; padding: 2rem 0; background: #f8fafc; border-radius: 8px;">
             No hay historia registrada para este producto.
         </div>
+    </div>
+
+    <div *ngIf="vistaBitacora === 'comisiones'">
+        <p-table [value]="comisiones" [scrollable]="true" scrollHeight="400px">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Motivo</th>
+                    <th>Usuario</th>
+                    <th style="text-align: right;">Monto</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-com>
+                <tr>
+                    <td>{{ com.fecha | date:'dd/MM/yy' }}</td>
+                    <td>{{ com.motivo }}</td>
+                    <td><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ com.usuarioNombre }}</td>
+                    <td style="text-align: right; color: #ef4444; font-weight: 600;">{{ com.monto | currency }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="4" class="empty-msg" style="text-align: center; color: #64748b; padding: 2rem 0;">No hay comisiones registradas para este producto.</td>
+                </tr>
+            </ng-template>
+        </p-table>
     </div>
 </div>
 

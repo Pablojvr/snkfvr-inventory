@@ -5,7 +5,7 @@
             <div class="product-search" style="width: 100%;">
                 <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
                     <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar por motivo o usuario..." style="width: 100%; padding-left: 2.5rem;" />
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar por motivo o usuario..." style="width: 100%; padding-left: 2.5rem;" />
                 </div>
             </div>
         </div>

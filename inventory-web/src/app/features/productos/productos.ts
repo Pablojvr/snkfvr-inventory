@@ -26,9 +26,7 @@ import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialo
 export class Productos implements OnInit {
   productos: Producto[] = [];
   displayDialog: boolean = false;
-  displayTimeline: boolean = false;
   producto: Producto = { descripcion: '', fechaCompra: new Date(), costo: 0 };
-  movimientosProducto: Movimiento[] = [];
   
   editando: boolean = false;
   submitted: boolean = false;
@@ -37,21 +35,31 @@ export class Productos implements OnInit {
   textoFiltro: string = '';
   menuItems: MenuItem[] = [];
 
-  vistaBitacora: string = 'historial';
-  opcionesVistaBitacora: any[] = [
-    { label: 'Historial de Cambios', value: 'historial' },
-    { label: 'Solo Comisiones', value: 'comisiones' }
-  ];
-  comisionesProducto: any[] = [];
-  productoSeleccionadoId: number | null = null;
-
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
 
-  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
+  constructor(
+    private api: ApiService, 
+    private toastManager: ToastManagerService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.textoFiltro = params['search'] || '';
+    });
     this.cargarDatos();
+  }
+
+  onFilterChange() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.textoFiltro || null
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   cargarDatos() {
@@ -70,62 +78,15 @@ export class Productos implements OnInit {
   toggleMenu(event: any, prod: Producto, menu: any) {
       event.stopPropagation();
       this.menuItems = [
-          { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', prod.id]) },
-          { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(prod) },
+          { label: 'Ver Producto (Individual)', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', prod.id]) },
+          { label: 'Editar Rápido', icon: 'pi pi-pencil', command: () => this.editar(prod) },
+          { label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(prod.id!) }
       ];
-      
-      if (prod.estado !== 'Vendido') {
-          this.menuItems.push({ label: 'Registrar Comisión', icon: 'pi pi-dollar', command: () => this.agregarComision(prod.id!) });
-          this.menuItems.push({ label: 'Registrar Venta', icon: 'pi pi-shopping-cart', command: () => this.venderProducto(prod.id!) });
-      }
-      this.menuItems.push({ label: 'Eliminar', icon: 'pi pi-trash', command: () => this.eliminar(prod.id!) });
-      
       menu.toggle(event);
   }
 
   agregarComision(productoId: number) {
       this.dialogGasto.showDialog(productoId, 'Comisión');
-  }
-
-  verTimeline(prod: Producto) {
-    if (prod.id) {
-        this.productoSeleccionadoId = prod.id;
-        this.vistaBitacora = 'historial';
-        import('rxjs').then(({ forkJoin }) => {
-            forkJoin({
-                movimientos: this.api.getMovimientosPorProducto(prod.id!),
-                usuarios: this.api.getUsuarios(),
-                gastos: this.api.getGastos()
-            }).subscribe(({ movimientos, usuarios, gastos }) => {
-                this.movimientosProducto = movimientos.map(mov => {
-                    let desc = mov.descripcion;
-                    desc = desc.replace(/usuario con ID (\d+)/g, (match, p1) => {
-                        const u = usuarios.find(x => x.id === parseInt(p1, 10));
-                        return u ? u.nombre : match;
-                    });
-                    desc = desc.replace(/producto (\d+)/g, (match, p1) => {
-                        const p = this.productos.find(x => x.id === parseInt(p1, 10));
-                        return p ? `producto ${p.descripcion}` : match;
-                    });
-                    return { ...mov, descripcion: desc };
-                });
-                
-                // Extraer comisiones
-                this.comisionesProducto = gastos
-                    .filter(g => g.productoId === prod.id && g.tipo === 'Comisión')
-                    .map(g => ({
-                        ...g,
-                        usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
-                    }));
-
-                this.displayTimeline = true;
-            });
-        });
-    }
-  }
-
-  cambiarVistaBitacora() {
-      // Logic handled via bindings, UI will just show the correct section based on this.vistaBitacora
   }
 
   showDialog() {

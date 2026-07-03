@@ -1,11 +1,11 @@
 <div class="card">
     <div class="page-header">
         <div class="header-left">
-            <h2>Inventario de Productos</h2>
+            <h2>Inventario</h2>
             <div class="product-search" style="width: 100%;">
                 <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
                     <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar producto o estado..." style="width: 100%; padding-left: 2.5rem;" />
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar producto o estado..." style="width: 100%; padding-left: 2.5rem;" />
                 </div>
             </div>
         </div>
@@ -15,7 +15,7 @@
     </div>
 
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
-        <div class="entity-card" *ngFor="let prod of productosFiltrados" (click)="verTimeline(prod)">
+        <div class="entity-card" *ngFor="let prod of productosFiltrados" (click)="toggleMenu($event, prod, menu)">
             <div class="entity-card-header">
                 <h4 class="entity-card-title">{{ prod.descripcion }}</h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
@@ -72,56 +72,6 @@
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayDialog = false"></p-button>
         <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
     </ng-template>
-</p-dialog>
-
-<!-- Timeline Dialog -->
-<p-dialog [(visible)]="displayTimeline" [modal]="true" [style]="{width: 'min(650px, 95vw)'}" header="Bitácora del Producto" [draggable]="false" [resizable]="false">
-    
-    <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-        <p-select [options]="opcionesVistaBitacora" [(ngModel)]="vistaBitacora" optionLabel="label" optionValue="value" (onChange)="cambiarVistaBitacora()"></p-select>
-    </div>
-
-    <!-- Vista Historial Completo (Timeline) -->
-    <div *ngIf="vistaBitacora === 'historial'">
-        <p-timeline [value]="movimientosProducto">
-            <ng-template pTemplate="content" let-mov>
-                <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
-                <div style="font-weight: bold;">{{ mov.tipo }}</div>
-                <div [innerHTML]="mov.descripcion"></div>
-                <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
-                    {{ mov.montoTotal | currency }}
-                </div>
-            </ng-template>
-        </p-timeline>
-        <div *ngIf="movimientosProducto.length === 0" class="empty-msg">No hay movimientos para este producto.</div>
-    </div>
-
-    <!-- Vista Comisiones (Tabla pequeña) -->
-    <div *ngIf="vistaBitacora === 'comisiones'">
-        <p-table [value]="comisionesProducto" [scrollable]="true" scrollHeight="300px">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>Fecha</th>
-                    <th>Motivo</th>
-                    <th>Usuario</th>
-                    <th style="text-align: right;">Monto</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-com>
-                <tr>
-                    <td>{{ com.fecha | date:'dd/MM/yy' }}</td>
-                    <td>{{ com.motivo }}</td>
-                    <td><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ com.usuarioNombre }}</td>
-                    <td style="text-align: right; color: #ef4444; font-weight: 600;">{{ com.monto | currency }}</td>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="4" class="empty-msg">No hay comisiones registradas para este producto.</td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>
 </p-dialog>
 
 <!-- Gasto Modal -->

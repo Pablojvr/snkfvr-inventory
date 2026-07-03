@@ -639,6 +639,14 @@ body {
     width: 95vw !important;
     max-width: 95vw !important;
   }
+  
+  /* Inputs and Selects full width on mobile */
+  .p-select, .p-select .p-dropdown {
+    width: 100% !important;
+  }
+  .p-inputtext {
+    width: 100% !important;
+  }
 
   /* Tables: search input full width */
   .table-caption {

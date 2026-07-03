@@ -10,11 +10,14 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule],
+  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule],
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit {
@@ -23,16 +26,42 @@ export class Ventas implements OnInit {
   usuarios: Usuario[] = [];
 
   textoFiltro: string = '';
+  estadoFiltro: string = 'Todos'; // 'Todos', 'Reservado', 'Vendido'
   menuItems: MenuItem[] = [];
 
   // Detail modal
   displayDetalleVenta: boolean = false;
   ventaSeleccionada: any = null;
 
-  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router) {}
+  // New Sale modal
+  displayNuevaVenta: boolean = false;
+  nuevaVentaData: any = {};
+  productosDisponibles: Producto[] = [];
+
+  constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+        this.textoFiltro = params['search'] || '';
+        this.estadoFiltro = params['estado'] || 'Todos';
+    });
     this.cargarDatos();
+  }
+
+  onFilterChange() {
+      this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+              search: this.textoFiltro || null,
+              estado: this.estadoFiltro !== 'Todos' ? this.estadoFiltro : null
+          },
+          queryParamsHandling: 'merge'
+      });
+  }
+
+  setEstadoFiltro(estado: string) {
+      this.estadoFiltro = estado;
+      this.onFilterChange();
   }
 
   cargarDatos() {
@@ -44,6 +73,7 @@ export class Ventas implements OnInit {
       }).subscribe(({ ventas, productos, usuarios }) => {
         this.productos = productos;
         this.usuarios = usuarios;
+        this.productosDisponibles = this.productos.filter(p => p.estado !== 'Vendido');
         this.ventas = ventas.map(v => ({
           ...v,
           productoDescripcion: productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
@@ -54,17 +84,55 @@ export class Ventas implements OnInit {
   }
 
   showDialog() {
-    this.router.navigate(['/venta-masiva']);
+    this.nuevaVentaData = {
+        productoSeleccionado: null,
+        precioVenta: 0,
+        costoEnvio: 0,
+        costosAdicionales: 0,
+        estado: 'Vendido'
+    };
+    this.displayNuevaVenta = true;
+  }
+
+  guardarNuevaVenta() {
+      if (!this.nuevaVentaData.productoSeleccionado) return;
+
+      const v: Venta = {
+          productoId: this.nuevaVentaData.productoSeleccionado.id!,
+          costoEnvio: this.nuevaVentaData.costoEnvio || 0,
+          costosAdicionales: this.nuevaVentaData.costosAdicionales || 0,
+          precioVenta: this.nuevaVentaData.precioVenta || 0,
+          usuarioId: Number(localStorage.getItem('userId')) || 1, // Fallback
+          estado: this.nuevaVentaData.estado,
+          fechaVenta: new Date()
+      };
+
+      this.api.crearVenta(v).subscribe({
+          next: () => {
+              this.displayNuevaVenta = false;
+              this.toastManager.showSuccess('Éxito', 'Venta registrada correctamente');
+              this.cargarDatos();
+          },
+          error: (err) => this.toastManager.showError('Error', 'No se pudo registrar la venta')
+      });
   }
 
   get ventasFiltradas() {
-    if (!this.textoFiltro) return this.ventas;
-    const text = this.textoFiltro.toLowerCase();
-    return this.ventas.filter(v => 
-      (v.productoDescripcion && v.productoDescripcion.toLowerCase().includes(text)) ||
-      (v.usuarioNombre && v.usuarioNombre.toLowerCase().includes(text)) ||
-      (v.estado && v.estado.toLowerCase().includes(text))
-    );
+    let filtradas = this.ventas;
+    
+    if (this.estadoFiltro !== 'Todos') {
+        filtradas = filtradas.filter(v => v.estado === this.estadoFiltro);
+    }
+    
+    if (this.textoFiltro) {
+        const text = this.textoFiltro.toLowerCase();
+        filtradas = filtradas.filter(v => 
+          (v.productoDescripcion && v.productoDescripcion.toLowerCase().includes(text)) ||
+          (v.usuarioNombre && v.usuarioNombre.toLowerCase().includes(text)) ||
+          (v.estado && v.estado.toLowerCase().includes(text))
+        );
+    }
+    return filtradas;
   }
 
   abrirDetalle(venta: any) {

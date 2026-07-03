@@ -3,14 +3,14 @@
         <div class="header-left">
             <h2>Gastos y Compras</h2>
             <div class="product-search" style="width: 100%;">
-                <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full"></p-select>
+                <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" (onChange)="onFilterChange()" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full"></p-select>
                 <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
                     <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" placeholder="Buscar por motivo..." style="width: 100%; padding-left: 2.5rem;" />
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar descripción..." style="width: 100%; padding-left: 2.5rem;" />
                 </div>
             </div>
         </div>
-        <p-button label="Registrar Gasto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
+        <p-button label="Registrar Compra / Gasto" icon="pi pi-plus" (onClick)="showDialog()" styleClass="w-full"></p-button>
     </div>
 
     <div class="entity-cards-grid" *ngIf="gastosFiltrados.length > 0">

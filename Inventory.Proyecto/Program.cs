@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios al contenedor.
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

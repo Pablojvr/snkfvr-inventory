@@ -191,8 +191,8 @@ export class ApiService {
 
   // --- Integración AI ---
   scanLabel(imageBase64: string): Observable<{ modelo: string, talla: string, cm: string }> {
-    // Apuntamos directamente al servicio en Vercel
-    const aiUrl = 'https://label-scanner-app-pied.vercel.app/api/scan';
+    // Apuntamos al backend .NET (proxy) para evitar CORS con Vercel
+    const aiUrl = `${this.apiUrl}/Ai/scan`;
     return this.http.post<{ modelo: string, talla: string, cm: string }>(aiUrl, { imageBase64 });
   }
 }

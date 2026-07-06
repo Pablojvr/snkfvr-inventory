@@ -54,6 +54,10 @@ export class DialogGastoComponent {
             fecha: gastoExistente.fecha ? new Date(gastoExistente.fecha) : new Date(),
             fechaIngreso: gastoExistente.fechaIngreso ? new Date(gastoExistente.fechaIngreso) : undefined
         };
+        // Ocultar visualmente los prefijos añadidos por el backend
+        if (this.gasto.motivo) {
+            this.gasto.motivo = this.gasto.motivo.replace(/^COM\s*\|\s*/, '').replace(/^ENV\s*\|\s*/, '');
+        }
         this.editando = true;
         this.prefilledProducto = !!gastoExistente.productoId;
     } else {
@@ -125,7 +129,7 @@ export class DialogGastoComponent {
   onTipoChange() {
       this.resolveTipoNombre();
       
-      if (this.tipoNombreActual === 'Producto' && !this.gasto.motivo.startsWith('COM |') && !this.gasto.motivo.startsWith('ENV |')) {
+      if (this.tipoNombreActual === 'Producto') {
           const aleUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('ale'));
           if (aleUser && !this.gasto.comisionUsuarioId) {
               this.gasto.comisionUsuarioId = aleUser.id;
@@ -147,8 +151,7 @@ export class DialogGastoComponent {
               nombreProducto = prod.descripcion;
           }
       }
-      const prefix = this.tipoNombreActual === 'Comisión' ? 'COM' : 'ENV';
-      this.gasto.motivo = nombreProducto ? `${prefix} | ${nombreProducto}` : `${prefix} | `;
+      this.gasto.motivo = nombreProducto;
   }
 
   guardar() {

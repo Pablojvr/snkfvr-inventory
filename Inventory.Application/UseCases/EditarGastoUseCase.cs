@@ -47,6 +47,15 @@ namespace Inventory.Application.UseCases
                 throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión, Envío o Producto.");
             }
 
+            if (nuevoTipoNombre == "Comisión" && !gastoDto.Motivo.StartsWith("COM |"))
+            {
+                gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "COM | " : $"COM | {gastoDto.Motivo}";
+            }
+            else if (nuevoTipoNombre == "Envío" && !gastoDto.Motivo.StartsWith("ENV |"))
+            {
+                gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "ENV | " : $"ENV | {gastoDto.Motivo}";
+            }
+
             // Si se editó el motivo de un Producto que generó producto, actualizamos el producto
             var tipoAnterior = await _tipoGastoRepositorio.ObtenerPorIdAsync(gasto.TipoGastoId);
             var tipoAnteriorNombre = tipoAnterior?.Nombre ?? "";

@@ -47,6 +47,15 @@ namespace Inventory.Application.UseCases
                 throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión, Envío o Producto.");
             }
 
+            if (tipoNombre == "Comisión" && !gastoDto.Motivo.StartsWith("COM |"))
+            {
+                gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "COM | " : $"COM | {gastoDto.Motivo}";
+            }
+            else if (tipoNombre == "Envío" && !gastoDto.Motivo.StartsWith("ENV |"))
+            {
+                gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "ENV | " : $"ENV | {gastoDto.Motivo}";
+            }
+
             // Creacion automatica de producto si es Producto (antes Calzado)
             if (tipoNombre == "Producto" && !productoId.HasValue)
             {

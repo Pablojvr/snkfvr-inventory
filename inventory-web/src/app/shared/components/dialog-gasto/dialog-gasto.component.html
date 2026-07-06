@@ -30,6 +30,7 @@
             <label for="motivo" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-align-left" style="margin-right: 0.25rem;"></i> Motivo / Descripción</label>
             <div style="display: flex; gap: 0.5rem; align-items: stretch;">
                 <input pInputText id="motivo" [(ngModel)]="gasto.motivo" required autofocus 
+                       [disabled]="escaneando"
                        [readonly]="tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío'"
                        [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" style="flex: 1;" />
                 
@@ -88,6 +89,6 @@
     
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayDialog = false"></p-button>
-        <p-button label="Guardar" icon="pi pi-check" severity="success" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" severity="success" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando || escaneando"></p-button>
     </ng-template>
 </p-dialog>

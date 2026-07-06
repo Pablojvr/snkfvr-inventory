@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { TimelineModule } from 'primeng/timeline';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
 import { ApiService, Movimiento } from '../../core/services/api';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 @Component({
   selector: 'app-movimientos',
   standalone: true,
-  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule],
+  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule],
   templateUrl: './movimientos.html',
   styles: [`
     :host ::ng-deep .p-timeline-event-content {
@@ -20,6 +23,9 @@ export class Movimientos implements OnInit {
   movimientos: Movimiento[] = [];
   textoFiltro: string = '';
   filtroTipoActivo: string = 'Todos';
+  
+  displayDetalle: boolean = false;
+  movimientoSeleccionado: Movimiento | null = null;
   
   categorias = [
     { label: 'Todos', value: 'Todos' },
@@ -85,6 +91,21 @@ export class Movimientos implements OnInit {
 
   setFiltro(tipo: string) {
     this.filtroTipoActivo = tipo;
+  }
+
+  getTiempoRelativo(fecha: Date | string): string {
+    if (!fecha) return '';
+    const dateObj = new Date(fecha);
+    try {
+      return formatDistanceToNow(dateObj, { addSuffix: true, locale: es });
+    } catch(e) {
+      return '';
+    }
+  }
+
+  abrirDetalle(mov: Movimiento) {
+    this.movimientoSeleccionado = mov;
+    this.displayDetalle = true;
   }
 
   getIconoPorMov(mov: Movimiento): string {

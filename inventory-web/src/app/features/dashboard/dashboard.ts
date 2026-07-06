@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { ButtonModule } from 'primeng/button';
 import { TimelineModule } from 'primeng/timeline';
@@ -56,6 +58,16 @@ export class Dashboard implements OnInit {
     this.cargarDatos();
   }
   
+  getTiempoRelativo(fecha: Date | string): string {
+    if (!fecha) return '';
+    const dateObj = new Date(fecha);
+    try {
+      return formatDistanceToNow(dateObj, { addSuffix: true, locale: es });
+    } catch(e) {
+      return '';
+    }
+  }
+
   cargarDatos() {
     import('rxjs').then(({ forkJoin }) => {
         forkJoin({
@@ -75,11 +87,19 @@ export class Dashboard implements OnInit {
           
           this.ventasReservadas = ventas
             .filter(v => v.estado === 'Reservado')
-            .map(v => ({
-              ...v,
-              productoDescripcion: this.productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
-              usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido'
-            }));
+            .map(v => {
+              const movAdelanto = movimientos.find(m => m.referenciaId === v.id && m.descripcion.startsWith('Adelanto por reserva'));
+              const adelantoMonto = movAdelanto ? movAdelanto.montoTotal : 0;
+              const saldoPendiente = v.precioVenta - adelantoMonto;
+
+              return {
+                ...v,
+                productoDescripcion: this.productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
+                usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido',
+                adelantoMonto: adelantoMonto,
+                saldoPendiente: saldoPendiente > 0 ? saldoPendiente : 0
+              };
+            });
             
           // Calcular estadísticas reales
           this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);

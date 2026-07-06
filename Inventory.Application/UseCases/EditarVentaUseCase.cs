@@ -130,15 +130,38 @@ namespace Inventory.Application.UseCases
             }
 
             var movimientos = await _movimientoRepositorio.ObtenerTodosAsync();
-            var mov = movimientos.FirstOrDefault(m => m.ReferenciaId == id && m.Tipo == "Venta");
-
-            if (mov != null)
+            var movVenta = movimientos.FirstOrDefault(m => m.ReferenciaId == id && m.Tipo == "Venta");
+            
+            // Si antes era Reservado, es probable que no tenga movVenta, o si lo tiene hay que actualizarlo
+            if (venta.Estado == "Vendido")
             {
-                mov.MontoTotal = ventaDto.PrecioVenta; // La venta completa
-                mov.Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}";
-                mov.ProductoId = ventaDto.ProductoId;
-                if (venta.FechaVenta.HasValue) mov.Fecha = venta.FechaVenta.Value;
-                await _movimientoRepositorio.ActualizarAsync(mov);
+                var movAdelanto = movimientos.FirstOrDefault(m => m.ReferenciaId == id && m.Descripcion.StartsWith("Adelanto por reserva"));
+                var adelanto = movAdelanto != null ? movAdelanto.MontoTotal : 0;
+                
+                var montoVenta = ventaDto.PrecioVenta - adelanto;
+
+                if (movVenta != null)
+                {
+                    movVenta.MontoTotal = montoVenta;
+                    movVenta.Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}";
+                    movVenta.ProductoId = ventaDto.ProductoId;
+                    if (venta.FechaVenta.HasValue) movVenta.Fecha = venta.FechaVenta.Value;
+                    await _movimientoRepositorio.ActualizarAsync(movVenta);
+                }
+                else
+                {
+                    // No había movimiento de venta porque era reserva, lo creamos ahora
+                    movVenta = new Movimiento
+                    {
+                        Tipo = "Venta",
+                        Fecha = venta.FechaVenta ?? DateTime.Now,
+                        Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
+                        MontoTotal = montoVenta,
+                        ReferenciaId = venta.Id,
+                        ProductoId = ventaDto.ProductoId
+                    };
+                    await _movimientoRepositorio.AgregarAsync(movVenta);
+                }
             }
 
             return venta;

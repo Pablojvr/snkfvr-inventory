@@ -6,13 +6,14 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { ApiService, Producto, Usuario } from '../../../core/services/api';
 import { ToastManagerService } from '../../../core/services/toast-manager.service';
 
 @Component({
   selector: 'app-dialog-venta',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, SelectModule, InputNumberModule, InputTextModule, ButtonModule],
+  imports: [CommonModule, FormsModule, DialogModule, SelectModule, InputNumberModule, InputTextModule, ButtonModule, CheckboxModule],
   templateUrl: './dialog-venta.component.html',
 })
 export class DialogVentaComponent implements OnInit {
@@ -21,6 +22,7 @@ export class DialogVentaComponent implements OnInit {
   display: boolean = false;
   guardando: boolean = false;
   editando: boolean = false;
+  tieneAdelanto: boolean = false;
   ventaEditId?: number;
 
   nuevaVentaData: any = {
@@ -33,7 +35,8 @@ export class DialogVentaComponent implements OnInit {
     nombreComprador: '',
     lugarDestino: '',
     comisionMonto: null,
-    comisionUsuarioId: null
+    comisionUsuarioId: null,
+    adelantoMonto: null
   };
 
   productosDisponibles: Producto[] = [];
@@ -72,9 +75,11 @@ export class DialogVentaComponent implements OnInit {
     const fabriUser = this.usuarios.find(u => u.nombre.toLowerCase().includes('fabri'));
     this.cargarDatosAdicionales(); // Refresh available products just in case
 
+    this.editando = !!venta;
+    this.tieneAdelanto = false;
+
     if (venta && producto) {
       // Editar venta
-      this.editando = true;
       this.ventaEditId = venta.id;
       this.nuevaVentaData = {
           productoPreseleccionado: true,
@@ -86,15 +91,18 @@ export class DialogVentaComponent implements OnInit {
           nombreComprador: venta.nombreComprador,
           lugarDestino: venta.lugarDestino,
           comisionMonto: venta.comisionMonto,
-          comisionUsuarioId: venta.comisionUsuarioId
+          comisionUsuarioId: venta.comisionUsuarioId,
+          adelantoMonto: venta.adelantoMonto
       };
+      if (venta.adelantoMonto) {
+        this.tieneAdelanto = true;
+      }
       if (overrideState) {
           this.onNuevaVentaChange();
       }
     } else if (producto) {
       // Registrar venta para un producto preseleccionado
       const suggestedPrice = (producto.costoCalculado || producto.costo || 0) + 15;
-      this.editando = false;
       this.ventaEditId = undefined;
       this.nuevaVentaData = {
           productoPreseleccionado: true,
@@ -106,11 +114,11 @@ export class DialogVentaComponent implements OnInit {
           nombreComprador: '',
           lugarDestino: '',
           comisionMonto: null,
-          comisionUsuarioId: fabriUser ? fabriUser.id : null
+          comisionUsuarioId: fabriUser ? fabriUser.id : null,
+          adelantoMonto: null
       };
     } else {
       // Registrar venta desde cero (Buscando producto)
-      this.editando = false;
       this.ventaEditId = undefined;
       this.nuevaVentaData = {
           productoPreseleccionado: false,
@@ -122,7 +130,8 @@ export class DialogVentaComponent implements OnInit {
           nombreComprador: '',
           lugarDestino: '',
           comisionMonto: null,
-          comisionUsuarioId: fabriUser ? fabriUser.id : null
+          comisionUsuarioId: fabriUser ? fabriUser.id : null,
+          adelantoMonto: null
       };
     }
 
@@ -130,6 +139,11 @@ export class DialogVentaComponent implements OnInit {
   }
 
   onNuevaVentaChange() {
+      if (this.nuevaVentaData.estado === 'Vendido') {
+        this.tieneAdelanto = false;
+        this.nuevaVentaData.adelantoMonto = null;
+      }
+
       if (this.nuevaVentaData.estado === 'Vendido' && this.nuevaVentaData.productoSeleccionado && this.nuevaVentaData.precioVenta) {
           const costoCalc = this.nuevaVentaData.productoSeleccionado.costoCalculado || this.nuevaVentaData.productoSeleccionado.costo || 0;
           const envio = this.nuevaVentaData.costoEnvio || 0;
@@ -144,6 +158,12 @@ export class DialogVentaComponent implements OnInit {
       } else {
           this.nuevaVentaData.comisionMonto = null;
       }
+  }
+
+  onAdelantoChange() {
+    if (!this.tieneAdelanto) {
+      this.nuevaVentaData.adelantoMonto = null;
+    }
   }
 
   onProductoSeleccionadoModal() {
@@ -175,7 +195,8 @@ export class DialogVentaComponent implements OnInit {
           lugarDestino: this.nuevaVentaData.lugarDestino,
           fechaVenta: this.nuevaVentaData.estado === 'Vendido' ? new Date() : undefined,
           comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
-          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId
+          comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId,
+          adelantoMonto: this.tieneAdelanto ? this.nuevaVentaData.adelantoMonto : null
       };
 
       this.guardando = true;

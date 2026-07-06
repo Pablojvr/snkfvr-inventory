@@ -69,15 +69,33 @@ namespace Inventory.Application.UseCases
                 await _productoRepositorio.ActualizarAsync(producto);
             }
 
-            var movimiento = new Movimiento
+            if (estadoDeseado == "Vendido")
             {
-                Tipo = "Venta",
-                Fecha = ventaDto.FechaVenta ?? DateTime.Now,
-                Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
-                MontoTotal = ventaDto.PrecioVenta, // La venta completa
-                ReferenciaId = ventaAgregada.Id,
-                ProductoId = ventaDto.ProductoId
-            };
+                var movimiento = new Movimiento
+                {
+                    Tipo = "Venta",
+                    Fecha = ventaDto.FechaVenta ?? DateTime.Now,
+                    Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
+                    MontoTotal = ventaDto.PrecioVenta, // La venta completa
+                    ReferenciaId = ventaAgregada.Id,
+                    ProductoId = ventaDto.ProductoId
+                };
+                await _movimientoRepositorio.AgregarAsync(movimiento);
+            }
+            else if (estadoDeseado == "Reservado" && ventaDto.AdelantoMonto.HasValue && ventaDto.AdelantoMonto.Value > 0)
+            {
+                // Registrar solo el adelanto en reservas
+                var movimientoAdelanto = new Movimiento
+                {
+                    Tipo = "Ingreso", // Lo clasificamos como Ingreso / Adelanto
+                    Fecha = ventaDto.FechaVenta ?? DateTime.Now,
+                    Descripcion = $"Adelanto por reserva del producto {ventaDto.ProductoId}",
+                    MontoTotal = ventaDto.AdelantoMonto.Value,
+                    ReferenciaId = ventaAgregada.Id,
+                    ProductoId = ventaDto.ProductoId
+                };
+                await _movimientoRepositorio.AgregarAsync(movimientoAdelanto);
+            }
 
             var movimientoEstado = new Movimiento
             {
@@ -89,7 +107,6 @@ namespace Inventory.Application.UseCases
                 ProductoId = ventaDto.ProductoId
             };
 
-            await _movimientoRepositorio.AgregarAsync(movimiento);
             await _movimientoRepositorio.AgregarAsync(movimientoEstado);
 
             // Resolve TipoGasto IDs for Envío and Comisión

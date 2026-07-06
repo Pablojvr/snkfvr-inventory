@@ -27,7 +27,7 @@
             No se encontraron movimientos.
         </div>
 
-        <div *ngFor="let mov of movimientosFiltrados" class="transaction-item" style="display: flex; align-items: center; padding: 1rem; background: #ffffff; border-radius: 20px; margin-bottom: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.25s ease-in-out;">
+        <div *ngFor="let mov of movimientosFiltrados" class="transaction-item" (click)="abrirDetalle(mov)" style="display: flex; align-items: center; padding: 1rem; background: #ffffff; border-radius: 20px; margin-bottom: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.25s ease-in-out; cursor: pointer;">
             <!-- Icon -->
             <div class="transaction-icon" [style.background]="getColorPorMov(mov).bg" [style.color]="getColorPorMov(mov).text" style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                 <i class="pi {{ getIconoPorMov(mov) }}" style="font-size: 1.25rem;"></i>
@@ -37,7 +37,7 @@
             <div class="transaction-details" style="flex: 1; overflow: hidden; margin-right: 1rem;">
                 <div [innerHTML]="mov.descripcion" style="font-weight: 600; font-size: 0.95rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
                 <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.2rem;">
-                    {{ mov.descripcion.includes('ENV |') ? 'Envío' : (mov.tipo === 'Salida de dinero' ? 'Gasto' : mov.tipo) }} • {{ mov.fecha | date:'MMM d, y, h:mm a' }}
+                    {{ mov.descripcion.includes('ENV |') ? 'Envío' : (mov.tipo === 'Salida de dinero' ? 'Gasto' : mov.tipo) }} • {{ getTiempoRelativo(mov.fecha) }}
                 </div>
             </div>
 
@@ -48,3 +48,39 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Detalle de Movimiento -->
+<p-dialog [(visible)]="displayDetalle" [modal]="true" [style]="{width: 'min(400px, 95vw)'}" [draggable]="false" [resizable]="false" [showHeader]="false">
+    <div *ngIf="movimientoSeleccionado" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        
+        <div class="transaction-icon-large" [style.background]="getColorPorMov(movimientoSeleccionado).bg" [style.color]="getColorPorMov(movimientoSeleccionado).text" style="width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <i class="pi {{ getIconoPorMov(movimientoSeleccionado) }}" style="font-size: 2rem;"></i>
+        </div>
+        
+        <h3 style="margin: 0 0 0.5rem 0; font-weight: 800; font-size: 1.2rem; color: #1e293b;">
+            {{ movimientoSeleccionado.descripcion.includes('ENV |') ? 'Envío' : (movimientoSeleccionado.tipo === 'Salida de dinero' ? 'Gasto' : movimientoSeleccionado.tipo) }}
+        </h3>
+        
+        <div style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1;" [style.color]="movimientoSeleccionado.montoTotal > 0 ? '#10b981' : '#1e293b'">
+            {{ movimientoSeleccionado.montoTotal > 0 ? '+' : '' }}{{ movimientoSeleccionado.montoTotal | currency }}
+        </div>
+        
+        <div style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;">
+            {{ movimientoSeleccionado.fecha | date:'fullDate' }} a las {{ movimientoSeleccionado.fecha | date:'shortTime' }}
+        </div>
+
+        <div style="width: 100%; background: #f8fafc; border-radius: 12px; padding: 1rem; text-align: left;">
+            <div style="color: #475569; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">Concepto</div>
+            <div [innerHTML]="movimientoSeleccionado.descripcion" style="color: #1e293b; font-size: 0.95rem; font-weight: 600; line-height: 1.4;"></div>
+            
+            <div *ngIf="$any(movimientoSeleccionado).productoId" style="margin-top: 1rem;">
+                <div style="color: #475569; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem; letter-spacing: 0.5px;">ID Referencia</div>
+                <div style="color: #1e293b; font-size: 0.95rem; font-weight: 600;">Producto #{{ $any(movimientoSeleccionado).productoId }}</div>
+            </div>
+        </div>
+
+        <button (click)="displayDetalle = false" style="margin-top: 2rem; width: 100%; padding: 1rem; border-radius: 20px; background: #f1f5f9; color: #1e293b; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s;">
+            Cerrar
+        </button>
+    </div>
+</p-dialog>

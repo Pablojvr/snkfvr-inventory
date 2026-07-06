@@ -16,5 +16,6 @@ namespace Inventory.Application.DTOs
         public string Estado { get; set; } = "Reservado";
         public decimal? ComisionMonto { get; set; }
         public int? ComisionUsuarioId { get; set; }
+        public decimal? AdelantoMonto { get; set; }
     }
 }

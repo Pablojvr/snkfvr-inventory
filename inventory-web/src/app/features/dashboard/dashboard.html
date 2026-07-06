@@ -65,12 +65,18 @@
             </div>
             <div class="entity-card-body">
                 <div class="entity-card-meta">
-                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.usuarioNombre }}</span>
-                    <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.fechaRegistro | date:'dd/MM/yy' }}</span>
+                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
+                    <span><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
                     <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
-                    <span class="badge-warn">{{ venta.estado }}</span>
+                    <span class="entity-card-badge" [class.badge-primary]="true" style="font-size: 0.75rem;">Pendiente</span>
+                    
+                    <!-- Adelanto/Restante UI -->
+                    <div *ngIf="venta.adelantoMonto > 0" style="margin-top: 0.25rem; font-size: 0.75rem; text-align: right; background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                        Adelanto: {{ venta.adelantoMonto | currency }} <br>
+                        Resta: {{ venta.saldoPendiente | currency }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,7 +95,7 @@
         </h3>
         <p-timeline [value]="movimientos">
             <ng-template pTemplate="content" let-mov>
-                <small class="p-text-secondary">{{ mov.fecha | date:'short' }}</small>
+                <small class="p-text-secondary">{{ getTiempoRelativo(mov.fecha) }}</small>
                 <div style="font-weight: bold;">{{ mov.tipo }}</div>
                 <div [innerHTML]="mov.descripcion"></div>
                 <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">

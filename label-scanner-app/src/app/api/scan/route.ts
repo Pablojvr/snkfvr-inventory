@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400 });
     }
 
-    // El modelo gemini-2.5-flash es excelente para tareas multimodales (visión + texto) rápidas
+    // Cambiamos a gemini-1.5-flash ya que su capa gratuita (Free Tier) tiene límites mucho más altos (1500 por día / 15 por minuto)
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       tools: [{ googleSearch: {} } as any]
     });
 

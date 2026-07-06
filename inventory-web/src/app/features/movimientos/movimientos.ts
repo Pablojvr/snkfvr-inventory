@@ -95,12 +95,31 @@ export class Movimientos implements OnInit {
 
   getTiempoRelativo(fecha: Date | string): string {
     if (!fecha) return '';
-    const dateObj = new Date(fecha);
-    try {
-      return formatDistanceToNow(dateObj, { addSuffix: true, locale: es });
-    } catch(e) {
-      return '';
+    let dateObj = new Date(fecha);
+    let diff = new Date().getTime() - dateObj.getTime();
+    
+    if (diff < -60000 && typeof fecha === 'string' && !fecha.endsWith('Z')) {
+        const utcDate = new Date(fecha + 'Z');
+        const utcDiff = new Date().getTime() - utcDate.getTime();
+        if (utcDiff >= 0 || utcDiff > diff) {
+            diff = utcDiff;
+        }
     }
+    
+    if (diff < 0) diff = 0;
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (seconds < 60) return 'Hace un momento';
+    if (minutes === 1) return 'Hace un minuto';
+    if (minutes < 60) return `Hace ${minutes} minutos`;
+    if (hours === 1) return 'Hace una hora';
+    if (hours < 24) return `Hace ${hours} horas`;
+    if (days === 1) return 'Hace un día';
+    return `Hace ${days} días`;
   }
 
   abrirDetalle(mov: Movimiento) {

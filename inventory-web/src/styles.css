@@ -401,13 +401,17 @@ body {
 .stat-purple { border-bottom: 4px solid #64748b; }
 
 .dashboard-bottom {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .chart-card, .timeline-card {
   margin-bottom: 0;
+  min-width: 0;
+  width: 100%;
 }
 
 .section-title-warn {
@@ -640,7 +644,8 @@ body {
   }
 
   .dashboard-bottom {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Toast - above bottom bar */

@@ -66,7 +66,7 @@
         </div>
         
         <div style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;">
-            {{ movimientoSeleccionado.fecha | date:'fullDate' }} a las {{ movimientoSeleccionado.fecha | date:'shortTime' }}
+            {{ formatearFecha(movimientoSeleccionado.fecha) }}
         </div>
 
         <div style="width: 100%; background: #f8fafc; border-radius: 12px; padding: 1rem; text-align: left;">

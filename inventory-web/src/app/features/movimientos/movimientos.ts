@@ -13,6 +13,7 @@ import { es } from 'date-fns/locale';
   standalone: true,
   imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule],
   templateUrl: './movimientos.html',
+  styleUrls: ['./movimientos.css'],
   styles: [`
     :host ::ng-deep .p-timeline-event-content {
       padding-bottom: 2rem;
@@ -120,6 +121,17 @@ export class Movimientos implements OnInit {
     if (hours < 24) return `Hace ${hours} horas`;
     if (days === 1) return 'Hace un día';
     return `Hace ${days} días`;
+  }
+
+  formatearFecha(fecha: Date | string): string {
+    if (!fecha) return '';
+    const dateObj = new Date(fecha);
+    const opcionesFecha: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const strFecha = dateObj.toLocaleDateString('es-ES', opcionesFecha);
+    const strHora = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    // Capitalizar primera letra
+    const strFechaCap = strFecha.charAt(0).toUpperCase() + strFecha.slice(1);
+    return `${strFechaCap} a las ${strHora}`;
   }
 
   abrirDetalle(mov: Movimiento) {

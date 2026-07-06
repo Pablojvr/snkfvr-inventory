@@ -13,11 +13,12 @@ import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent],
+  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent, PaginatorModule],
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit {
@@ -41,6 +42,15 @@ export class Ventas implements OnInit {
   ];
 
   menuItems: MenuItem[] = [];
+
+  // Paginación
+  first: number = 0;
+  rows: number = 12;
+
+  onPageChange(event: any) {
+      this.first = event.first;
+      this.rows = event.rows;
+  }
 
   // Dialog Venta
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;

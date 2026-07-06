@@ -12,6 +12,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TimelineModule } from 'primeng/timeline';
 import { TooltipModule } from 'primeng/tooltip';
 import { MenuModule } from 'primeng/menu';
+import { PaginatorModule } from 'primeng/paginator';
 import { MenuItem } from 'primeng/api';
 import { ApiService, Producto, Movimiento, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
@@ -22,7 +23,7 @@ import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialo
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, TableModule, SelectModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent, DialogVentaComponent],
+  imports: [CommonModule, ButtonModule, DialogModule, TableModule, SelectModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent, DialogVentaComponent, PaginatorModule],
   templateUrl: './productos.html',
 })
 export class Productos implements OnInit {
@@ -38,6 +39,15 @@ export class Productos implements OnInit {
   textoFiltro: string = '';
   estadoFiltro: string = 'Todos';
   menuItems: MenuItem[] = [];
+
+  // Paginación
+  first: number = 0;
+  rows: number = 12;
+
+  onPageChange(event: any) {
+      this.first = event.first;
+      this.rows = event.rows;
+  }
 
   // Venta Modal
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;

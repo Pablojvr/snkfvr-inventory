@@ -22,7 +22,7 @@
     </div>
 
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
-        <div class="entity-card" *ngFor="let prod of productosFiltrados" (click)="toggleMenu($event, prod, menu)">
+        <div class="entity-card" *ngFor="let prod of (productosFiltrados | slice:first:first+rows)" (click)="toggleMenu($event, prod, menu)">
             <div class="entity-card-header">
                 <h4 class="entity-card-title">{{ prod.descripcion }}</h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
@@ -53,6 +53,14 @@
         </div>
     </div>
     
+    <p-paginator *ngIf="productosFiltrados.length > 0" 
+                 [first]="first" 
+                 [rows]="rows" 
+                 [totalRecords]="productosFiltrados.length" 
+                 (onPageChange)="onPageChange($event)"
+                 styleClass="mt-3">
+    </p-paginator>
+
     <div *ngIf="productosFiltrados.length === 0" class="empty-msg">
         No hay productos registrados.
     </div>

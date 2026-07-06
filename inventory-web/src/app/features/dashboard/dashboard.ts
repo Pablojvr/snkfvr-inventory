@@ -38,6 +38,7 @@ export class Dashboard implements OnInit {
   // Estadísticas Reales
   inventarioTotal: number = 0;
   ventasTotales: number = 0;
+  articulosDisponibles: number = 0;
 
   // Detail modal
   displayDetalleVenta: boolean = false;
@@ -125,6 +126,7 @@ export class Dashboard implements OnInit {
           // Calcular estadísticas reales
           this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
           this.ventasTotales = ventas.filter(v => v.estado === 'Vendido').reduce((acc, v) => acc + (v.precioVenta || 0), 0);
+          this.articulosDisponibles = this.productos.filter(p => p.estado === 'Disponible').length;
             
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
               let desc = mov.descripcion;

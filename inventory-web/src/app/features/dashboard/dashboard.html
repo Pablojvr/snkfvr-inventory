@@ -15,8 +15,8 @@
     </div>
 </div>
 
-<!-- Cuadrícula de Rendimiento (2 Columnas) -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+<!-- Cuadrícula de Rendimiento (3 Columnas) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
     <div class="stat-card" style="background: linear-gradient(135deg, #ffffff, #fff5f5); border: 1px solid #ffe4e6; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
         <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Valor Inventario</span>
         <div style="display: flex; align-items: flex-end; justify-content: space-between;">
@@ -29,6 +29,13 @@
         <div style="display: flex; align-items: flex-end; justify-content: space-between;">
             <span style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ ventasTotales | currency }}</span>
             <i class="pi pi-chart-line" style="font-size: 1.5rem; color: #10b981; opacity: 0.5;"></i>
+        </div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #f0f9ff, #ffffff); border: 1px solid #e0f2fe; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Disponibles</span>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+            <span style="font-size: 1.5rem; font-weight: 800; color: #0ea5e9;">{{ articulosDisponibles }} <span style="font-size: 0.9rem; color: #64748b;">unds.</span></span>
+            <i class="pi pi-tags" style="font-size: 1.5rem; color: #0ea5e9; opacity: 0.5;"></i>
         </div>
     </div>
 </div>

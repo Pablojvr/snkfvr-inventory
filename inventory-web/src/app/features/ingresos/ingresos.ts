@@ -13,11 +13,12 @@ import { MenuItem } from 'primeng/api';
 import { ApiService, Ingreso, Usuario } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-ingresos',
   standalone: true,
-  imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, SelectModule, TooltipModule, MenuModule],
+  imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, SelectModule, TooltipModule, MenuModule, PaginatorModule],
   templateUrl: './ingresos.html',
 })
 export class Ingresos implements OnInit {
@@ -32,6 +33,15 @@ export class Ingresos implements OnInit {
 
   textoFiltro: string = '';
   menuItems: MenuItem[] = [];
+
+  // Paginación
+  first: number = 0;
+  rows: number = 12;
+
+  onPageChange(event: any) {
+      this.first = event.first;
+      this.rows = event.rows;
+  }
 
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 

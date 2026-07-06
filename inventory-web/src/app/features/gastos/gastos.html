@@ -14,7 +14,7 @@
     </div>
 
     <div class="entity-cards-grid" *ngIf="gastosFiltrados.length > 0">
-        <div class="entity-card" *ngFor="let gasto of gastosFiltrados">
+        <div class="entity-card" *ngFor="let gasto of (gastosFiltrados | slice:first:first+rows)">
             <div class="entity-card-header">
                 <h4 class="entity-card-title">{{ gasto.motivo }}</h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
@@ -35,6 +35,14 @@
             </div>
         </div>
     </div>
+    
+    <p-paginator *ngIf="gastosFiltrados.length > 0" 
+                 [first]="first" 
+                 [rows]="rows" 
+                 [totalRecords]="gastosFiltrados.length" 
+                 (onPageChange)="onPageChange($event)"
+                 styleClass="mt-3">
+    </p-paginator>
     
     <div *ngIf="gastosFiltrados.length === 0" class="empty-msg">
         No hay gastos registrados.

@@ -34,6 +34,21 @@
     </div>
 </div>
 
+<h3 style="margin-top: 2rem; margin-bottom: 1rem; font-weight: 700; color: #1e293b;">Costos Operativos</h3>
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <!-- Comisiones de Venta -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Comisiones de Venta</h4>
+        <h2 style="color: #f59e0b;">{{ comisionesVenta | currency }}</h2>
+    </div>
+
+    <!-- Comisiones de Compra -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Comisiones de Compra</h4>
+        <h2 style="color: #ef4444;">{{ comisionesCompra | currency }}</h2>
+    </div>
+</div>
+
 <!-- Gráfico de Desempeño Financiero -->
 <div class="card chart-card" style="margin-top: 2rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
     <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b;">Flujo de Efectivo</h3>

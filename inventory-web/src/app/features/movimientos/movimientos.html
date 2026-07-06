@@ -27,7 +27,7 @@
             No se encontraron movimientos.
         </div>
 
-        <div *ngFor="let mov of movimientosFiltrados" class="transaction-item" (click)="abrirDetalle(mov)" style="display: flex; align-items: center; padding: 1rem; background: #ffffff; border-radius: 20px; margin-bottom: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.25s ease-in-out; cursor: pointer;">
+        <div *ngFor="let mov of (movimientosFiltrados | slice:first:first+rows)" class="transaction-item" (click)="abrirDetalle(mov)" style="display: flex; align-items: center; padding: 1rem; background: #ffffff; border-radius: 20px; margin-bottom: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.25s ease-in-out; cursor: pointer;">
             <!-- Icon -->
             <div class="transaction-icon" [style.background]="getColorPorMov(mov).bg" [style.color]="getColorPorMov(mov).text" style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
                 <i class="pi {{ getIconoPorMov(mov) }}" style="font-size: 1.25rem;"></i>
@@ -47,6 +47,15 @@
             </div>
         </div>
     </div>
+
+    <p-paginator *ngIf="movimientosFiltrados.length > 0" 
+                 [first]="first" 
+                 [rows]="rows" 
+                 [totalRecords]="movimientosFiltrados.length" 
+                 (onPageChange)="onPageChange($event)"
+                 styleClass="mt-3"
+                 [style]="{'background': 'transparent', 'border': 'none'}">
+    </p-paginator>
 </div>
 
 <!-- Modal de Detalle de Movimiento -->

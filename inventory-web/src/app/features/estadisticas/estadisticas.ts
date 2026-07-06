@@ -4,7 +4,7 @@ import { ChartModule } from 'primeng/chart';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { ApiService, Producto, Venta, Gasto } from '../../core/services/api';
+import { ApiService, Producto, Venta, Gasto, Movimiento } from '../../core/services/api';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -18,6 +18,8 @@ export class Estadisticas implements OnInit {
   gananciaNeta: number = 0;
   roiPromedio: number = 0;
   tiempoPromedioVenta: number = 0; // days
+  comisionesVenta: number = 0;
+  comisionesCompra: number = 0;
   
   // Top Productos
   topProductos: any[] = [];
@@ -39,6 +41,7 @@ export class Estadisticas implements OnInit {
   productos: Producto[] = [];
   ventas: Venta[] = [];
   gastos: Gasto[] = [];
+  movimientos: Movimiento[] = [];
 
   constructor(private api: ApiService) {}
 
@@ -51,11 +54,13 @@ export class Estadisticas implements OnInit {
     forkJoin({
       productos: this.api.getProductos(),
       ventas: this.api.getVentas(),
-      gastos: this.api.getGastos()
-    }).subscribe(({ productos, ventas, gastos }) => {
+      gastos: this.api.getGastos(),
+      movimientos: this.api.getMovimientos()
+    }).subscribe(({ productos, ventas, gastos, movimientos }) => {
       this.productos = productos;
       this.ventas = ventas;
       this.gastos = gastos;
+      this.movimientos = movimientos;
       this.procesarEstadisticas();
     });
   }
@@ -65,9 +70,9 @@ export class Estadisticas implements OnInit {
   }
 
   procesarEstadisticas() {
-      const { ventasFiltradas, gastosFiltrados } = this.filtrarPorFecha();
+      const { ventasFiltradas, gastosFiltrados, movimientosFiltrados } = this.filtrarPorFecha();
       
-      this.calcularKPIs(ventasFiltradas, gastosFiltrados);
+      this.calcularKPIs(ventasFiltradas, gastosFiltrados, movimientosFiltrados);
       this.calcularTopProductos(ventasFiltradas, gastosFiltrados);
       this.generarGrafico(ventasFiltradas, gastosFiltrados);
   }
@@ -86,11 +91,12 @@ export class Estadisticas implements OnInit {
 
       const ventasFiltradas = this.ventas.filter(v => new Date(v.fechaVenta || v.fechaRegistro || hoy) >= fechaInicio && v.activo);
       const gastosFiltrados = this.gastos.filter(g => new Date(g.fecha) >= fechaInicio && g.activo);
+      const movimientosFiltrados = this.movimientos.filter(m => new Date(m.fecha) >= fechaInicio && m.activo !== false);
 
-      return { ventasFiltradas, gastosFiltrados };
+      return { ventasFiltradas, gastosFiltrados, movimientosFiltrados };
   }
 
-  calcularKPIs(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {
+  calcularKPIs(ventasFiltradas: Venta[], gastosFiltrados: Gasto[], movimientosFiltrados: Movimiento[]) {
       // Ingresos Totales
       const ingresosVentas = ventasFiltradas.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
       
@@ -123,6 +129,14 @@ export class Estadisticas implements OnInit {
       });
 
       this.tiempoPromedioVenta = cantidadVendidos > 0 ? (diasTotales / cantidadVendidos) : 0;
+      
+      this.comisionesVenta = movimientosFiltrados
+          .filter(m => m.tipo === 'Comisión' && m.descripcion.startsWith('Comisión de venta'))
+          .reduce((sum, m) => sum + Math.abs(m.montoTotal), 0);
+          
+      this.comisionesCompra = movimientosFiltrados
+          .filter(m => m.tipo === 'Comisión' && !m.descripcion.startsWith('Comisión de venta'))
+          .reduce((sum, m) => sum + Math.abs(m.montoTotal), 0);
   }
 
   calcularTopProductos(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {

@@ -13,7 +13,7 @@
     </div>
 
     <div class="entity-cards-grid" *ngIf="ingresosFiltrados.length > 0">
-        <div class="entity-card" *ngFor="let ingreso of ingresosFiltrados">
+        <div class="entity-card" *ngFor="let ingreso of (ingresosFiltrados | slice:first:first+rows)">
             <div class="entity-card-header">
                 <h4 class="entity-card-title">{{ ingreso.motivo }}</h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
@@ -33,6 +33,14 @@
         </div>
     </div>
     
+    <p-paginator *ngIf="ingresosFiltrados.length > 0" 
+                 [first]="first" 
+                 [rows]="rows" 
+                 [totalRecords]="ingresosFiltrados.length" 
+                 (onPageChange)="onPageChange($event)"
+                 styleClass="mt-3">
+    </p-paginator>
+
     <div *ngIf="ingresosFiltrados.length === 0" class="empty-msg">
         No hay ingresos registrados.
     </div>

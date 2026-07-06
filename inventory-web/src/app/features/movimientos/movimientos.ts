@@ -7,11 +7,12 @@ import { DialogModule } from 'primeng/dialog';
 import { ApiService, Movimiento } from '../../core/services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-movimientos',
   standalone: true,
-  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule],
+  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule, PaginatorModule],
   templateUrl: './movimientos.html',
   styleUrls: ['./movimientos.css'],
   styles: [`
@@ -27,6 +28,15 @@ export class Movimientos implements OnInit {
   
   displayDetalle: boolean = false;
   movimientoSeleccionado: Movimiento | null = null;
+  
+  // Paginación
+  first: number = 0;
+  rows: number = 12;
+
+  onPageChange(event: any) {
+      this.first = event.first;
+      this.rows = event.rows;
+  }
   
   categorias = [
     { label: 'Todos', value: 'Todos' },

@@ -13,11 +13,12 @@ import { MenuItem } from 'primeng/api';
 import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-gastos',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule, DialogGastoComponent],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule, DialogGastoComponent, PaginatorModule],
   templateUrl: './gastos.html',
 })
 export class Gastos implements OnInit {
@@ -33,6 +34,15 @@ export class Gastos implements OnInit {
   ];
   
   menuItems: MenuItem[] = [];
+
+  // Paginación
+  first: number = 0;
+  rows: number = 12;
+
+  onPageChange(event: any) {
+      this.first = event.first;
+      this.rows = event.rows;
+  }
 
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 

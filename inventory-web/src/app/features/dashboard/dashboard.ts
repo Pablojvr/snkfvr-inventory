@@ -110,7 +110,8 @@ export class Dashboard implements OnInit {
             .map(v => {
               const movAdelanto = movimientos.find(m => m.referenciaId === v.id && m.descripcion.startsWith('Adelanto por reserva'));
               const adelantoMonto = movAdelanto ? movAdelanto.montoTotal : 0;
-              const saldoPendiente = v.precioVenta - adelantoMonto;
+              const precio = v.precioVenta || 0;
+              const saldoPendiente = precio - adelantoMonto;
 
               return {
                 ...v,

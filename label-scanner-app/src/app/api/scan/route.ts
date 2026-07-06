@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400 });
     }
 
-    // Utilizamos gemini-2.0-flash-lite porque gemini-1.5 ya no está disponible,
-    // y la versión lite de la serie 2.0 tiene cuotas gratuitas mucho más altas (ideal para evitar límites de 20 peticiones).
+    // Tras hacer validaciones directas con los servidores de Google, 
+    // la versión 2.5-flash-lite está confirmada y activa para el nivel gratuito de esta cuenta.
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash-lite',
+      model: 'gemini-2.5-flash-lite',
       tools: [{ googleSearch: {} } as any]
     });
 

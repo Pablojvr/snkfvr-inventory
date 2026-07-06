@@ -20,9 +20,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400 });
     }
 
-    // Cambiamos a gemini-1.5-flash ya que su capa gratuita (Free Tier) tiene límites mucho más altos (1500 por día / 15 por minuto)
+    // Utilizamos gemini-2.0-flash-lite porque gemini-1.5 ya no está disponible,
+    // y la versión lite de la serie 2.0 tiene cuotas gratuitas mucho más altas (ideal para evitar límites de 20 peticiones).
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash-lite',
       tools: [{ googleSearch: {} } as any]
     });
 

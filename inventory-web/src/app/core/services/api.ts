@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { retry } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface Producto {
@@ -193,6 +194,8 @@ export class ApiService {
   scanLabel(imageBase64: string): Observable<{ modelo: string, talla: string, cm: string }> {
     // Apuntamos al backend .NET (proxy) para evitar CORS con Vercel
     const aiUrl = `${this.apiUrl}/Ai/scan`;
-    return this.http.post<{ modelo: string, talla: string, cm: string }>(aiUrl, { imageBase64 });
+    return this.http.post<{ modelo: string, talla: string, cm: string }>(aiUrl, { imageBase64 }).pipe(
+      retry(1) // Reintenta 1 vez en caso de fallo temporal de Gemini
+    );
   }
 }

@@ -10,23 +10,23 @@ export class ToastManagerService {
 
   constructor(private messageService: MessageService) {}
 
-  showSuccess(title: string, detail: string) {
-    this.addMessage('success', title, detail);
+  showSuccess(title: string, detail: string, life?: number) {
+    this.addMessage('success', title, detail, life);
   }
 
-  showInfo(title: string, detail: string) {
-    this.addMessage('info', title, detail);
+  showInfo(title: string, detail: string, life?: number) {
+    this.addMessage('info', title, detail, life);
   }
 
-  showWarn(title: string, detail: string) {
-    this.addMessage('warn', title, detail);
+  showWarn(title: string, detail: string, life?: number) {
+    this.addMessage('warn', title, detail, life);
   }
 
-  showError(title: string, detail: string) {
-    this.addMessage('error', title, detail);
+  showError(title: string, detail: string, life?: number) {
+    this.addMessage('error', title, detail, life);
   }
 
-  private addMessage(severity: string, summary: string, detail: string) {
+  private addMessage(severity: string, summary: string, detail: string, life: number = 3000) {
     if (this.activeMessages.length >= this.maxMessages) {
       // Remover el más antiguo de la cola interna de activeMessages, pero primeng clear ya borra todo.
       // Para simular el comportamiento FIFO exacto, podemos limpiar todos y re-agregar, o primeng v16+ lo maneja mejor.
@@ -35,12 +35,12 @@ export class ToastManagerService {
       this.activeMessages = [];
     }
 
-    const msg = { severity, summary, detail, life: 3000 };
+    const msg = { severity, summary, detail, life };
     this.activeMessages.push(msg);
     this.messageService.add(msg);
     
     setTimeout(() => {
         this.activeMessages = this.activeMessages.filter(m => m !== msg);
-    }, 3000);
+    }, life);
   }
 }

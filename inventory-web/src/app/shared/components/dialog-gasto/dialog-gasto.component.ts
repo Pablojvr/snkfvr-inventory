@@ -204,7 +204,7 @@ export class DialogGastoComponent {
     if (!file) return;
 
     this.escaneando = true;
-    this.toastManager.showSuccess('Procesando', 'Analizando la etiqueta con IA, por favor espera...');
+    this.toastManager.showInfo('Iniciando IA', 'Analizando la viñeta con búsqueda web. Esto tomará unos 20 segundos...', 5000);
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
@@ -243,15 +243,15 @@ export class DialogGastoComponent {
                         this.escaneando = false;
                         if(data && (data.talla || data.modelo)) {
                             this.gasto.motivo = `Talla ${data.talla || 'N/A'} | ${data.modelo || 'Desconocido'}`;
-                            this.toastManager.showSuccess('Escáner', 'Viñeta analizada correctamente.');
+                            this.toastManager.showSuccess('¡Listo!', 'La IA encontró y analizó el zapato exitosamente.');
                         } else {
-                            this.toastManager.showError('Escáner', 'La IA no pudo reconocer el texto.');
+                            this.toastManager.showError('Sin resultados', 'La IA no pudo reconocer el modelo del zapato en la imagen.');
                         }
                     },
                     error: (err) => {
                         console.error('Error de API:', err);
                         this.escaneando = false;
-                        this.toastManager.showError('Escáner IA', 'No se pudo contactar con la inteligencia artificial.');
+                        this.toastManager.showError('Fallo en IA', 'Lo sentimos, hubo un error o demora al buscar en la web. Intenta de nuevo.');
                     }
                 });
             }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+// Dummy comment to force Vercel to rebuild the API
 
 // Permitir hasta 60 segundos en Vercel Serverless (Plan Hobby)
 export const maxDuration = 60;

@@ -105,7 +105,7 @@ namespace Inventory.Application.UseCases
                         {
                             Tipo = TipoMovimientoConstants.Comision,
                             Fecha = DateTime.Now,
-                            Descripcion = $"Comisión de venta: COM | {nombreProducto} asignada a {nombreUsuarioComision}",
+                            Descripcion = $"COM | {nombreProducto} asignada a {nombreUsuarioComision}",
                             MontoTotal = -ventaDto.ComisionMonto.Value,
                             ReferenciaId = comAgregada.Id,
                             ProductoId = ventaDto.ProductoId

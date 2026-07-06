@@ -84,10 +84,9 @@ namespace Inventory.Application.UseCases
 
             if (mov != null)
             {
-                var descPrefix = nuevoTipoNombre == TipoGastoConstants.Comision ? "Comisión" : "Gasto/Compra";
                 mov.Tipo = nuevoTipoNombre == TipoGastoConstants.Comision ? TipoMovimientoConstants.Comision : (nuevoProductoId.HasValue ? TipoMovimientoConstants.Compra : TipoMovimientoConstants.SalidaDeDinero);
                 mov.MontoTotal = -gastoDto.Monto;
-                mov.Descripcion = $"{descPrefix}: {gastoDto.Motivo} por el usuario con ID {gastoDto.UsuarioId}";
+                mov.Descripcion = $"{gastoDto.Motivo} por el usuario con ID {gastoDto.UsuarioId}";
                 mov.ProductoId = nuevoProductoId;
                 await _movimientoRepositorio.ActualizarAsync(mov);
             }

@@ -164,6 +164,12 @@ export class Dashboard implements OnInit {
             
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
               let desc = mov.descripcion;
+              
+              // Limpiar prefijos redundantes
+              desc = desc.replace(/^Gasto\/Compra:\s*/, '');
+              desc = desc.replace(/^Comisión:\s*/, '');
+              desc = desc.replace(/^Comisión de venta:\s*/, '');
+              
               desc = desc.replace(/usuario con ID (\d+)/g, (match, p1) => {
                   const u = usuarios.find(x => x.id === parseInt(p1, 10));
                   return u ? u.nombre : match;

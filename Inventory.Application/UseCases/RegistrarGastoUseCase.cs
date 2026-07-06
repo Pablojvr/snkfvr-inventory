@@ -86,13 +86,12 @@ namespace Inventory.Application.UseCases
             var gastoAgregado = await _gastoRepositorio.AgregarAsync(gasto);
 
             var tipoMovimiento = tipoNombre == TipoGastoConstants.Comision ? TipoMovimientoConstants.Comision : (productoId.HasValue ? TipoMovimientoConstants.Compra : TipoMovimientoConstants.SalidaDeDinero);
-            var descPrefix = tipoNombre == TipoGastoConstants.Comision ? "Comisión" : "Gasto/Compra";
 
             var movimiento = new Movimiento
             {
                 Tipo = tipoMovimiento,
                 Fecha = gastoDto.Fecha,
-                Descripcion = $"{descPrefix}: {gastoDto.Motivo} por el usuario con ID {gastoDto.UsuarioId}",
+                Descripcion = $"{gastoDto.Motivo} por el usuario con ID {gastoDto.UsuarioId}",
                 MontoTotal = -gastoDto.Monto, // Negativo porque es un gasto
                 ReferenciaId = gastoAgregado.Id,
                 ProductoId = productoId
@@ -130,7 +129,7 @@ namespace Inventory.Application.UseCases
                 {
                     Tipo = TipoMovimientoConstants.Comision,
                     Fecha = gastoDto.Fecha,
-                    Descripcion = $"Comisión: COM | {nombreProducto} asignada al usuario con ID {comisionUsuarioId}",
+                    Descripcion = $"COM | {nombreProducto} asignada al usuario con ID {comisionUsuarioId}",
                     MontoTotal = -gastoDto.ComisionMonto.Value,
                     ReferenciaId = comisionAgregada.Id,
                     ProductoId = productoId

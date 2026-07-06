@@ -3,11 +3,11 @@
         
         <div class="field" *ngIf="!nuevaVentaData.productoPreseleccionado">
             <label style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-box" style="margin-right: 0.25rem;"></i> Seleccionar Producto Disponible</label>
-            <p-select [options]="productosDisponibles" [(ngModel)]="nuevaVentaData.productoSeleccionado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onChange)="onProductoSeleccionadoModal()">
+            <p-autoComplete [(ngModel)]="nuevaVentaData.productoSeleccionado" [suggestions]="filteredProductos" (completeMethod)="filterProducto($event)" field="descripcion" [dropdown]="true" placeholder="Buscar producto..." styleClass="w-full" appendTo="body" (onSelect)="onProductoSeleccionadoModal()">
                 <ng-template let-prod pTemplate="item">
                     <div>{{prod.descripcion}} - {{prod.costoCalculado | currency}}</div>
                 </ng-template>
-            </p-select>
+            </p-autoComplete>
         </div>
 
         <div *ngIf="nuevaVentaData.productoSeleccionado" style="display: flex; flex-direction: column; gap: 1rem;">

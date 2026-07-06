@@ -72,7 +72,7 @@ export class Ingresos implements OnInit {
         this.ingresos = ingresos.map(i => ({
           ...i,
           usuarioNombre: usuarios.find(u => u.id === i.usuarioId)?.nombre || 'Desconocido'
-        }));
+        })).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
       });
     });
   }

@@ -44,6 +44,9 @@ export class Dashboard implements OnInit {
   displayDetalleVenta: boolean = false;
   ventaSeleccionada: any = null;
 
+  displayDetalleMovimiento: boolean = false;
+  movimientoSeleccionado: any = null;
+
   // Menu
   menuItems: MenuItem[] = [];
   
@@ -163,6 +166,11 @@ export class Dashboard implements OnInit {
   }
 
   // --- Card actions ---
+  abrirDetalleMovimiento(mov: any) {
+      this.movimientoSeleccionado = mov;
+      this.displayDetalleMovimiento = true;
+  }
+
   abrirDetalle(venta: any) {
     this.ventaSeleccionada = venta;
     this.displayDetalleVenta = true;

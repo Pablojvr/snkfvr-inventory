@@ -788,3 +788,54 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Paginator */
+.p-paginator {
+  background: transparent !important;
+  border: none !important;
+  padding: 1rem 0 !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  border-radius: 50% !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  color: #64748b !important;
+  background: transparent !important;
+  border: none !important;
+  transition: all 0.2s !important;
+  margin: 0 0.1rem !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page:hover {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3) !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  transition: all 0.2s !important;
+}
+
+.p-paginator .p-paginator-first:hover:not(.p-disabled),
+.p-paginator .p-paginator-prev:hover:not(.p-disabled),
+.p-paginator .p-paginator-next:hover:not(.p-disabled),
+.p-paginator .p-paginator-last:hover:not(.p-disabled) {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+

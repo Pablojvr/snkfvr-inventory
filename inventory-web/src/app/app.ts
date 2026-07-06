@@ -8,12 +8,13 @@ import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
 import { ApiService, Usuario } from './core/services/api';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastModule, TooltipModule, MenuModule, DialogModule, SelectModule, FormsModule, ButtonModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastModule, TooltipModule, MenuModule, DialogModule, SelectModule, FormsModule, ButtonModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -41,12 +42,14 @@ export class App implements OnInit {
     ];
 
     const userId = localStorage.getItem('userId');
-    if (!userId) {
-      this.api.getUsuarios().subscribe(users => {
-        this.usuarios = users;
+    this.api.getUsuarios().subscribe(users => {
+      this.usuarios = users;
+      if (!userId) {
         this.displayUserModal = true;
-      });
-    }
+      } else {
+        this.selectedUserId = parseInt(userId, 10);
+      }
+    });
   }
 
   guardarUsuario() {
@@ -54,6 +57,17 @@ export class App implements OnInit {
       localStorage.setItem('userId', this.selectedUserId.toString());
       this.displayUserModal = false;
     }
+  }
+
+  getSelectedUserName(): string {
+      if (!this.selectedUserId) return 'Usuario';
+      const u = this.usuarios.find(x => x.id === this.selectedUserId);
+      return u ? u.nombre : 'Usuario';
+  }
+
+  getSelectedUserInitial(): string {
+      const name = this.getSelectedUserName();
+      return name.charAt(0).toUpperCase();
   }
 
   toggleSidebar() {

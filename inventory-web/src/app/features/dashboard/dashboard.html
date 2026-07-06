@@ -1,37 +1,29 @@
 <!-- Encabezado de Inicio y Perfil -->
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding: 0 0.5rem;">
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding: 0 0.5rem;">
     <div style="display: flex; flex-direction: column;">
         <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-color);">Inicio</h2>
         <span style="color: #64748b; font-size: 0.9rem;">Resumen General</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 0.75rem; background: white; padding: 0.5rem 1rem; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ff7a85); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
-            J
-        </div>
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-color);">Usuario</span>
-            <span style="color: var(--primary-color); font-size: 0.75rem; font-weight: 700;">Nivel 5</span>
-        </div>
-    </div>
 </div>
 
 <!-- Cuadrícula de Rendimiento (3 Columnas) -->
-<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
-    <div class="stat-card" style="background: linear-gradient(135deg, #ffffff, #fff5f5); border: 1px solid #ffe4e6; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+<!-- Cuadrícula de Rendimiento (Horizontal Scrollable) -->
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding: 0.5rem 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; background: linear-gradient(135deg, #ffffff, #fff5f5); border: 1px solid #ffe4e6; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
         <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Valor Inventario</span>
         <div style="display: flex; align-items: flex-end; justify-content: space-between;">
             <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-color);">{{ inventarioTotal | currency }}</span>
             <i class="pi pi-box" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.5;"></i>
         </div>
     </div>
-    <div class="stat-card" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
         <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Ventas Totales</span>
         <div style="display: flex; align-items: flex-end; justify-content: space-between;">
             <span style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ ventasTotales | currency }}</span>
             <i class="pi pi-chart-line" style="font-size: 1.5rem; color: #10b981; opacity: 0.5;"></i>
         </div>
     </div>
-    <div class="stat-card" style="background: linear-gradient(135deg, #f0f9ff, #ffffff); border: 1px solid #e0f2fe; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; background: linear-gradient(135deg, #f0f9ff, #ffffff); border: 1px solid #e0f2fe; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
         <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Disponibles</span>
         <div style="display: flex; align-items: flex-end; justify-content: space-between;">
             <span style="font-size: 1.5rem; font-weight: 800; color: #0ea5e9;">{{ articulosDisponibles }} <span style="font-size: 0.9rem; color: #64748b;">unds.</span></span>
@@ -97,20 +89,25 @@
 <!-- Actividad Reciente -->
 <div class="dashboard-bottom">
     <div class="card timeline-card">
-        <h3 class="section-title-dark">
+        <h3 class="section-title-dark" style="margin-bottom: 1rem;">
             <i class="pi pi-list"></i> Actividad Reciente
         </h3>
-        <p-timeline [value]="movimientos">
-            <ng-template pTemplate="content" let-mov>
-                <small class="p-text-secondary">{{ getTiempoRelativo(mov.fecha) }}</small>
-                <div style="font-weight: bold;">{{ mov.tipo }}</div>
-                <div [innerHTML]="mov.descripcion"></div>
-                <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 600;">
+        <div style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div *ngFor="let mov of movimientos" (click)="abrirDetalleMovimiento(mov)" style="display: flex; align-items: center; background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0.5rem; gap: 0.5rem; cursor: pointer; transition: box-shadow 0.2s;" [ngStyle]="{'box-shadow': '0 0 5px ' + (mov.montoTotal < 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}">
+                <div style="flex: 1; min-width: 0; line-height: 1.2;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 0.75rem; color: #1e293b;">{{ mov.tipo }}</span>
+                        <span style="font-size: 0.65rem; color: #64748b;">{{ getTiempoRelativo(mov.fecha) }}</span>
+                    </div>
+                    <div style="font-size: 0.7rem; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.15rem;" [innerHTML]="mov.descripcion"></div>
+                </div>
+                <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 700; font-size: 0.8rem; margin-left: 0.5rem;">
                     {{ mov.montoTotal | currency }}
                 </div>
-            </ng-template>
-        </p-timeline>
-        <div *ngIf="movimientos.length === 0" class="empty-msg">No hay actividad reciente.</div>
+            </div>
+            
+            <div *ngIf="movimientos.length === 0" class="empty-msg">No hay actividad reciente.</div>
+        </div>
     </div>
 </div>
 
@@ -153,6 +150,28 @@
             <p-button label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
         </div>
     </ng-template>
+</p-dialog>
+
+<!-- Modal Detalle de Movimiento -->
+<p-dialog [(visible)]="displayDetalleMovimiento" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Movimiento" [draggable]="false" [resizable]="false">
+    <div *ngIf="movimientoSeleccionado" style="display: flex; flex-direction: column; gap: 0;">
+        <div class="detail-row">
+            <span class="detail-label">Tipo</span>
+            <span class="detail-value">{{ movimientoSeleccionado.tipo }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Razón/Descripción</span>
+            <span class="detail-value" [innerHTML]="movimientoSeleccionado.descripcion"></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Monto Total</span>
+            <span class="detail-value" [style.color]="movimientoSeleccionado.montoTotal < 0 ? '#ef4444' : '#10b981'">{{ movimientoSeleccionado.montoTotal | currency }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Fecha</span>
+            <span class="detail-value">{{ movimientoSeleccionado.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+    </div>
 </p-dialog>
 
 <!-- Modal Registrar Venta Compartido -->

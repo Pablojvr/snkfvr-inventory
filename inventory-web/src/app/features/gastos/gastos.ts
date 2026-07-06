@@ -81,7 +81,7 @@ export class Gastos implements OnInit {
           ...g,
           productoDescripcion: g.productoId ? productos.find(p => p.id === g.productoId)?.descripcion || 'Desconocido' : '',
           usuarioNombre: usuarios.find(u => u.id === g.usuarioId)?.nombre || 'Desconocido'
-        }));
+        })).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
       });
     });
   }

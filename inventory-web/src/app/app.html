@@ -38,7 +38,15 @@
         <i class="pi pi-bars"></i>
       </button>
       <div class="topbar-title">Inventario SNKFVR</div>
-      <div class="topbar-right">
+      <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
+        <div *ngIf="selectedUserId" style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.25rem 0.75rem 0.25rem 0.25rem; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" (click)="displayUserModal = true" class="user-pill-hover">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ff7a85); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.9rem;">
+                {{ getSelectedUserInitial() }}
+            </div>
+            <div style="display: flex; flex-direction: column; line-height: 1.1;">
+                <span style="font-weight: 700; font-size: 0.8rem; color: var(--text-color);">{{ getSelectedUserName() }}</span>
+            </div>
+        </div>
         <button class="sidebar-toggle-btn" (click)="toggleSidebar()" pTooltip="Menú" tooltipPosition="bottom">
           <i class="pi pi-cog"></i>
         </button>

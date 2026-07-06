@@ -107,6 +107,10 @@ export class Ventas implements OnInit {
                lugarDestino: venta?.lugarDestino || '',
                precioVenta: venta?.precioVenta || 0
            };
+        }).sort((a, b) => {
+           const dateB = b.ventaAsociada ? new Date(b.ventaAsociada.fecha).getTime() : new Date(b.fechaCompra).getTime();
+           const dateA = a.ventaAsociada ? new Date(a.ventaAsociada.fecha).getTime() : new Date(a.fechaCompra).getTime();
+           return dateB - dateA;
         });
       });
     });

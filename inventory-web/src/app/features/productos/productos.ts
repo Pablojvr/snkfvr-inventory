@@ -91,7 +91,7 @@ export class Productos implements OnInit {
                 ...p,
                 costoCalculado: costoCalculado
             };
-        });
+        }).sort((a, b) => new Date(b.fechaCompra).getTime() - new Date(a.fechaCompra).getTime());
       });
     });
   }

@@ -8,13 +8,13 @@
         </div>
 
         <div class="field" *ngIf="!editando && !prefilledProducto && !soloProducto">
-            <label for="tipoGasto">Tipo de Registro</label>
+            <label for="tipoGasto" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-list" style="margin-right: 0.25rem;"></i> Tipo de Registro</label>
             <p-select id="tipoGasto" [options]="tiposGasto" [(ngModel)]="gasto.tipoGastoId" optionLabel="nombre" optionValue="id" appendTo="body" (onChange)="onTipoChange()"></p-select>
         </div>
         
         <!-- Selector de producto solo cuando NO viene pre-seleccionado y es Comisión/Envío -->
         <div class="field" *ngIf="!prefilledProducto && (tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío' || (editando && gasto.productoId))">
-            <label for="productoId">Producto Relacionado</label>
+            <label for="productoId" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-box" style="margin-right: 0.25rem;"></i> Producto Relacionado</label>
             <p-select id="productoId" [options]="productos" [(ngModel)]="gasto.productoId" optionLabel="descripcion" 
                       [filter]="true" filterBy="descripcion" [showClear]="true" placeholder="Seleccionar producto..." appendTo="body"
                       (onChange)="onTipoChange()"
@@ -27,7 +27,7 @@
         </div>
 
         <div class="field">
-            <label for="motivo">Motivo / Descripción</label>
+            <label for="motivo" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-align-left" style="margin-right: 0.25rem;"></i> Motivo / Descripción</label>
             <input pInputText id="motivo" [(ngModel)]="gasto.motivo" required autofocus 
                    [readonly]="tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío'"
                    [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" />
@@ -36,7 +36,7 @@
         
         <div class="field">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <label for="monto">Monto (Costo)</label>
+                <label for="monto" style="color: #1e293b; font-size: 0.95rem; font-weight: 700;"><i class="pi pi-dollar" style="margin-right: 0.25rem;"></i> Monto (Costo)</label>
                 <small *ngIf="costoActual !== undefined" style="color: #64748b; font-weight: 600;">(Costo actual: {{ costoActual | currency }})</small>
             </div>
             <p-inputNumber id="monto" [(ngModel)]="gasto.monto" mode="currency" currency="USD" locale="en-US" 
@@ -45,18 +45,18 @@
         </div>
 
         <div class="field">
-            <label for="fecha">Fecha del Gasto</label>
+            <label for="fecha" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-calendar" style="margin-right: 0.25rem;"></i> Fecha del Gasto</label>
             <p-datepicker id="fecha" [(ngModel)]="gasto.fecha" appendTo="body" dateFormat="dd/mm/yy"></p-datepicker>
         </div>
         
         <div class="field" *ngIf="tipoNombreActual === 'Producto' || (editando && !gasto.productoId)">
-            <label for="fechaIngreso">Fecha de Ingreso del Producto (Opcional)</label>
+            <label for="fechaIngreso" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-calendar-plus" style="margin-right: 0.25rem;"></i> Fecha de Ingreso del Producto <span style="opacity:0.6;">(Opcional)</span></label>
             <p-datepicker id="fechaIngreso" [(ngModel)]="gasto.fechaIngreso" appendTo="body" dateFormat="dd/mm/yy"></p-datepicker>
         </div>
 
         <!-- Usuario -->
         <div class="field" *ngIf="editando || tipoNombreActual === 'Comisión'">
-            <label for="usuarioId">{{ tipoNombreActual === 'Comisión' ? 'Usuario Comisionista' : 'Registrado por' }}</label>
+            <label for="usuarioId" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-user" style="margin-right: 0.25rem;"></i> {{ tipoNombreActual === 'Comisión' ? 'Usuario Comisionista' : 'Registrado por' }}</label>
             <p-select id="usuarioId" [options]="usuarios" [(ngModel)]="gasto.usuarioId" optionLabel="nombre" optionValue="id" appendTo="body"
                       [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.usuarioId}"></p-select>
             <small class="p-error" *ngIf="submitted && !gasto.usuarioId">El usuario es obligatorio.</small>
@@ -81,6 +81,6 @@
     
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" [text]="true" (onClick)="displayDialog = false"></p-button>
-        <p-button label="Guardar" icon="pi pi-check" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" severity="success" (onClick)="guardar()" [loading]="guardando" [disabled]="guardando"></p-button>
     </ng-template>
 </p-dialog>

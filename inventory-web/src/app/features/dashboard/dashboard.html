@@ -1,16 +1,50 @@
-<div class="card" style="margin-bottom: 1.5rem;">
-    <div class="p-fluid">
-        <label style="font-weight: 600; color: #475569; margin-bottom: 0.5rem; display: block;"><i class="pi pi-search" style="margin-right: 0.5rem;"></i>Búsqueda Rápida</label>
-        <p-select [options]="productosParaBuscador" [(ngModel)]="productoBuscado" optionLabel="descripcion" [filter]="true" filterBy="descripcion" (onChange)="onProductoSeleccionado($event)" placeholder="Buscar producto..." styleClass="w-full" style="margin-bottom: 1.25rem;">
-            <ng-template let-prod pTemplate="item">
-                <div>{{prod.descripcion}} <span style="color: #94a3b8; font-size: 0.8em; margin-left: 0.5rem;">({{prod.estado || 'Disponible'}})</span></div>
-            </ng-template>
-        </p-select>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem;">
-            <p-button label="Vender Producto" icon="pi pi-shopping-cart" severity="success" (onClick)="nuevaVentaRapida()" styleClass="w-full"></p-button>
-            <p-button label="Compra / Gasto" icon="pi pi-dollar" severity="secondary" [outlined]="true" (onClick)="nuevoGastoRapido()" styleClass="w-full"></p-button>
+<!-- Encabezado de Inicio y Perfil -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding: 0 0.5rem;">
+    <div style="display: flex; flex-direction: column;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-color);">Inicio</h2>
+        <span style="color: #64748b; font-size: 0.9rem;">Resumen General</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem; background: white; padding: 0.5rem 1rem; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ff7a85); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
+            J
         </div>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-color);">Usuario</span>
+            <span style="color: var(--primary-color); font-size: 0.75rem; font-weight: 700;">Nivel 5</span>
+        </div>
+    </div>
+</div>
+
+<!-- Cuadrícula de Rendimiento (2 Columnas) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #ffffff, #fff5f5); border: 1px solid #ffe4e6; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Valor Inventario</span>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+            <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-color);">{{ inventarioTotal | currency }}</span>
+            <i class="pi pi-box" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.5;"></i>
+        </div>
+    </div>
+    <div class="stat-card" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
+        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Ventas Totales</span>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+            <span style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ ventasTotales | currency }}</span>
+            <i class="pi pi-chart-line" style="font-size: 1.5rem; color: #10b981; opacity: 0.5;"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Rápidas (Reemplaza Búsqueda) -->
+<div class="card" style="margin-bottom: 2rem; background: var(--primary-color); color: white; border: none; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);">
+    <h3 style="margin-top: 0; font-size: 1.2rem; font-weight: 700;">Acciones Rápidas</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <button (click)="nuevaVentaRapida()" style="background: rgba(255,255,255,0.2); border: none; padding: 1rem; border-radius: 16px; color: white; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; transition: background 0.3s;">
+            <i class="pi pi-shopping-cart" style="font-size: 1.5rem;"></i>
+            Vender
+        </button>
+        <button (click)="nuevoGastoRapido()" style="background: rgba(255,255,255,0.2); border: none; padding: 1rem; border-radius: 16px; color: white; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; transition: background 0.3s;">
+            <i class="pi pi-shopping-bag" style="font-size: 1.5rem;"></i>
+            Comprar
+        </button>
     </div>
 </div>
 

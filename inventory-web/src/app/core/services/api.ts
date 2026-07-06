@@ -188,4 +188,9 @@ export class ApiService {
   getDashboardBalance(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/dashboard/balance`);
   }
+
+  // --- Integración AI ---
+  scanLabel(imageBase64: string): Observable<{ modelo: string, talla: string, cm: string }> {
+    return this.http.post<{ modelo: string, talla: string, cm: string }>('http://localhost:3000/api/scan', { imageBase64 });
+  }
 }

@@ -33,6 +33,10 @@ export class Dashboard implements OnInit {
   productosParaBuscador: Producto[] = [];
   productoBuscado: any;
 
+  // Estadísticas Reales
+  inventarioTotal: number = 0;
+  ventasTotales: number = 0;
+
   // Detail modal
   displayDetalleVenta: boolean = false;
   ventaSeleccionada: any = null;
@@ -76,6 +80,10 @@ export class Dashboard implements OnInit {
               productoDescripcion: this.productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
               usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido'
             }));
+            
+          // Calcular estadísticas reales
+          this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
+          this.ventasTotales = ventas.filter(v => v.estado === 'Vendido').reduce((acc, v) => acc + (v.precioVenta || 0), 0);
             
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
               let desc = mov.descripcion;

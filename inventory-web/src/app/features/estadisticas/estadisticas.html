@@ -1,29 +1,76 @@
-<div class="page-header">
-    <div class="header-left">
-        <h2>Estadísticas Generales</h2>
+<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Reportes</h2>
+        
+        <p-select [options]="rangoOpciones" [(ngModel)]="rangoSeleccionado" (onChange)="onRangoChange()" 
+            optionLabel="label" optionValue="value" styleClass="w-full md:w-56"
+            style="border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+        </p-select>
+    </div>
+    <span style="color: #64748b; font-size: 0.9rem;">Inteligencia de Negocios y Flujos Financieros</span>
+</div>
+
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 1.5rem;">
+    <!-- Ganancia Neta -->
+    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);">
+        <h4 style="color: rgba(255,255,255,0.8);">Ganancia Neta</h4>
+        <h2 style="color: white; display: flex; align-items: center; gap: 0.5rem;">
+            {{ gananciaNeta | currency }}
+            <i class="pi pi-arrow-up-right" style="font-size: 1.2rem; opacity: 0.7;" *ngIf="gananciaNeta >= 0"></i>
+            <i class="pi pi-arrow-down-right" style="font-size: 1.2rem; opacity: 0.7;" *ngIf="gananciaNeta < 0"></i>
+        </h2>
+    </div>
+
+    <!-- ROI Promedio -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Margen Promedio (ROI)</h4>
+        <h2 style="color: #0f172a;">{{ roiPromedio | number:'1.0-1' }}%</h2>
+    </div>
+
+    <!-- Rotación -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Rotación Promedio</h4>
+        <h2 style="color: #0f172a;">{{ tiempoPromedioVenta | number:'1.0-0' }} <span style="font-size: 1rem; color: #94a3b8; font-weight: 500;">días</span></h2>
     </div>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card stat-green">
-        <h4>Total Ventas</h4>
-        <h2>{{ totalVentas | currency }}</h2>
-    </div>
-    <div class="stat-card stat-blue">
-        <h4>Ingresos Manuales</h4>
-        <h2>{{ totalIngresos | currency }}</h2>
-    </div>
-    <div class="stat-card stat-red">
-        <h4>Total Gastos</h4>
-        <h2>{{ totalGastos | currency }}</h2>
-    </div>
-    <div class="stat-card stat-purple">
-        <h4>Balance General</h4>
-        <h2>{{ balance | currency }}</h2>
-    </div>
+<!-- Gráfico de Desempeño Financiero -->
+<div class="card chart-card" style="margin-top: 2rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
+    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b;">Flujo de Efectivo</h3>
+    <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
 </div>
 
-<div class="card chart-card">
-    <h3 style="margin-top: 0;">Resumen Financiero</h3>
-    <p-chart type="bar" [data]="basicData" [options]="basicOptions" height="300px"></p-chart>
+<!-- Top Productos -->
+<div class="card" style="margin-top: 2rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
+    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="pi pi-star-fill" style="color: #f59e0b;"></i> Top 5 Más Rentables
+    </h3>
+    
+    <p-table [value]="topProductos" responsiveLayout="scroll" styleClass="p-datatable-sm" [rowHover]="true">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Producto</th>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Ganancia Pura</th>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ROI</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-prod>
+            <tr>
+                <td style="font-weight: 600; color: #1e293b;">{{prod.descripcion}}</td>
+                <td style="color: #10b981; font-weight: 700;">+{{prod.ganancia | currency}}</td>
+                <td>
+                    <span style="background: #f1f5f9; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155;">
+                        {{prod.roi | number:'1.0-1'}}%
+                    </span>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                    Aún no hay ventas registradas en este periodo.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
 </div>

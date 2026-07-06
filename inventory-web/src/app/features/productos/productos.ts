@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -36,12 +36,19 @@ export class Productos implements OnInit {
   guardando: boolean = false;
 
   textoFiltro: string = '';
+  estadoFiltro: string = 'Todos';
   menuItems: MenuItem[] = [];
 
   // Venta Modal
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
-
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
+
+  // Camera Integration
+  @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+  mostrarCamara: boolean = false;
+  escaneando: boolean = false;
+  mediaStream: MediaStream | null = null;
 
 
   constructor(
@@ -89,12 +96,22 @@ export class Productos implements OnInit {
   }
 
   get productosFiltrados() {
-    if (!this.textoFiltro) return this.productos;
-    const text = this.textoFiltro.toLowerCase();
-    return this.productos.filter(p => 
-      p.descripcion.toLowerCase().includes(text) ||
-      (p.estado && p.estado.toLowerCase().includes(text))
-    );
+    let result = this.productos;
+    if (this.estadoFiltro !== 'Todos') {
+        result = result.filter(p => (p.estado || 'Disponible') === this.estadoFiltro);
+    }
+    if (this.textoFiltro) {
+        const text = this.textoFiltro.toLowerCase();
+        result = result.filter(p => 
+          p.descripcion.toLowerCase().includes(text) ||
+          (p.estado && p.estado.toLowerCase().includes(text))
+        );
+    }
+    return result;
+  }
+
+  setEstadoFiltro(estado: string) {
+      this.estadoFiltro = estado;
   }
 
   toggleMenu(event: any, prod: Producto, menu: any) {
@@ -169,5 +186,93 @@ export class Productos implements OnInit {
         this.toastManager.showSuccess('Éxito', `Se eliminó el producto con ID ${id}`);
       });
     }
+  }
+
+  // --- Cámara y OCR ---
+  abrirCamara() {
+    this.mostrarCamara = true;
+    setTimeout(() => {
+        this.iniciarStreamVideo();
+    }, 200); // Dar tiempo a que el modal se renderice
+  }
+
+  cerrarCamara() {
+    this.mostrarCamara = false;
+    this.escaneando = false;
+    this.detenerStreamVideo();
+  }
+
+  iniciarStreamVideo() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } // Preferir cámara trasera
+        }).then(stream => {
+            this.mediaStream = stream;
+            if (this.videoElement && this.videoElement.nativeElement) {
+                this.videoElement.nativeElement.srcObject = stream;
+            }
+        }).catch(err => {
+            console.error('Error al acceder a la cámara: ', err);
+            this.toastManager.showError('Cámara', 'No se pudo acceder a la cámara. Revisa los permisos.');
+            this.cerrarCamara();
+        });
+    } else {
+        this.toastManager.showError('Cámara', 'Tu navegador no soporta el acceso a la cámara.');
+        this.cerrarCamara();
+    }
+  }
+
+  detenerStreamVideo() {
+    if (this.mediaStream) {
+        this.mediaStream.getTracks().forEach(track => track.stop());
+        this.mediaStream = null;
+    }
+  }
+
+  capturarImagen() {
+      if (!this.videoElement || !this.canvasElement) return;
+
+      const video = this.videoElement.nativeElement;
+      const canvas = this.canvasElement.nativeElement;
+      const context = canvas.getContext('2d');
+
+      if (context) {
+          this.escaneando = true;
+          // Ajustar canvas al tamaño real del video
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          
+          // Dibujar el fotograma actual
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Extraer a Base64 (comprimido a JPEG)
+          const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          
+          // Llamar a la API de Next.js
+          this.api.scanLabel(imageBase64).subscribe({
+              next: (data) => {
+                  this.escaneando = false;
+                  // Formato: Talla {Talla US} | {Modelo}
+                  if(data && (data.talla || data.modelo)) {
+                      this.producto.descripcion = `Talla ${data.talla || 'N/A'} | ${data.modelo || 'Desconocido'}`;
+                      this.toastManager.showSuccess('Escáner', 'Viñeta analizada correctamente.');
+                  } else {
+                      this.toastManager.showError('Escáner', 'La IA no pudo reconocer el texto.');
+                  }
+                  this.cerrarCamara();
+              },
+              error: (err) => {
+                  console.error('Error de API:', err);
+                  this.escaneando = false;
+                  // Captura de errores silenciosa: No bloquea el proceso
+                  this.toastManager.showError('Escáner IA', 'No se pudo contactar con la inteligencia artificial.');
+                  this.cerrarCamara();
+              }
+          });
+      }
+  }
+
+  ngOnDestroy() {
+      this.detenerStreamVideo();
   }
 }

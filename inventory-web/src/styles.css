@@ -1,21 +1,23 @@
 @import "primeicons/primeicons.css";
 
 :root {
-  --primary-color: #3b82f6;
-  --surface-ground: #f8fafc;
+  --primary-color: #FF4757;
+  --surface-ground: #ffffff;
   --surface-section: #ffffff;
-  --text-color: #334155;
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #f8fafc;
-  --sidebar-hover: #334155;
-  --border-color: #e2e8f0;
+  --text-color: #1e293b;
+  --sidebar-bg: #111827;
+  --sidebar-text: #ffffff;
+  --sidebar-hover: #1f2937;
+  --border-color: #f1f5f9;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--surface-ground);
   color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ===== LAYOUT ===== */
@@ -103,14 +105,13 @@ body {
 }
 
 .topbar {
-  height: 56px;
+  height: 60px;
   background-color: var(--surface-section);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   flex-shrink: 0;
 }
 
@@ -158,15 +159,15 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  padding: 0.4rem 0 env(safe-area-inset-bottom, 0.35rem);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #f1f5f9;
+  padding: 0.6rem 0 env(safe-area-inset-bottom, 0.6rem);
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 99;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
 }
 
 .bottom-bar a {
@@ -175,13 +176,13 @@ body {
   align-items: center;
   text-decoration: none;
   color: #94a3b8;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 500;
-  gap: 0.15rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 8px;
-  transition: color 0.2s, background 0.2s;
-  min-width: 50px;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  min-width: 60px;
 }
 
 .bottom-bar a i {
@@ -201,9 +202,14 @@ body {
 .card {
   background: var(--surface-section);
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
   margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
 }
 
 /* ===== ENTITY CARDS (replaces tables) ===== */
@@ -215,13 +221,18 @@ body {
 
 .entity-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 1rem 1.15rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border-radius: 20px;
+  padding: 1.25rem;
   border: 1px solid #f1f5f9;
   position: relative;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.entity-card:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
 }
 
 .entity-card:active {
@@ -314,8 +325,8 @@ body {
 .page-header-bar {
   background: white;
   padding: 1.25rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
   margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -360,8 +371,14 @@ body {
 .stat-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
 }
 
 .stat-card h4 {
@@ -378,10 +395,10 @@ body {
   color: #1e293b;
 }
 
-.stat-green { border-left: 4px solid #10b981; }
-.stat-blue  { border-left: 4px solid #3b82f6; }
-.stat-red   { border-left: 4px solid #ef4444; }
-.stat-purple { border-left: 4px solid #8b5cf6; }
+.stat-green { border-bottom: 4px solid #10b981; }
+.stat-blue  { border-bottom: 4px solid var(--primary-color); }
+.stat-red   { border-bottom: 4px solid #ef4444; }
+.stat-purple { border-bottom: 4px solid #64748b; }
 
 .dashboard-bottom {
   display: grid;
@@ -474,9 +491,9 @@ body {
 .p-toast .p-toast-message {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
   color: #1e293b;
   margin-bottom: 1rem;
   animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOutUp 0.3s 2.7s forwards;
@@ -674,3 +691,100 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== VANGUARDIA 2026 OVERRIDES ===== */
+
+/* Inputs & Selects */
+.p-inputtext, .p-inputnumber-input, .p-dropdown, .p-multiselect, .p-select, .p-datepicker-input {
+  border-radius: 20px !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 0.75rem 1.25rem !important;
+  transition: all 0.3s ease !important;
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+.p-dropdown-label, .p-select-label {
+  color: #1e293b !important;
+  background-color: transparent !important;
+}
+
+.p-input-icon-left > .p-inputtext {
+  padding-left: 2.5rem !important;
+}
+
+.p-inputtext:enabled:focus, .p-inputnumber-input:enabled:focus, .p-dropdown:not(.p-disabled).p-focus {
+  outline: 0 none !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2) !important;
+  border-color: var(--primary-color) !important;
+  background-color: #ffffff !important;
+}
+
+/* Dialog / Modales */
+.p-dialog {
+  border-radius: 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  overflow: hidden !important;
+}
+
+.p-dialog .p-dialog-header {
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 1.5rem !important;
+  background: white !important;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title {
+  font-weight: 800 !important;
+  font-size: 1.25rem !important;
+  color: var(--text-color) !important;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.5rem !important;
+  background: white !important;
+}
+
+.p-dialog .p-dialog-footer {
+  border-top: 1px solid #f1f5f9 !important;
+  padding: 1rem 1.5rem !important;
+  background: #f8fafc !important;
+}
+
+/* Botones Principales (Override severity="success" -> Brand Coral) */
+.p-button.p-button-success {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(255, 71, 87, 0.25) !important;
+  border-radius: 20px !important;
+}
+
+.p-button.p-button-success:enabled:hover {
+  background: #ff2e43 !important;
+  border-color: #ff2e43 !important;
+  box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.p-button.p-button-success:enabled:active {
+  transform: translateY(0);
+}
+
+/* Todos los botones base */
+.p-button {
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Toast Notifications (Glassmorphism) */
+.p-toast .p-toast-message {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+

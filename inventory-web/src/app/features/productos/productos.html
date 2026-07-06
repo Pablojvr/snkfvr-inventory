@@ -2,7 +2,7 @@
     <div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
             <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Inventario</h2>
-            <p-button icon="pi pi-plus" (onClick)="showDialog()" styleClass="p-button-rounded p-button-text" pTooltip="Nuevo Producto"></p-button>
+            <p-button icon="pi pi-plus" (onClick)="dialogGasto.showDialog(undefined, 1, undefined, true)" styleClass="p-button-rounded p-button-text" pTooltip="Nuevo Producto"></p-button>
         </div>
         
         <div class="product-search" style="width: 100%;">
@@ -62,13 +62,8 @@
     <div class="p-fluid" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
         <div class="field">
             <label for="descripcion" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-box" style="margin-right: 0.25rem;"></i> Descripción</label>
-            <div style="display: flex; gap: 0.5rem; align-items: stretch;">
-                <input pInputText id="descripcion" [(ngModel)]="producto.descripcion" required autofocus 
-                       [ngClass]="{'ng-invalid ng-dirty': submitted && !producto.descripcion}" style="flex: 1;" />
-                
-                <input type="file" accept="image/*" capture="environment" style="display: none" #fileInput (change)="procesarImagenSeleccionada($event)">
-                <p-button icon="pi pi-camera" styleClass="p-button-outlined p-button-secondary" (onClick)="fileInput.click()" pTooltip="Escanear viñeta (IA)" [loading]="escaneando" [disabled]="escaneando"></p-button>
-            </div>
+            <input pInputText id="descripcion" [(ngModel)]="producto.descripcion" required autofocus 
+                   [ngClass]="{'ng-invalid ng-dirty': submitted && !producto.descripcion}" style="width: 100%;" />
             <small class="p-error" *ngIf="submitted && !producto.descripcion">La descripción es obligatoria.</small>
         </div>
         <div class="field">

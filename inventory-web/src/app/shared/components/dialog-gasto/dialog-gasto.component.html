@@ -28,9 +28,14 @@
 
         <div class="field">
             <label for="motivo" style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-align-left" style="margin-right: 0.25rem;"></i> Motivo / Descripción</label>
-            <input pInputText id="motivo" [(ngModel)]="gasto.motivo" required autofocus 
-                   [readonly]="tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío'"
-                   [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" />
+            <div style="display: flex; gap: 0.5rem; align-items: stretch;">
+                <input pInputText id="motivo" [(ngModel)]="gasto.motivo" required autofocus 
+                       [readonly]="tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío'"
+                       [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" style="flex: 1;" />
+                
+                <input type="file" accept="image/*" capture="environment" style="display: none" #fileInput (change)="procesarImagenSeleccionada($event)" *ngIf="tipoNombreActual === 'Producto'">
+                <p-button icon="pi pi-camera" styleClass="p-button-outlined p-button-secondary" (onClick)="fileInput.click()" pTooltip="Escanear viñeta (IA)" [loading]="escaneando" [disabled]="escaneando" *ngIf="tipoNombreActual === 'Producto'"></p-button>
+            </div>
             <small class="p-error" *ngIf="submitted && !gasto.motivo">El motivo es obligatorio.</small>
         </div>
         

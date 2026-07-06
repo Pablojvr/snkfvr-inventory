@@ -27,6 +27,7 @@ export class DialogGastoComponent {
   productoNombre: string = '';
   costoActual: number | undefined = undefined;
   prefilledProducto: boolean = false;
+  escaneando: boolean = false;
   
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
@@ -195,5 +196,70 @@ export class DialogGastoComponent {
         error: () => this.guardando = false
       });
     }
+  }
+
+  // --- Cámara Nativa y OCR ---
+  procesarImagenSeleccionada(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.escaneando = true;
+    this.toastManager.showSuccess('Procesando', 'Analizando la etiqueta con IA, por favor espera...');
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+        const img = new Image();
+        img.onload = () => {
+            // Usar un canvas en memoria para comprimir y extraer base64
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800;
+            const MAX_HEIGHT = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            if (ctx) {
+                ctx.drawImage(img, 0, 0, width, height);
+                const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Llamar a la API
+                this.api.scanLabel(imageBase64).subscribe({
+                    next: (data) => {
+                        this.escaneando = false;
+                        if(data && (data.talla || data.modelo)) {
+                            this.gasto.motivo = `Talla ${data.talla || 'N/A'} | ${data.modelo || 'Desconocido'}`;
+                            this.toastManager.showSuccess('Escáner', 'Viñeta analizada correctamente.');
+                        } else {
+                            this.toastManager.showError('Escáner', 'La IA no pudo reconocer el texto.');
+                        }
+                    },
+                    error: (err) => {
+                        console.error('Error de API:', err);
+                        this.escaneando = false;
+                        this.toastManager.showError('Escáner IA', 'No se pudo contactar con la inteligencia artificial.');
+                    }
+                });
+            }
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    // Limpiar input para permitir seleccionar la misma foto si hubo error
+    event.target.value = '';
   }
 }

@@ -108,8 +108,8 @@ export class Ventas implements OnInit {
                precioVenta: venta?.precioVenta || 0
            };
         }).sort((a, b) => {
-           const dateB = b.ventaAsociada ? new Date(b.ventaAsociada.fecha).getTime() : new Date(b.fechaCompra).getTime();
-           const dateA = a.ventaAsociada ? new Date(a.ventaAsociada.fecha).getTime() : new Date(a.fechaCompra).getTime();
+           const dateB = b.ventaAsociada ? new Date(b.ventaAsociada.fechaVenta || b.ventaAsociada.fechaRegistro || 0).getTime() : new Date(b.fechaCompra).getTime();
+           const dateA = a.ventaAsociada ? new Date(a.ventaAsociada.fechaVenta || a.ventaAsociada.fechaRegistro || 0).getTime() : new Date(a.fechaCompra).getTime();
            return dateB - dateA;
         });
       });

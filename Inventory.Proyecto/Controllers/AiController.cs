@@ -44,11 +44,8 @@ namespace Inventory.Proyecto.Controllers
                     return StatusCode((int)response.StatusCode, responseString);
                 }
 
-                // Parse the response from Vercel to ensure it's valid JSON
-                using (var document = JsonDocument.Parse(responseString))
-                {
-                    return Ok(document.RootElement);
-                }
+                // Devolver la respuesta directamente con su Content-Type
+                return Content(responseString, "application/json");
             }
             catch (Exception ex)
             {

@@ -33,8 +33,10 @@
                        [readonly]="tipoNombreActual === 'Comisión' || tipoNombreActual === 'Envío'"
                        [ngClass]="{'ng-invalid ng-dirty': submitted && !gasto.motivo}" style="flex: 1;" />
                 
-                <input type="file" accept="image/*" capture="environment" style="display: none" #fileInput (change)="procesarImagenSeleccionada($event)" *ngIf="tipoNombreActual === 'Producto'">
-                <p-button icon="pi pi-camera" styleClass="p-button-outlined p-button-secondary" (onClick)="fileInput.click()" pTooltip="Escanear viñeta (IA)" [loading]="escaneando" [disabled]="escaneando" *ngIf="tipoNombreActual === 'Producto'"></p-button>
+                <ng-container *ngIf="tipoNombreActual === 'Producto'">
+                    <input type="file" accept="image/*" capture="environment" style="display: none" #fileInput (change)="procesarImagenSeleccionada($event)">
+                    <p-button icon="pi pi-camera" styleClass="p-button-outlined p-button-secondary" (onClick)="fileInput.click()" pTooltip="Escanear viñeta (IA)" [loading]="escaneando" [disabled]="escaneando"></p-button>
+                </ng-container>
             </div>
             <small class="p-error" *ngIf="submitted && !gasto.motivo">El motivo es obligatorio.</small>
         </div>

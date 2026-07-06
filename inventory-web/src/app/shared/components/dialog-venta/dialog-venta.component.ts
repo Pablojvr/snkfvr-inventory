@@ -7,14 +7,13 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ApiService, Producto, Usuario } from '../../../core/services/api';
 import { ToastManagerService } from '../../../core/services/toast-manager.service';
 
 @Component({
   selector: 'app-dialog-venta',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, SelectModule, InputNumberModule, InputTextModule, ButtonModule, CheckboxModule, AutoCompleteModule],
+  imports: [CommonModule, FormsModule, DialogModule, SelectModule, InputNumberModule, InputTextModule, ButtonModule, CheckboxModule],
   templateUrl: './dialog-venta.component.html',
 })
 export class DialogVentaComponent implements OnInit {
@@ -41,7 +40,6 @@ export class DialogVentaComponent implements OnInit {
   };
 
   productosDisponibles: Producto[] = [];
-  filteredProductos: Producto[] = [];
   usuarios: Usuario[] = [];
 
   constructor(private api: ApiService, private toastManager: ToastManagerService) {}
@@ -174,24 +172,6 @@ export class DialogVentaComponent implements OnInit {
           this.nuevaVentaData.precioVenta = (prod.costoCalculado || prod.costo || 0) + 15;
           this.onNuevaVentaChange();
       }
-  }
-
-  filterProducto(event: any) {
-      let filtered: Producto[] = [];
-      let query = event.query;
-      
-      if (query) {
-          for (let i = 0; i < this.productosDisponibles.length; i++) {
-              let prod = this.productosDisponibles[i];
-              if (prod.descripcion.toLowerCase().indexOf(query.toLowerCase()) >= 0) {
-                  filtered.push(prod);
-              }
-          }
-      } else {
-          filtered = [...this.productosDisponibles];
-      }
-      
-      this.filteredProductos = filtered;
   }
 
   guardar() {

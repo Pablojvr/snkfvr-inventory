@@ -4,29 +4,16 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Instanciar el cliente de Google Generative AI (requiere variable de entorno GEMINI_API_KEY)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: corsHeaders,
-  });
-}
-
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'Falta la API Key de Gemini en el servidor.' }, { status: 500, headers: corsHeaders });
+      return NextResponse.json({ error: 'Falta la API Key de Gemini en el servidor.' }, { status: 500 });
     }
 
     const { imageBase64 } = await req.json();
 
     if (!imageBase64) {
-      return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400, headers: corsHeaders });
+      return NextResponse.json({ error: 'No se proporcionó ninguna imagen.' }, { status: 400 });
     }
 
     // El modelo gemini-2.5-flash es excelente para tareas multimodales (visión + texto) rápidas
@@ -66,10 +53,10 @@ export async function POST(req: NextRequest) {
 
     const data = JSON.parse(cleanJson);
 
-    return NextResponse.json(data, { headers: corsHeaders });
+    return NextResponse.json(data);
 
   } catch (error: any) {
     console.error('Error al procesar la imagen con Gemini:', error);
-    return NextResponse.json({ error: 'Hubo un error al procesar la imagen.', details: error.message }, { status: 500, headers: corsHeaders });
+    return NextResponse.json({ error: 'Hubo un error al procesar la imagen.', details: error.message }, { status: 500 });
   }
 }

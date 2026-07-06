@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Permitir hasta 60 segundos en Vercel Serverless (Plan Hobby)
+export const maxDuration = 60;
+
 // Instanciar el cliente de Google Generative AI (requiere variable de entorno GEMINI_API_KEY)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -18,8 +21,7 @@ export async function POST(req: NextRequest) {
 
     // El modelo gemini-2.5-flash es excelente para tareas multimodales (visión + texto) rápidas
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
-      tools: [{ googleSearch: {} } as any]
+      model: 'gemini-2.5-flash'
     });
 
     const prompt = `

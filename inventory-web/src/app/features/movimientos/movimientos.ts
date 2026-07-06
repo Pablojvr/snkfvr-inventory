@@ -19,6 +19,17 @@ import { ApiService, Movimiento } from '../../core/services/api';
 export class Movimientos implements OnInit {
   movimientos: Movimiento[] = [];
   textoFiltro: string = '';
+  filtroTipoActivo: string = 'Todos';
+  
+  categorias = [
+    { label: 'Todos', value: 'Todos' },
+    { label: 'Compras', value: 'Compra' },
+    { label: 'Ventas', value: 'Venta' },
+    { label: 'Gastos', value: 'Gasto' },
+    { label: 'Comisiones', value: 'Comisión' },
+    { label: 'Envíos', value: 'Envío' },
+    { label: 'Ingresos', value: 'Ingreso' }
+  ];
 
   constructor(private api: ApiService) {}
 
@@ -48,11 +59,59 @@ export class Movimientos implements OnInit {
   }
 
   get movimientosFiltrados() {
-    if (!this.textoFiltro) return this.movimientos;
-    const text = this.textoFiltro.toLowerCase();
-    return this.movimientos.filter(m => 
-      m.descripcion.toLowerCase().includes(text) ||
-      m.tipo.toLowerCase().includes(text)
-    );
+    let filtrados = this.movimientos;
+    
+    if (this.filtroTipoActivo !== 'Todos') {
+      if (this.filtroTipoActivo === 'Envío') {
+        filtrados = filtrados.filter(m => m.descripcion.includes('ENV |'));
+      } else if (this.filtroTipoActivo === 'Gasto') {
+        filtrados = filtrados.filter(m => m.tipo === 'Salida de dinero' && !m.descripcion.includes('ENV |'));
+      } else if (this.filtroTipoActivo === 'Compra') {
+        filtrados = filtrados.filter(m => m.tipo === 'Compra' && !m.descripcion.includes('ENV |'));
+      } else {
+        filtrados = filtrados.filter(m => m.tipo === this.filtroTipoActivo);
+      }
+    }
+    
+    if (this.textoFiltro) {
+      const text = this.textoFiltro.toLowerCase();
+      filtrados = filtrados.filter(m => 
+        m.descripcion.toLowerCase().includes(text) ||
+        m.tipo.toLowerCase().includes(text)
+      );
+    }
+    return filtrados;
+  }
+
+  setFiltro(tipo: string) {
+    this.filtroTipoActivo = tipo;
+  }
+
+  getIconoPorMov(mov: Movimiento): string {
+    if (mov.descripcion.includes('ENV |')) return 'pi-truck';
+    
+    switch(mov.tipo) {
+      case 'Compra': return 'pi-shopping-cart';
+      case 'Venta': return 'pi-dollar';
+      case 'Ingreso': return 'pi-arrow-down-left';
+      case 'Comisión': return 'pi-wallet';
+      case 'Salida de dinero': return 'pi-arrow-up-right';
+      case 'Cambio de Estado': return 'pi-sync';
+      default: return 'pi-list';
+    }
+  }
+
+  getColorPorMov(mov: Movimiento): { bg: string, text: string } {
+    if (mov.descripcion.includes('ENV |')) return { bg: '#e0f2fe', text: '#0284c7' }; // Blue
+    
+    switch(mov.tipo) {
+      case 'Compra': return { bg: '#e0e7ff', text: '#4f46e5' }; // Indigo
+      case 'Venta': return { bg: '#dcfce7', text: '#16a34a' }; // Green
+      case 'Ingreso': return { bg: '#dcfce7', text: '#16a34a' }; // Green
+      case 'Comisión': return { bg: '#ffedd5', text: '#ea580c' }; // Orange
+      case 'Salida de dinero': return { bg: '#fee2e2', text: '#dc2626' }; // Red
+      case 'Cambio de Estado': return { bg: '#f3f4f6', text: '#4b5563' }; // Gray
+      default: return { bg: '#f1f5f9', text: '#64748b' }; // Slate
+    }
   }
 }

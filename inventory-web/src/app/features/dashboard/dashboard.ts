@@ -88,8 +88,39 @@ export class Dashboard implements OnInit {
     if (minutes < 60) return `Hace ${minutes} minutos`;
     if (hours === 1) return 'Hace una hora';
     if (hours < 24) return `Hace ${hours} horas`;
-    if (days === 1) return 'Hace un día';
+    if (days === 1) return 'Ayer';
     return `Hace ${days} días`;
+  }
+
+  getIconForMovimiento(tipo: string): string {
+    switch (tipo?.toLowerCase()) {
+      case 'compra':
+      case 'salida de dinero':
+        return 'pi pi-shopping-bag';
+      case 'venta':
+      case 'ingreso':
+        return 'pi pi-arrow-down-left';
+      case 'comisión':
+        return 'pi pi-percentage';
+      case 'adelanto por reserva':
+        return 'pi pi-clock';
+      case 'cambio de estado':
+        return 'pi pi-sync';
+      default:
+        return 'pi pi-info-circle';
+    }
+  }
+
+  getColorForMovimiento(tipo: string, monto: number): string {
+    if (monto < 0) return '#ef4444'; // Red
+    if (monto > 0) return '#10b981'; // Green
+    
+    // Fallbacks
+    switch (tipo?.toLowerCase()) {
+      case 'comisión': return '#f59e0b';
+      case 'cambio de estado': return '#3b82f6';
+      default: return '#64748b';
+    }
   }
 
   cargarDatos() {

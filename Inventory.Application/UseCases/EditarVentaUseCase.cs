@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
+using Inventory.Core.Constants;
 
 namespace Inventory.Application.UseCases
 {
@@ -59,7 +60,7 @@ namespace Inventory.Application.UseCases
 
             // Resolve TipoGasto IDs
             var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
-            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == "Comisión")?.Id ?? 3;
+            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == TipoGastoConstants.Comision)?.Id ?? 3;
 
             if (venta.Estado == "Vendido")
             {
@@ -71,7 +72,7 @@ namespace Inventory.Application.UseCases
 
                     var movimientoEstado = new Movimiento
                     {
-                        Tipo = "Cambio de Estado",
+                        Tipo = TipoMovimientoConstants.CambioDeEstado,
                         Fecha = DateTime.Now,
                         Descripcion = $"El producto {venta.ProductoId} cambió a Vendido",
                         MontoTotal = 0,
@@ -102,7 +103,7 @@ namespace Inventory.Application.UseCases
 
                         var movComisionVenta = new Movimiento
                         {
-                            Tipo = "Comisión",
+                            Tipo = TipoMovimientoConstants.Comision,
                             Fecha = DateTime.Now,
                             Descripcion = $"Comisión de venta: COM | {nombreProducto} asignada a {nombreUsuarioComision}",
                             MontoTotal = -ventaDto.ComisionMonto.Value,
@@ -130,7 +131,7 @@ namespace Inventory.Application.UseCases
             }
 
             var movimientos = await _movimientoRepositorio.ObtenerTodosAsync();
-            var movVenta = movimientos.FirstOrDefault(m => m.ReferenciaId == id && m.Tipo == "Venta");
+            var movVenta = movimientos.FirstOrDefault(m => m.ReferenciaId == id && m.Tipo == TipoMovimientoConstants.Venta);
             
             // Si antes era Reservado, es probable que no tenga movVenta, o si lo tiene hay que actualizarlo
             if (venta.Estado == "Vendido")
@@ -153,7 +154,7 @@ namespace Inventory.Application.UseCases
                     // No había movimiento de venta porque era reserva, lo creamos ahora
                     movVenta = new Movimiento
                     {
-                        Tipo = "Venta",
+                        Tipo = TipoMovimientoConstants.Venta,
                         Fecha = venta.FechaVenta ?? DateTime.Now,
                         Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
                         MontoTotal = montoVenta,

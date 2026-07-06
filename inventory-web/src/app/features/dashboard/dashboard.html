@@ -94,6 +94,11 @@
         </h3>
         <div style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
             <div *ngFor="let mov of movimientos" (click)="abrirDetalleMovimiento(mov)" style="display: flex; align-items: center; background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0.5rem; gap: 0.5rem; cursor: pointer; transition: box-shadow 0.2s;" [ngStyle]="{'box-shadow': '0 0 5px ' + (mov.montoTotal < 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}">
+                <div [style.background]="getColorForMovimiento(mov.tipo, mov.montoTotal) + '20'" 
+                     [style.color]="getColorForMovimiento(mov.tipo, mov.montoTotal)" 
+                     style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i [class]="getIconForMovimiento(mov.tipo)" style="font-size: 0.9rem;"></i>
+                </div>
                 <div style="flex: 1; min-width: 0; line-height: 1.2;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 700; font-size: 0.75rem; color: #1e293b;">{{ mov.tipo }}</span>
@@ -101,7 +106,7 @@
                     </div>
                     <div style="font-size: 0.7rem; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.15rem;" [innerHTML]="mov.descripcion"></div>
                 </div>
-                <div [style.color]="mov.montoTotal < 0 ? '#ef4444' : '#10b981'" style="font-weight: 700; font-size: 0.8rem; margin-left: 0.5rem;">
+                <div [style.color]="getColorForMovimiento(mov.tipo, mov.montoTotal)" style="font-weight: 700; font-size: 0.8rem; margin-left: 0.5rem;">
                     {{ mov.montoTotal | currency }}
                 </div>
             </div>

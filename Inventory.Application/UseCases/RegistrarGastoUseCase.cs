@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
+using Inventory.Core.Constants;
 
 namespace Inventory.Application.UseCases
 {
@@ -42,22 +43,22 @@ namespace Inventory.Application.UseCases
             var tipoGasto = await _tipoGastoRepositorio.ObtenerPorIdAsync(gastoDto.TipoGastoId);
             var tipoNombre = tipoGasto?.Nombre ?? "Producto";
 
-            if (productoId.HasValue && tipoNombre != "Comisión" && tipoNombre != "Envío" && tipoNombre != "Producto")
+            if (productoId.HasValue && tipoNombre != TipoGastoConstants.Comision && tipoNombre != TipoGastoConstants.Envio && tipoNombre != TipoGastoConstants.Producto)
             {
                 throw new Exception("Un gasto asociado a un producto solo puede ser de tipo Comisión, Envío o Producto.");
             }
 
-            if (tipoNombre == "Comisión" && !gastoDto.Motivo.StartsWith("COM |"))
+            if (tipoNombre == TipoGastoConstants.Comision && !gastoDto.Motivo.StartsWith("COM |"))
             {
                 gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "COM | " : $"COM | {gastoDto.Motivo}";
             }
-            else if (tipoNombre == "Envío" && !gastoDto.Motivo.StartsWith("ENV |"))
+            else if (tipoNombre == TipoGastoConstants.Envio && !gastoDto.Motivo.StartsWith("ENV |"))
             {
                 gastoDto.Motivo = string.IsNullOrWhiteSpace(gastoDto.Motivo) ? "ENV | " : $"ENV | {gastoDto.Motivo}";
             }
 
             // Creacion automatica de producto si es Producto (antes Calzado)
-            if (tipoNombre == "Producto" && !productoId.HasValue)
+            if (tipoNombre == TipoGastoConstants.Producto && !productoId.HasValue)
             {
                 var producto = new Producto
                 {
@@ -84,8 +85,8 @@ namespace Inventory.Application.UseCases
 
             var gastoAgregado = await _gastoRepositorio.AgregarAsync(gasto);
 
-            var tipoMovimiento = tipoNombre == "Comisión" ? "Comisión" : (productoId.HasValue ? "Compra" : "Salida de dinero");
-            var descPrefix = tipoNombre == "Comisión" ? "Comisión" : "Gasto/Compra";
+            var tipoMovimiento = tipoNombre == TipoGastoConstants.Comision ? TipoMovimientoConstants.Comision : (productoId.HasValue ? TipoMovimientoConstants.Compra : TipoMovimientoConstants.SalidaDeDinero);
+            var descPrefix = tipoNombre == TipoGastoConstants.Comision ? "Comisión" : "Gasto/Compra";
 
             var movimiento = new Movimiento
             {
@@ -108,7 +109,7 @@ namespace Inventory.Application.UseCases
                 
                 // Resolve the "Comisión" type ID
                 var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
-                var tipoComision = tipos.FirstOrDefault(t => t.Nombre == "Comisión");
+                var tipoComision = tipos.FirstOrDefault(t => t.Nombre == TipoGastoConstants.Comision);
                 var comisionTipoId = tipoComision?.Id ?? 3;
 
                 var nombreProducto = gastoDto.Motivo;
@@ -127,7 +128,7 @@ namespace Inventory.Application.UseCases
 
                 var movimientoComision = new Movimiento
                 {
-                    Tipo = "Comisión",
+                    Tipo = TipoMovimientoConstants.Comision,
                     Fecha = gastoDto.Fecha,
                     Descripcion = $"Comisión: COM | {nombreProducto} asignada al usuario con ID {comisionUsuarioId}",
                     MontoTotal = -gastoDto.ComisionMonto.Value,

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
+using Inventory.Core.Constants;
 
 namespace Inventory.Application.UseCases
 {
@@ -47,7 +48,7 @@ namespace Inventory.Application.UseCases
 
                 // Desactivar el producto si el gasto fue de tipo Producto y creó el producto
                 var tipoGasto = await _tipoGastoRepositorio.ObtenerPorIdAsync(gasto.TipoGastoId);
-                if (tipoGasto?.Nombre == "Producto" && gasto.ProductoId.HasValue)
+                if (tipoGasto?.Nombre == TipoGastoConstants.Producto && gasto.ProductoId.HasValue)
                 {
                     await _productoRepositorio.EliminarAsync(gasto.ProductoId.Value);
                 }

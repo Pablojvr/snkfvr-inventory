@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Inventory.Application.DTOs;
 using Inventory.Core.Entities;
 using Inventory.Core.Interfaces;
+using Inventory.Core.Constants;
 
 namespace Inventory.Application.UseCases
 {
@@ -73,7 +74,7 @@ namespace Inventory.Application.UseCases
             {
                 var movimiento = new Movimiento
                 {
-                    Tipo = "Venta",
+                    Tipo = TipoMovimientoConstants.Venta,
                     Fecha = ventaDto.FechaVenta ?? DateTime.Now,
                     Descripcion = $"Venta del producto {ventaDto.ProductoId} realizada por el usuario con ID {ventaDto.UsuarioId}",
                     MontoTotal = ventaDto.PrecioVenta, // La venta completa
@@ -87,9 +88,9 @@ namespace Inventory.Application.UseCases
                 // Registrar solo el adelanto en reservas
                 var movimientoAdelanto = new Movimiento
                 {
-                    Tipo = "Ingreso", // Lo clasificamos como Ingreso / Adelanto
+                    Tipo = TipoMovimientoConstants.Ingreso, // Lo clasificamos como Ingreso / Adelanto
                     Fecha = ventaDto.FechaVenta ?? DateTime.Now,
-                    Descripcion = $"Adelanto por reserva del producto {ventaDto.ProductoId}",
+                    Descripcion = $"{TipoMovimientoConstants.AdelantoPorReserva} del producto {ventaDto.ProductoId}",
                     MontoTotal = ventaDto.AdelantoMonto.Value,
                     ReferenciaId = ventaAgregada.Id,
                     ProductoId = ventaDto.ProductoId
@@ -99,7 +100,7 @@ namespace Inventory.Application.UseCases
 
             var movimientoEstado = new Movimiento
             {
-                Tipo = "Cambio de Estado",
+                Tipo = TipoMovimientoConstants.CambioDeEstado,
                 Fecha = DateTime.Now,
                 Descripcion = $"El producto {ventaDto.ProductoId} cambió a {estadoDeseado}",
                 MontoTotal = 0,
@@ -111,8 +112,8 @@ namespace Inventory.Application.UseCases
 
             // Resolve TipoGasto IDs for Envío and Comisión
             var tipos = await _tipoGastoRepositorio.ObtenerTodosAsync();
-            var tipoEnvioId = tipos.FirstOrDefault(t => t.Nombre == "Envío")?.Id ?? 2;
-            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == "Comisión")?.Id ?? 3;
+            var tipoEnvioId = tipos.FirstOrDefault(t => t.Nombre == TipoGastoConstants.Envio)?.Id ?? 2;
+            var tipoComisionId = tipos.FirstOrDefault(t => t.Nombre == TipoGastoConstants.Comision)?.Id ?? 3;
 
             if (ventaDto.CostoEnvio > 0)
             {
@@ -165,7 +166,7 @@ namespace Inventory.Application.UseCases
 
                 var movComisionVenta = new Movimiento
                 {
-                    Tipo = "Comisión",
+                    Tipo = TipoMovimientoConstants.Comision,
                     Fecha = DateTime.Now,
                     Descripcion = $"Comisión de venta: COM | {nombreProducto} asignada a {nombreUsuarioComision}",
                     MontoTotal = -ventaDto.ComisionMonto.Value,

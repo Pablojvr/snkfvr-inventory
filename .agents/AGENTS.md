@@ -10,3 +10,4 @@
 - **Reseteo de Paginación**: Al cambiar cualquier filtro (texto, estado, categoría), siempre se debe forzar el regreso a la primera página estableciendo `this.first = 0`.
 - **Botones Flotantes (FAB)**: Para las acciones principales de creación (como "Nueva Venta" o "Registrar Gasto"), se prioriza el uso de botones grandes dentro de la cabecera, o FAB redondos en la esquina inferior derecha.
 - **Paginador**: El estilo del paginador de PrimeNG en estado activo usa el color corporativo `--primary-color`.
+- **Calidad de Marca**: Es OBLIGATORIO hacer revisión de las reglas de marca de calidad al diseño y garantizar que cualquier elemento de UI nuevo o modificado sea coherente visualmente, use la paleta de colores correcta y no tenga defectos visuales (ej. textos invisibles, fondos discordantes o componentes que no sigan el esquema de diseños).

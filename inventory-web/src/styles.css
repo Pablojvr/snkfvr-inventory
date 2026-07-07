@@ -846,3 +846,126 @@ body {
   color: #1e293b !important;
 }
 
+/* Light Theme overrides for popup menus */
+.light-menu.p-menu {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  border-radius: 12px !important;
+  padding: 0.5rem 0 !important;
+}
+
+.light-menu.p-menu .p-menuitem-link {
+  color: #1e293b !important;
+  padding: 0.75rem 1.25rem !important;
+  transition: background-color 0.2s, color 0.2s !important;
+}
+
+.light-menu.p-menu .p-menuitem-text,
+.light-menu.p-menu .p-menuitem-icon,
+.light-menu.p-menu .p-menu-item-label,
+.light-menu.p-menu .p-menu-item-icon,
+.light-menu.p-menu span {
+  color: #1e293b !important;
+}
+
+.light-menu.p-menu .p-menuitem-link:hover {
+  background: #f1f5f9 !important;
+}
+
+/* ===== GLOBAL DROPDOWN / SELECT OVERLAY OVERRIDES ===== */
+.p-select-overlay, .p-dropdown-panel {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 0 !important; /* Remove outer padding to fix alignment and overflow */
+  max-width: 95vw !important; 
+  box-sizing: border-box !important;
+  overflow: hidden !important; /* Contain inner elements */
+}
+
+.p-select-overlay .p-select-list-container,
+.p-dropdown-panel .p-dropdown-items-wrapper {
+  padding: 0.25rem 0.5rem !important;
+}
+
+.p-select-overlay .p-select-option,
+.p-dropdown-panel .p-dropdown-item {
+  color: #1e293b !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 0.75rem !important;
+  margin: 0.15rem 0 !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
+  font-size: 0.95rem !important;
+  white-space: normal !important; /* Permitir que el texto baje a otra línea en vez de expandir el ancho */
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+}
+
+.p-select-overlay .p-select-option:hover,
+.p-dropdown-panel .p-dropdown-item:hover {
+  background: #f8fafc !important;
+}
+
+.p-select-overlay .p-select-option.p-select-option-selected,
+.p-select-overlay .p-select-option[data-p-selected="true"],
+.p-select-overlay .p-select-option[data-p-highlight="true"],
+.p-dropdown-panel .p-dropdown-item.p-highlight {
+  background: #fff1f2 !important;
+  color: var(--primary-color) !important;
+}
+
+.p-select-overlay .p-select-option.p-select-option-selected *,
+.p-select-overlay .p-select-option[data-p-selected="true"] *,
+.p-select-overlay .p-select-option[data-p-highlight="true"] *,
+.p-dropdown-panel .p-dropdown-item.p-highlight * {
+  color: var(--primary-color) !important;
+}
+
+/* Default label color if no template */
+.p-select-overlay .p-select-item-label,
+.p-dropdown-panel .p-dropdown-item-label {
+  color: #1e293b !important;
+}
+
+/* Filter/Search box */
+.p-select-overlay .p-select-filter-container,
+.p-dropdown-panel .p-dropdown-filter-container {
+  padding: 0.75rem 0.75rem 0.5rem 0.75rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  margin-bottom: 0 !important;
+  background: #ffffff !important;
+}
+
+.p-select-overlay .p-select-filter,
+.p-dropdown-panel .p-dropdown-filter {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 0.75rem !important;
+  padding-left: 2.2rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s !important;
+  font-size: 0.9rem !important;
+  height: auto !important;
+}
+
+.p-select-overlay .p-select-filter:focus,
+.p-dropdown-panel .p-dropdown-filter:focus,
+.p-select-overlay .p-select-filter.p-focus,
+.p-dropdown-panel .p-dropdown-filter.p-focus {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 0 0 3px rgba(241, 245, 249, 1) !important;
+  background: #ffffff !important;
+  outline: none !important;
+}
+
+.p-select-overlay .p-select-filter-icon,
+.p-dropdown-panel .p-dropdown-filter-icon {
+  color: #94a3b8 !important;
+  left: 1.25rem !important;
+}

@@ -7,26 +7,12 @@
       </button>
     </div>
     <nav class="nav-menu">
-      <span class="nav-section-label">Accesos Directos</span>
-      <a routerLink="/anadir-masivo" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-plus-circle"></i> Añadir Masivo (Compras)
-      </a>
-      <a routerLink="/venta-masiva" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-cart-plus"></i> Venta Masiva
-      </a>
-
-      <span class="nav-section-label">Configuración</span>
+      <span class="nav-section-label">Configuraciones del Sistema</span>
       <a routerLink="/usuarios" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-users"></i> Usuarios
       </a>
       <a routerLink="/tipos-gasto" routerLinkActive="active" (click)="closeSidebar()">
         <i class="pi pi-tags"></i> Tipos de Gasto
-      </a>
-      <a routerLink="/movimientos" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-list"></i> Bitácora
-      </a>
-      <a routerLink="/ingresos" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="pi pi-arrow-down-left"></i> Ingresos
       </a>
     </nav>
   </aside>
@@ -37,7 +23,7 @@
       <button class="menu-toggle" (click)="toggleSidebar()" style="display: none;">
         <i class="pi pi-bars"></i>
       </button>
-      <div class="topbar-title">Inventario SNKFVR</div>
+      <div class="topbar-title">SNKFVR</div>
       <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
         <div *ngIf="selectedUserId" style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.25rem 0.75rem 0.25rem 0.25rem; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" (click)="displayUserModal = true" class="user-pill-hover">
             <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ff7a85); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.9rem;">
@@ -81,7 +67,7 @@
         <span>Más</span>
       </a>
     </nav>
-    <p-menu #mobileMenu [popup]="true" [model]="mobileMenuOptions" appendTo="body"></p-menu>
+    <p-menu #mobileMenu [popup]="true" [model]="mobileMenuOptions" appendTo="body" styleClass="light-menu"></p-menu>
   </div>
 </div>
 

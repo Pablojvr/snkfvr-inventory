@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +26,7 @@ import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialo
   imports: [CommonModule, ButtonModule, DialogModule, TableModule, SelectModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, TimelineModule, TooltipModule, MenuModule, DialogGastoComponent, DialogVentaComponent, PaginatorModule],
   templateUrl: './productos.html',
 })
-export class Productos implements OnInit {
+export class Productos implements OnInit, AfterViewInit {
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
   displayDialog: boolean = false;
@@ -47,6 +47,34 @@ export class Productos implements OnInit {
   onPageChange(event: any) {
       this.first = event.first;
       this.rows = event.rows;
+  }
+
+  isScrolled: boolean = false;
+
+  countByState(state: string): number {
+      return this.productos.filter(p => (p.estado || 'Disponible') === state).length;
+  }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+      this.checkScroll(window.scrollY || document.documentElement.scrollTop);
+  }
+
+  ngAfterViewInit() {
+      const contentEl = document.querySelector('.content');
+      if (contentEl) {
+          contentEl.addEventListener('scroll', (e: any) => {
+              this.checkScroll(e.target.scrollTop);
+          });
+      }
+  }
+
+  checkScroll(scrollTop: number) {
+      if (scrollTop > 30 && !this.isScrolled) {
+          this.isScrolled = true;
+      } else if (scrollTop <= 30 && this.isScrolled) {
+          this.isScrolled = false;
+      }
   }
 
   // Venta Modal

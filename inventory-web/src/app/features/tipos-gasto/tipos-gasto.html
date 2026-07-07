@@ -4,22 +4,22 @@
         <p-button label="Nuevo Tipo" icon="pi pi-plus" (onClick)="showDialog()"></p-button>
     </div>
 
-    <p-table [value]="tipos" [loading]="loading" [rowHover]="true" styleClass="p-datatable-striped">
+    <p-table [value]="tipos" [loading]="loading" [rowHover]="true" styleClass="p-datatable-sm">
         <ng-template pTemplate="header">
             <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Sistema</th>
-                <th style="width: 8rem; text-align: center;">Acciones</th>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ID</th>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Nombre</th>
+                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Sistema</th>
+                <th style="width: 8rem; text-align: center; font-size: 0.85rem; color: #64748b; font-weight: 600;">Acciones</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-tipo>
             <tr>
-                <td>#{{tipo.id}}</td>
-                <td style="font-weight: 600;">{{tipo.nombre}}</td>
+                <td style="color: #64748b;">#{{tipo.id}}</td>
+                <td style="font-weight: 600; color: #1e293b;">{{tipo.nombre}}</td>
                 <td>
-                    <p-tag *ngIf="tipo.esSistema" severity="info" value="Sistema"></p-tag>
-                    <p-tag *ngIf="!tipo.esSistema" severity="success" value="Personalizado"></p-tag>
+                    <span *ngIf="tipo.esSistema" style="background: #e0f2fe; color: #0284c7; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Sistema</span>
+                    <span *ngIf="!tipo.esSistema" style="background: #dcfce7; color: #16a34a; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Personalizado</span>
                 </td>
                 <td>
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">

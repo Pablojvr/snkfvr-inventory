@@ -83,9 +83,9 @@ export class VentaMasivaComponent implements OnInit {
     const nuevaVenta: Venta = {
       productoId: productoId || 0,
       usuarioId: this.defaultUsuarioId,
-      precioVenta: 0,
-      costoEnvio: 0,
-      costosAdicionales: 0,
+      precioVenta: null as any,
+      costoEnvio: null as any,
+      costosAdicionales: null as any,
       estado: 'Reservado'
     };
 

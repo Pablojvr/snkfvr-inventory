@@ -20,6 +20,8 @@ export class Estadisticas implements OnInit {
   tiempoPromedioVenta: number = 0; // days
   comisionesVenta: number = 0;
   comisionesCompra: number = 0;
+  gananciaPotencial: number = 0;
+  stockDisponible: number = 0;
   
   // Top Productos
   topProductos: any[] = [];
@@ -75,6 +77,11 @@ export class Estadisticas implements OnInit {
       this.calcularKPIs(ventasFiltradas, gastosFiltrados, movimientosFiltrados);
       this.calcularTopProductos(ventasFiltradas, gastosFiltrados);
       this.generarGrafico(ventasFiltradas, gastosFiltrados);
+
+      // Calcular ganancia potencial de los productos en inventario
+      const disponibles = this.productos.filter(p => p.estado === 'Disponible' || !p.estado);
+      this.stockDisponible = disponibles.length;
+      this.gananciaPotencial = this.stockDisponible * 20;
   }
 
   filtrarPorFecha() {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -21,7 +21,7 @@ import { PaginatorModule } from 'primeng/paginator';
   imports: [CommonModule, ButtonModule, DialogModule, FormsModule, InputTextModule, InputNumberModule, DatePickerModule, SelectModule, TooltipModule, MenuModule, PaginatorModule],
   templateUrl: './ingresos.html',
 })
-export class Ingresos implements OnInit {
+export class Ingresos implements OnInit, AfterViewInit {
   ingresos: Ingreso[] = [];
   usuarios: Usuario[] = [];
   displayDialog: boolean = false;
@@ -43,6 +43,30 @@ export class Ingresos implements OnInit {
       this.rows = event.rows;
   }
 
+  isScrolled: boolean = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+      this.checkScroll(window.scrollY || document.documentElement.scrollTop);
+  }
+
+  ngAfterViewInit() {
+      const contentEl = document.querySelector('.content');
+      if (contentEl) {
+          contentEl.addEventListener('scroll', (e: any) => {
+              this.checkScroll(e.target.scrollTop);
+          });
+      }
+  }
+
+  checkScroll(scrollTop: number) {
+      if (scrollTop > 30 && !this.isScrolled) {
+          this.isScrolled = true;
+      } else if (scrollTop <= 30 && this.isScrolled) {
+          this.isScrolled = false;
+      }
+  }
+
   constructor(private api: ApiService, private toastManager: ToastManagerService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -53,13 +77,14 @@ export class Ingresos implements OnInit {
   }
 
   onFilterChange() {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        search: this.textoFiltro || null
-      },
-      queryParamsHandling: 'merge'
-    });
+      this.first = 0;
+      this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+              search: this.textoFiltro || null
+          },
+          queryParamsHandling: 'merge'
+      });
   }
 
   cargarDatos() {

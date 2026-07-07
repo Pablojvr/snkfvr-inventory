@@ -1,16 +1,38 @@
-<div class="card">
-    <div class="page-header">
-        <div class="header-left">
-            <h2>Gastos y Compras</h2>
-            <div class="product-search" style="width: 100%;">
-                <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" (onChange)="onFilterChange()" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full"></p-select>
+<div class="card" style="padding-top: 0; position: relative;">
+    <!-- Título principal que NO se congela -->
+    <div style="margin-bottom: 1rem; padding-top: 1rem; transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center;" 
+         [ngStyle]="{'opacity': isScrolled ? '0' : '1', 'height': isScrolled ? '0' : 'auto', 'overflow': 'hidden', 'transform': isScrolled ? 'translateY(-10px)' : 'translateY(0)'}">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Gastos y Compras</h2>
+        <p-button label="Registrar Compra / Gasto" icon="pi pi-plus" severity="success" (onClick)="showDialog()"></p-button>
+    </div>
+
+    <!-- Panel que sí se congela -->
+    <div class="sticky-header" style="position: sticky; top: -1.25rem; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10; padding: 1rem 0 0.5rem; margin-bottom: 1rem; transition: all 0.3s; border-bottom: 1px solid transparent;"
+         [ngStyle]="{'border-bottom-color': isScrolled ? '#f1f5f9' : 'transparent', 'box-shadow': isScrolled ? '0 4px 20px rgba(0,0,0,0.03)' : 'none'}">
+        
+        <!-- Mini Header animado que aparece al hacer scroll -->
+        <div style="display: flex; justify-content: space-between; align-items: center; overflow: hidden; transition: all 0.3s ease;"
+             [ngStyle]="{'max-height': isScrolled ? '40px' : '0px', 'opacity': isScrolled ? '1' : '0', 'margin-bottom': isScrolled ? '0.75rem' : '0'}">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-color); margin: 0;">Gastos y Compras</h3>
+                <p-button icon="pi pi-plus" severity="success" [rounded]="true" [text]="true" size="small" (onClick)="showDialog()" pTooltip="Registrar Gasto"></p-button>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 700; background: #fff0f1; padding: 0.2rem 0.6rem; border-radius: 12px;">{{ gastosFiltrados.length }} registros</span>
+        </div>
+
+        <div class="product-search" style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; position: relative;">
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <p-select [options]="opcionesFiltro" [(ngModel)]="tipoFiltro" (onChange)="onFilterChange()" optionLabel="label" optionValue="value" placeholder="Filtrar por tipo" styleClass="w-full md:w-15rem"></p-select>
                 <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
-                    <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar descripción..." style="width: 100%; padding-left: 2.5rem;" />
+                    <i class="pi pi-search" style="position: absolute; left: 1rem; color: #94a3b8; z-index: 1; font-size: 1.1rem;"></i>
+                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar descripción..." style="width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 20px; border: 1px solid #e2e8f0; font-size: 0.95rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" />
                 </div>
             </div>
+            <!-- Contador al lado del buscador (opcional para el estado inicial) -->
+            <div *ngIf="!isScrolled" style="position: absolute; right: 1.25rem; bottom: 0.85rem; font-size: 0.75rem; color: #94a3b8; font-weight: 600;">
+                {{ gastosFiltrados.length }} regs.
+            </div>
         </div>
-        <p-button label="Registrar Compra / Gasto" icon="pi pi-plus" severity="success" (onClick)="showDialog()" styleClass="w-full"></p-button>
     </div>
 
     <div class="entity-cards-grid" *ngIf="gastosFiltrados.length > 0">

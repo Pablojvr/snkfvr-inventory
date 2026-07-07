@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TimelineModule } from 'primeng/timeline';
 import { InputTextModule } from 'primeng/inputtext';
@@ -21,7 +21,7 @@ import { PaginatorModule } from 'primeng/paginator';
     }
   `]
 })
-export class Movimientos implements OnInit {
+export class Movimientos implements OnInit, AfterViewInit {
   movimientos: Movimiento[] = [];
   textoFiltro: string = '';
   filtroTipoActivo: string = 'Todos';
@@ -36,6 +36,30 @@ export class Movimientos implements OnInit {
   onPageChange(event: any) {
       this.first = event.first;
       this.rows = event.rows;
+  }
+
+  isScrolled: boolean = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+      this.checkScroll(window.scrollY || document.documentElement.scrollTop);
+  }
+
+  ngAfterViewInit() {
+      const contentEl = document.querySelector('.content');
+      if (contentEl) {
+          contentEl.addEventListener('scroll', (e: any) => {
+              this.checkScroll(e.target.scrollTop);
+          });
+      }
+  }
+
+  checkScroll(scrollTop: number) {
+      if (scrollTop > 30 && !this.isScrolled) {
+          this.isScrolled = true;
+      } else if (scrollTop <= 30 && this.isScrolled) {
+          this.isScrolled = false;
+      }
   }
   
   categorias = [
@@ -100,8 +124,9 @@ export class Movimientos implements OnInit {
     return filtrados;
   }
 
-  setFiltro(tipo: string) {
-    this.filtroTipoActivo = tipo;
+  setFiltro(tipo: string | null) {
+      this.filtroTipoActivo = tipo || 'Todos';
+      this.first = 0;
   }
 
   getTiempoRelativo(fecha: Date | string): string {

@@ -816,7 +816,9 @@ body {
   color: #1e293b !important;
 }
 
-.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight,
+.p-paginator .p-paginator-pages .p-paginator-page.p-paginator-page-selected,
+.p-paginator .p-paginator-pages .p-paginator-page[data-p-highlight="true"] {
   background: var(--primary-color) !important;
   color: white !important;
   font-weight: 700 !important;

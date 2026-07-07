@@ -1,19 +1,38 @@
-<div class="card">
-    <div class="page-header">
-        <div class="header-left">
-            <h2>Ventas (Inventario)</h2>
-            <div class="product-search" style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem;">
-                <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
-                    <i class="pi pi-search" style="position: absolute; left: 0.75rem; color: #94a3b8; z-index: 1;"></i>
-                    <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar producto o comprador..." style="width: 100%; padding-left: 2.5rem;" />
-                </div>
-                <div style="display: flex; gap: 0.5rem; width: 100%; overflow-x: auto;">
-                    <p-button [label]="'Todos'" size="small" [severity]="estadoFiltro === 'Todos' ? 'primary' : 'secondary'" [outlined]="estadoFiltro !== 'Todos'" (onClick)="setEstadoFiltro('Todos')"></p-button>
-                    <p-button [label]="'Disponibles'" size="small" [severity]="estadoFiltro === 'Disponible' ? 'info' : 'secondary'" [outlined]="estadoFiltro !== 'Disponible'" (onClick)="setEstadoFiltro('Disponible')"></p-button>
-                    <p-button [label]="'Reservados'" size="small" [severity]="estadoFiltro === 'Reservado' ? 'warn' : 'secondary'" [outlined]="estadoFiltro !== 'Reservado'" (onClick)="setEstadoFiltro('Reservado')"></p-button>
-                    <p-button [label]="'Vendidos'" size="small" [severity]="estadoFiltro === 'Vendido' ? 'success' : 'secondary'" [outlined]="estadoFiltro !== 'Vendido'" (onClick)="setEstadoFiltro('Vendido')"></p-button>
-                </div>
+<div class="card" style="padding-top: 0; position: relative;">
+    <!-- Título principal que NO se congela -->
+    <div style="margin-bottom: 1rem; padding-top: 1rem; transition: all 0.3s ease;" 
+         [ngStyle]="{'opacity': isScrolled ? '0' : '1', 'height': isScrolled ? '0' : 'auto', 'overflow': 'hidden', 'transform': isScrolled ? 'translateY(-10px)' : 'translateY(0)'}">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Ventas</h2>
+    </div>
+
+    <!-- Panel que sí se congela -->
+    <div class="sticky-header" style="position: sticky; top: -1.25rem; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10; padding: 1rem 0 0.5rem; margin-bottom: 1rem; transition: all 0.3s; border-bottom: 1px solid transparent;"
+         [ngStyle]="{'border-bottom-color': isScrolled ? '#f1f5f9' : 'transparent', 'box-shadow': isScrolled ? '0 4px 20px rgba(0,0,0,0.03)' : 'none'}">
+        
+        <!-- Mini Header animado que aparece al hacer scroll -->
+        <div style="display: flex; justify-content: space-between; align-items: center; overflow: hidden; transition: all 0.3s ease;"
+             [ngStyle]="{'max-height': isScrolled ? '40px' : '0px', 'opacity': isScrolled ? '1' : '0', 'margin-bottom': isScrolled ? '0.75rem' : '0'}">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-color); margin: 0;">Ventas</h3>
+            <span style="font-size: 0.8rem; color: var(--primary-color); font-weight: 700; background: #fff0f1; padding: 0.2rem 0.6rem; border-radius: 12px;">{{ productosFiltrados.length }} registros</span>
+        </div>
+
+        <div class="product-search" style="width: 100%; margin-bottom: 1rem; position: relative;">
+            <div class="p-input-icon-left w-full" style="position: relative; display: flex; align-items: center; width: 100%;">
+                <i class="pi pi-search" style="position: absolute; left: 1rem; color: #94a3b8; z-index: 1; font-size: 1.1rem;"></i>
+                <input pInputText type="text" [(ngModel)]="textoFiltro" (ngModelChange)="onFilterChange()" placeholder="Buscar producto o comprador..." style="width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 20px; border: 1px solid #e2e8f0; font-size: 0.95rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);" />
             </div>
+            <!-- Contador al lado del buscador (opcional para el estado inicial) -->
+            <div *ngIf="!isScrolled" style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: #94a3b8; font-weight: 600;">
+                {{ productosFiltrados.length }} regs.
+            </div>
+        </div>
+
+        <!-- Filtros horizontales dinámicos con conteos -->
+        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; width: 100%; -webkit-overflow-scrolling: touch;">
+            <span (click)="setEstadoFiltro('Todos')" [ngStyle]="estadoFiltro === 'Todos' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Todos ({{ countByState('Todos') }})</span>
+            <span (click)="setEstadoFiltro('Disponible')" [ngStyle]="estadoFiltro === 'Disponible' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Disponibles ({{ countByState('Disponible') }})</span>
+            <span (click)="setEstadoFiltro('Vendido')" [ngStyle]="estadoFiltro === 'Vendido' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Vendidos ({{ countByState('Vendido') }})</span>
+            <span (click)="setEstadoFiltro('Reservado')" [ngStyle]="estadoFiltro === 'Reservado' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Reservados ({{ countByState('Reservado') }})</span>
         </div>
     </div>
 

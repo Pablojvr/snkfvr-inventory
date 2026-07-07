@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -21,7 +21,7 @@ import { PaginatorModule } from 'primeng/paginator';
   imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent, PaginatorModule],
   templateUrl: './ventas.html',
 })
-export class Ventas implements OnInit {
+export class Ventas implements OnInit, AfterViewInit {
   productos: any[] = [];
   ventasRaw: Venta[] = [];
   usuarios: Usuario[] = [];
@@ -52,6 +52,30 @@ export class Ventas implements OnInit {
       this.rows = event.rows;
   }
 
+  isScrolled: boolean = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+      this.checkScroll(window.scrollY || document.documentElement.scrollTop);
+  }
+
+  ngAfterViewInit() {
+      const contentEl = document.querySelector('.content');
+      if (contentEl) {
+          contentEl.addEventListener('scroll', (e: any) => {
+              this.checkScroll(e.target.scrollTop);
+          });
+      }
+  }
+
+  checkScroll(scrollTop: number) {
+      if (scrollTop > 30 && !this.isScrolled) {
+          this.isScrolled = true;
+      } else if (scrollTop <= 30 && this.isScrolled) {
+          this.isScrolled = false;
+      }
+  }
+
   // Dialog Venta
   @ViewChild(DialogVentaComponent) dialogVenta!: DialogVentaComponent;
   
@@ -78,6 +102,7 @@ export class Ventas implements OnInit {
 
   setEstadoFiltro(estado: string) {
       this.estadoFiltro = estado;
+      this.first = 0;
       this.onFilterChange();
   }
 
@@ -137,6 +162,11 @@ export class Ventas implements OnInit {
 
   get productosDisponibles() {
     return this.productos.filter(p => p.estadoActual === 'Disponible');
+  }
+
+  countByState(state: string): number {
+    if (state === 'Todos') return this.productos.length;
+    return this.productos.filter(p => p.estadoActual === state).length;
   }
 
   showDialog(producto: any) {

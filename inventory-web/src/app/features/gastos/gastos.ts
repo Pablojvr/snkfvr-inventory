@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -21,7 +21,7 @@ import { PaginatorModule } from 'primeng/paginator';
   imports: [CommonModule, TableModule, ButtonModule, InputTextModule, SelectModule, TooltipModule, FormsModule, MenuModule, DialogGastoComponent, PaginatorModule],
   templateUrl: './gastos.html',
 })
-export class Gastos implements OnInit {
+export class Gastos implements OnInit, AfterViewInit {
   gastos: Gasto[] = [];
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
@@ -44,6 +44,30 @@ export class Gastos implements OnInit {
       this.rows = event.rows;
   }
 
+  isScrolled: boolean = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+      this.checkScroll(window.scrollY || document.documentElement.scrollTop);
+  }
+
+  ngAfterViewInit() {
+      const contentEl = document.querySelector('.content');
+      if (contentEl) {
+          contentEl.addEventListener('scroll', (e: any) => {
+              this.checkScroll(e.target.scrollTop);
+          });
+      }
+  }
+
+  checkScroll(scrollTop: number) {
+      if (scrollTop > 30 && !this.isScrolled) {
+          this.isScrolled = true;
+      } else if (scrollTop <= 30 && this.isScrolled) {
+          this.isScrolled = false;
+      }
+  }
+
   @ViewChild(DialogGastoComponent) dialogGasto!: DialogGastoComponent;
 
 
@@ -58,6 +82,7 @@ export class Gastos implements OnInit {
   }
 
   onFilterChange() {
+      this.first = 0;
       this.router.navigate([], {
           relativeTo: this.route,
           queryParams: {

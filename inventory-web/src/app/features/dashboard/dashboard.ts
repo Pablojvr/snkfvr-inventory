@@ -155,13 +155,21 @@ export class Dashboard implements OnInit {
               const precio = v.precioVenta || 0;
               const saldoPendiente = precio - adelantoMonto;
 
+              const productoInfo = this.productos.find(p => p.id === v.productoId);
+
               return {
                 ...v,
-                productoDescripcion: this.productos.find(p => p.id === v.productoId)?.descripcion || 'Desconocido',
+                productoDescripcion: productoInfo?.descripcion || 'Desconocido',
                 usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido',
                 adelantoMonto: adelantoMonto,
-                saldoPendiente: saldoPendiente > 0 ? saldoPendiente : 0
+                saldoPendiente: saldoPendiente > 0 ? saldoPendiente : 0,
+                ganancia: precio - (productoInfo?.costoCalculado || 0)
               };
+            })
+            .sort((a, b) => {
+                const dateA = a.fechaEntrega ? new Date(a.fechaEntrega).getTime() : Number.MAX_SAFE_INTEGER;
+                const dateB = b.fechaEntrega ? new Date(b.fechaEntrega).getTime() : Number.MAX_SAFE_INTEGER;
+                return dateA - dateB;
             });
             
           // Calcular estadísticas reales

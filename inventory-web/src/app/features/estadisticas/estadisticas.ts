@@ -104,11 +104,14 @@ export class Estadisticas implements OnInit {
   }
 
   calcularKPIs(ventasFiltradas: Venta[], gastosFiltrados: Gasto[], movimientosFiltrados: Movimiento[]) {
-      // Ingresos Totales
-      const ingresosVentas = ventasFiltradas.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
+      // 1. Ingresos: Solo las ventas completadas generan ingresos reales
+      const ventasCompletadas = ventasFiltradas.filter(v => v.estado === 'Vendido');
+      const ingresosVentas = ventasCompletadas.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
       
-      // Costos (Gastos) Totales
-      const costosTotales = gastosFiltrados.reduce((sum, g) => sum + (g.monto || 0), 0);
+      // 2. Costos: El costo solo se resta si el producto ya se vendió (Costo de Bienes Vendidos - COGS)
+      const idsProductosVendidos = ventasCompletadas.map(v => v.productoId).filter(id => id !== undefined) as number[];
+      const gastosDeProductosVendidos = gastosFiltrados.filter(g => g.productoId !== undefined && idsProductosVendidos.includes(g.productoId));
+      const costosTotales = gastosDeProductosVendidos.reduce((sum, g) => sum + (g.monto || 0), 0);
 
       this.gananciaNeta = ingresosVentas - costosTotales;
 
@@ -123,7 +126,7 @@ export class Estadisticas implements OnInit {
       let diasTotales = 0;
       let cantidadVendidos = 0;
 
-      ventasFiltradas.forEach(v => {
+      ventasCompletadas.forEach(v => {
           const producto = this.productos.find(p => p.id === v.productoId);
           if (producto && producto.fechaCompra && v.fechaVenta) {
               const compraDate = new Date(producto.fechaCompra).getTime();
@@ -148,8 +151,9 @@ export class Estadisticas implements OnInit {
 
   calcularTopProductos(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {
       const utilidades: any[] = [];
+      const ventasCompletadas = ventasFiltradas.filter(v => v.estado === 'Vendido');
 
-      ventasFiltradas.forEach(v => {
+      ventasCompletadas.forEach(v => {
           const producto = this.productos.find(p => p.id === v.productoId);
           if (producto) {
               // Costos del producto
@@ -200,7 +204,9 @@ export class Estadisticas implements OnInit {
       }
 
       // Populate Data
-      ventasFiltradas.forEach(v => {
+      const ventasCompletadas = ventasFiltradas.filter(v => v.estado === 'Vendido');
+      
+      ventasCompletadas.forEach(v => {
           const date = new Date(v.fechaVenta || v.fechaRegistro || new Date());
           const label = `${meses[date.getMonth()]} ${date.getFullYear().toString().substring(2)}`;
           if (ingresosMap.has(label)) {
@@ -208,7 +214,8 @@ export class Estadisticas implements OnInit {
           }
       });
 
-      gastosFiltrados.forEach(g => {
+      const idsProductosVendidosGrafico = ventasCompletadas.map(v => v.productoId).filter(id => id !== undefined) as number[];
+      gastosFiltrados.filter(g => g.productoId !== undefined && idsProductosVendidosGrafico.includes(g.productoId)).forEach(g => {
           const date = new Date(g.fecha);
           const label = `${meses[date.getMonth()]} ${date.getFullYear().toString().substring(2)}`;
           if (gastosMap.has(label)) {

@@ -204,7 +204,9 @@ export class DialogVentaComponent implements OnInit {
           fechaVenta: this.nuevaVentaData.estado === 'Vendido' ? new Date() : undefined,
           comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId,
-          adelantoMonto: this.tieneAdelanto ? this.nuevaVentaData.adelantoMonto : null
+          adelantoMonto: this.tieneAdelanto ? this.nuevaVentaData.adelantoMonto : null,
+          fechaEntrega: this.nuevaVentaData.fechaEntrega ? new Date(this.nuevaVentaData.fechaEntrega) : null,
+          estadoPago: this.nuevaVentaData.estadoPago || 'Pendiente'
       };
 
       this.guardando = true;

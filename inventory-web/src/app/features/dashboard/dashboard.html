@@ -66,7 +66,10 @@
                 <div class="entity-card-meta">
                     <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
                     <span><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
-                    <span *ngIf="venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #ea580c;"></i> <span style="color: #ea580c; font-weight: 600;">{{ venta.fechaEntrega | date:'dd/MM/yyyy' }}</span></span>
+                    <span *ngIf="venta.fechaEntrega" [ngStyle]="{'color': esAtrasado(venta.fechaEntrega) ? '#ef4444' : '#ea580c'}">
+                        <i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i>
+                        <span style="font-weight: 600;">{{ formatearFechaEntrega(venta.fechaEntrega) }}</span>
+                    </span>
                     <span *ngIf="!venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #94a3b8;"></i> <span style="color: #94a3b8; font-weight: 600;">Por definir</span></span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">

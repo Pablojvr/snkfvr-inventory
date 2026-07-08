@@ -99,6 +99,40 @@ export class Dashboard implements OnInit {
     return `Hace ${days} días`;
   }
 
+  esAtrasado(fechaStr: string | Date | null | undefined): boolean {
+      if (!fechaStr) return false;
+      const fecha = new Date(fechaStr);
+      const hoy = new Date();
+      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      const hoyNormalizado = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      return fechaNormalizada.getTime() < hoyNormalizado.getTime();
+  }
+
+  formatearFechaEntrega(fechaStr: string | Date | null | undefined): string {
+      if (!fechaStr) return 'Por definir';
+      
+      const fecha = new Date(fechaStr);
+      const hoy = new Date();
+      
+      const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      const hoyNormalizado = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      
+      const diffTiempo = fechaNormalizada.getTime() - hoyNormalizado.getTime();
+      const diffDias = Math.round(diffTiempo / (1000 * 60 * 60 * 24));
+
+      if (diffDias === 0) return 'Entrega hoy';
+      if (diffDias === 1) return 'Entrega mañana';
+      if (diffDias > 1 && diffDias <= 6) {
+          const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+          return `Entrega el ${diasSemana[fechaNormalizada.getDay()]}`;
+      }
+      if (diffDias >= 7 && diffDias <= 14) return 'En una semana';
+      if (diffDias > 14) return `En ${diffDias} días`;
+      
+      if (diffDias === -1) return 'Atrasado (Ayer)';
+      return `Atrasado (${Math.abs(diffDias)} días)`;
+  }
+
   getIconForMovimiento(tipo: string): string {
     switch (tipo?.toLowerCase()) {
       case 'compra':

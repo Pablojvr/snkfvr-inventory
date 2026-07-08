@@ -167,8 +167,10 @@ export class Dashboard implements OnInit {
               };
             })
             .sort((a, b) => {
-                const dateA = a.fechaEntrega ? new Date(a.fechaEntrega).getTime() : Number.MAX_SAFE_INTEGER;
-                const dateB = b.fechaEntrega ? new Date(b.fechaEntrega).getTime() : Number.MAX_SAFE_INTEGER;
+                const isValidA = a.fechaEntrega && !isNaN(new Date(a.fechaEntrega).getTime());
+                const isValidB = b.fechaEntrega && !isNaN(new Date(b.fechaEntrega).getTime());
+                const dateA = isValidA ? new Date(a.fechaEntrega!).getTime() : Number.MAX_SAFE_INTEGER;
+                const dateB = isValidB ? new Date(b.fechaEntrega!).getTime() : Number.MAX_SAFE_INTEGER;
                 return dateA - dateB;
             });
             

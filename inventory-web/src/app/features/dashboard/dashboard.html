@@ -67,6 +67,7 @@
                     <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
                     <span><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
                     <span *ngIf="venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #ea580c;"></i> <span style="color: #ea580c; font-weight: 600;">{{ venta.fechaEntrega | date:'dd/MM/yyyy' }}</span></span>
+                    <span *ngIf="!venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #94a3b8;"></i> <span style="color: #94a3b8; font-weight: 600;">Por definir</span></span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
                     <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
@@ -167,9 +168,10 @@
                     <span style="font-size: 0.85rem; color: #475569;">Registro</span>
                     <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
                 </div>
-                <div *ngIf="ventaSeleccionada.fechaEntrega" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.85rem; color: #475569;">Día de Entrega</span>
-                    <span style="font-size: 0.9rem; font-weight: 700; color: #ea580c;">{{ ventaSeleccionada.fechaEntrega | date:'dd/MM/yyyy' }}</span>
+                    <span *ngIf="ventaSeleccionada.fechaEntrega" style="font-size: 0.9rem; font-weight: 700; color: #ea580c;">{{ ventaSeleccionada.fechaEntrega | date:'dd/MM/yyyy' }}</span>
+                    <span *ngIf="!ventaSeleccionada.fechaEntrega" style="font-size: 0.9rem; font-weight: 600; color: #94a3b8;">Por definir</span>
                 </div>
             </div>
         </div>

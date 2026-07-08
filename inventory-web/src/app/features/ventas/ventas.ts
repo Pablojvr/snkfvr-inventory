@@ -32,6 +32,7 @@ export class Ventas implements OnInit, AfterViewInit {
     { label: 'Disponibles', value: 'Disponible' },
     { label: 'Reservados', value: 'Reservado' },
     { label: 'Vendidos', value: 'Vendido' },
+    { label: 'Por Cobrar', value: 'PorCobrar' },
     { label: 'Todos', value: 'Todos' }
   ];
 
@@ -145,7 +146,11 @@ export class Ventas implements OnInit, AfterViewInit {
     let filtradas = this.productos;
     
     if (this.estadoFiltro !== 'Todos') {
-        filtradas = filtradas.filter(p => p.estadoActual === this.estadoFiltro);
+        if (this.estadoFiltro === 'PorCobrar') {
+            filtradas = filtradas.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && p.ventaAsociada.estadoPago === 'Pendiente');
+        } else {
+            filtradas = filtradas.filter(p => p.estadoActual === this.estadoFiltro);
+        }
     }
     
     if (this.textoFiltro) {
@@ -166,6 +171,7 @@ export class Ventas implements OnInit, AfterViewInit {
 
   countByState(state: string): number {
     if (state === 'Todos') return this.productos.length;
+    if (state === 'PorCobrar') return this.productos.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && p.ventaAsociada.estadoPago === 'Pendiente').length;
     return this.productos.filter(p => p.estadoActual === state).length;
   }
 

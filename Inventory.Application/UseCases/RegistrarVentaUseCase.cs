@@ -56,7 +56,9 @@ namespace Inventory.Application.UseCases
                 UsuarioId = ventaDto.UsuarioId,
                 NombreComprador = ventaDto.NombreComprador,
                 LugarDestino = ventaDto.LugarDestino,
+                FechaEntrega = ventaDto.FechaEntrega,
                 Estado = estadoDeseado,
+                EstadoPago = !string.IsNullOrEmpty(ventaDto.EstadoPago) ? ventaDto.EstadoPago : "Pendiente",
                 Activo = true
             };
 
@@ -198,9 +200,9 @@ namespace Inventory.Application.UseCases
                 await _movimientoRepositorio.AgregarAsync(movComisionVenta);
             }
 
-            if (estadoDeseado == "Vendido")
+            // Calcular Ganancia y registrar Ingreso SÓLO si la venta está cobrada
+            if (venta.EstadoPago == "Cobrado")
             {
-                // Calcular Ganancia y registrar Ingreso
                 var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
                 var costoCalculado = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && g.Activo).Sum(g => g.Monto);
                 var ganancia = ventaDto.PrecioVenta - costoCalculado;

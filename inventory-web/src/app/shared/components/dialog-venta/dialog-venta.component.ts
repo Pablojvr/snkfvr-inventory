@@ -36,7 +36,9 @@ export class DialogVentaComponent implements OnInit {
     lugarDestino: '',
     comisionMonto: null,
     comisionUsuarioId: null,
-    adelantoMonto: null
+    adelantoMonto: null,
+    fechaEntrega: null,
+    estadoPago: 'Pendiente'
   };
 
   productosDisponibles: Producto[] = [];
@@ -92,7 +94,9 @@ export class DialogVentaComponent implements OnInit {
           lugarDestino: venta.lugarDestino,
           comisionMonto: venta.comisionMonto,
           comisionUsuarioId: venta.comisionUsuarioId,
-          adelantoMonto: venta.adelantoMonto
+          adelantoMonto: venta.adelantoMonto,
+          fechaEntrega: venta.fechaEntrega ? new Date(venta.fechaEntrega) : null,
+          estadoPago: venta.estadoPago || 'Pendiente'
       };
       if (venta.adelantoMonto) {
         this.tieneAdelanto = true;
@@ -113,6 +117,8 @@ export class DialogVentaComponent implements OnInit {
           estado: 'Reservado',
           nombreComprador: '',
           lugarDestino: '',
+          fechaEntrega: null,
+          estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,
           adelantoMonto: null
@@ -129,6 +135,8 @@ export class DialogVentaComponent implements OnInit {
           estado: 'Reservado',
           nombreComprador: '',
           lugarDestino: '',
+          fechaEntrega: null,
+          estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,
           adelantoMonto: null

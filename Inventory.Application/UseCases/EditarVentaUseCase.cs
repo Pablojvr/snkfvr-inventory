@@ -54,7 +54,9 @@ namespace Inventory.Application.UseCases
             venta.UsuarioId = ventaDto.UsuarioId;
             venta.NombreComprador = ventaDto.NombreComprador;
             venta.LugarDestino = ventaDto.LugarDestino;
+            venta.FechaEntrega = ventaDto.FechaEntrega;
             venta.Estado = ventaDto.Estado;
+            venta.EstadoPago = !string.IsNullOrEmpty(ventaDto.EstadoPago) ? ventaDto.EstadoPago : "Pendiente";
 
             await _ventaRepositorio.ActualizarAsync(venta);
 
@@ -113,20 +115,30 @@ namespace Inventory.Application.UseCases
                         await _movimientoRepositorio.AgregarAsync(movComisionVenta);
                     }
 
-                    // Calcular Ganancia y registrar Ingreso
-                    var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
-                    var costoCalculado = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && g.Activo).Sum(g => g.Monto);
-                    var ganancia = ventaDto.PrecioVenta - costoCalculado;
-
-                    var ingresoGanancia = new Ingreso
+                    // Calcular Ganancia y registrar Ingreso solo si está Cobrado y antes no lo estaba
+                    // Nota: Si antes no estaba cobrado y ahora sí, se debe generar el ingreso.
+                    if (venta.EstadoPago == "Cobrado")
                     {
-                        Motivo = $"Ganancia Venta | {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
-                        Monto = ganancia,
-                        Fecha = DateTime.Now,
-                        UsuarioId = ventaDto.UsuarioId,
-                        Activo = true
-                    };
-                    await _ingresoRepositorio.AgregarAsync(ingresoGanancia);
+                        var todosGastos = await _gastoRepositorio.ObtenerTodosAsync();
+                        var costoCalculado = todosGastos.Where(g => g.ProductoId == ventaDto.ProductoId && g.Activo).Sum(g => g.Monto);
+                        var ganancia = ventaDto.PrecioVenta - costoCalculado;
+
+                        var ingresoExistente = (await _ingresoRepositorio.ObtenerTodosAsync())
+                            .FirstOrDefault(i => i.Motivo.StartsWith("Ganancia Venta") && i.UsuarioId == ventaDto.UsuarioId && i.Monto == ganancia);
+
+                        if (ingresoExistente == null)
+                        {
+                            var ingresoGanancia = new Ingreso
+                            {
+                                Motivo = $"Ganancia Venta | {producto?.Descripcion ?? ventaDto.ProductoId.ToString()}",
+                                Monto = ganancia,
+                                Fecha = DateTime.Now,
+                                UsuarioId = ventaDto.UsuarioId,
+                                Activo = true
+                            };
+                            await _ingresoRepositorio.AgregarAsync(ingresoGanancia);
+                        }
+                    }
                 }
             }
 

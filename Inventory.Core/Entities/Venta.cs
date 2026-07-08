@@ -16,7 +16,9 @@ namespace Inventory.Core.Entities
         public string? NombreComprador { get; set; }
         public string? LugarDestino { get; set; }
         public DateTime FechaRegistro { get; set; }
+        public DateTime? FechaEntrega { get; set; }
         public string Estado { get; set; } = "Reservado";
+        public string EstadoPago { get; set; } = "Pendiente";
         public bool Activo { get; set; } = true;
     }
 }

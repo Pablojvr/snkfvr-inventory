@@ -33,6 +33,7 @@
             <span (click)="setEstadoFiltro('Disponible')" [ngStyle]="estadoFiltro === 'Disponible' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Disponibles ({{ countByState('Disponible') }})</span>
             <span (click)="setEstadoFiltro('Vendido')" [ngStyle]="estadoFiltro === 'Vendido' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Vendidos ({{ countByState('Vendido') }})</span>
             <span (click)="setEstadoFiltro('Reservado')" [ngStyle]="estadoFiltro === 'Reservado' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Reservados ({{ countByState('Reservado') }})</span>
+            <span (click)="setEstadoFiltro('PorCobrar')" [ngStyle]="estadoFiltro === 'PorCobrar' ? {'background': 'var(--primary-color)', 'color': 'white', 'box-shadow': '0 4px 10px rgba(255,71,87,0.3)'} : {'background': '#f1f5f9', 'color': '#64748b'}" style="padding: 0.45rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.3s ease;">Por Cobrar ({{ countByState('PorCobrar') }})</span>
         </div>
     </div>
 
@@ -55,6 +56,7 @@
                     <span *ngIf="producto.estadoActual !== 'Disponible'" class="entity-card-amount" style="color: #3b82f6;">{{ producto.precioVenta | currency }}</span>
                     
                     <span [ngClass]="producto.estadoActual === 'Vendido' ? 'badge-success' : (producto.estadoActual === 'Reservado' ? 'badge-warn' : 'badge-primary')">{{ producto.estadoActual }}</span>
+                    <span *ngIf="producto.estadoActual === 'Vendido' && producto.ventaAsociada?.estadoPago === 'Pendiente'" class="badge-secondary" style="margin-top: -0.25rem; font-size: 0.65rem;">Por Cobrar</span>
                 </div>
             </div>
         </div>

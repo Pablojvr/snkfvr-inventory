@@ -31,7 +31,7 @@ namespace Inventory.Proyecto.Controllers
             var ingresos = await _ingresoRepositorio.ObtenerTodosAsync();
             var gastos = await _gastoRepositorio.ObtenerTodosAsync();
 
-            var totalVentas = ventas.Where(v => v.Activo).Sum(v => v.PrecioVenta);
+            var totalVentas = ventas.Where(v => v.Activo && v.EstadoPago == "Cobrado").Sum(v => v.PrecioVenta);
             var totalIngresos = ingresos.Where(i => i.Activo).Sum(i => i.Monto);
             var totalGastos = gastos.Where(g => g.Activo).Sum(g => g.Monto);
 

@@ -61,8 +61,9 @@
             </div>
 
             <!-- Amount -->
-            <div class="transaction-amount" [style.color]="mov.montoTotal > 0 ? '#10b981' : '#1e293b'" style="font-weight: 800; font-size: 1.05rem; white-space: nowrap;">
-                {{ mov.montoTotal > 0 ? '+' : '' }}{{ mov.montoTotal | currency }}
+            <div class="transaction-amount" [style.color]="mov.tipo === 'Reserva' ? '#d97706' : (mov.montoTotal > 0 ? '#10b981' : '#1e293b')" style="font-weight: 800; font-size: 1.05rem; white-space: nowrap;">
+                <span *ngIf="mov.tipo === 'Reserva'" style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-right: 4px;">Valuado en</span>
+                {{ mov.tipo === 'Reserva' ? '' : (mov.montoTotal > 0 ? '+' : '') }}{{ mov.montoTotal | currency }}
             </div>
         </div>
     </div>
@@ -89,8 +90,9 @@
             {{ movimientoSeleccionado.descripcion.includes('ENV |') ? 'Envío' : (movimientoSeleccionado.tipo === 'Salida de dinero' ? 'Gasto' : movimientoSeleccionado.tipo) }}
         </h3>
         
-        <div style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1;" [style.color]="movimientoSeleccionado.montoTotal > 0 ? '#10b981' : '#1e293b'">
-            {{ movimientoSeleccionado.montoTotal > 0 ? '+' : '' }}{{ movimientoSeleccionado.montoTotal | currency }}
+        <div style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1;" [style.color]="movimientoSeleccionado.tipo === 'Reserva' ? '#d97706' : (movimientoSeleccionado.montoTotal > 0 ? '#10b981' : '#1e293b')">
+            <div *ngIf="movimientoSeleccionado.tipo === 'Reserva'" style="font-size: 0.9rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem;">Valor Estimado</div>
+            {{ movimientoSeleccionado.tipo === 'Reserva' ? '' : (movimientoSeleccionado.montoTotal > 0 ? '+' : '') }}{{ movimientoSeleccionado.montoTotal | currency }}
         </div>
         
         <div style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;">

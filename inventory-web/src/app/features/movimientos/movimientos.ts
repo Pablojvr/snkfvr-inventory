@@ -69,7 +69,8 @@ export class Movimientos implements OnInit, AfterViewInit {
     { label: 'Gastos', value: 'Gasto' },
     { label: 'Comisiones', value: 'Comisión' },
     { label: 'Envíos', value: 'Envío' },
-    { label: 'Ingresos', value: 'Ingreso' }
+    { label: 'Ingresos', value: 'Ingreso' },
+    { label: 'Reservas', value: 'Reserva' }
   ];
 
   constructor(private api: ApiService) {}
@@ -184,6 +185,7 @@ export class Movimientos implements OnInit, AfterViewInit {
       case 'Comisión': return 'pi-wallet';
       case 'Salida de dinero': return 'pi-arrow-up-right';
       case 'Cambio de Estado': return 'pi-sync';
+      case 'Reserva': return 'pi-bookmark';
       default: return 'pi-list';
     }
   }
@@ -198,6 +200,7 @@ export class Movimientos implements OnInit, AfterViewInit {
       case 'Comisión': return { bg: '#ffedd5', text: '#ea580c' }; // Orange
       case 'Salida de dinero': return { bg: '#fee2e2', text: '#dc2626' }; // Red
       case 'Cambio de Estado': return { bg: '#f3f4f6', text: '#4b5563' }; // Gray
+      case 'Reserva': return { bg: '#fef3c7', text: '#d97706' }; // Amber
       default: return { bg: '#f1f5f9', text: '#64748b' }; // Slate
     }
   }

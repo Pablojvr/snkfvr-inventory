@@ -100,10 +100,10 @@ namespace Inventory.Application.UseCases
 
             var movimientoEstado = new Movimiento
             {
-                Tipo = TipoMovimientoConstants.CambioDeEstado,
+                Tipo = estadoDeseado == "Reservado" ? TipoMovimientoConstants.Reserva : TipoMovimientoConstants.CambioDeEstado,
                 Fecha = DateTime.Now,
-                Descripcion = $"El producto {ventaDto.ProductoId} cambió a {estadoDeseado}",
-                MontoTotal = 0,
+                Descripcion = estadoDeseado == "Reservado" ? $"El producto {ventaDto.ProductoId} fue reservado por {ventaDto.NombreComprador}" : $"El producto {ventaDto.ProductoId} cambió a {estadoDeseado}",
+                MontoTotal = estadoDeseado == "Reservado" ? ventaDto.PrecioVenta : 0,
                 ReferenciaId = ventaAgregada.Id,
                 ProductoId = ventaDto.ProductoId
             };
@@ -127,7 +127,18 @@ namespace Inventory.Application.UseCases
                     ProductoId = ventaDto.ProductoId,
                     Activo = true
                 };
-                await _gastoRepositorio.AgregarAsync(gastoEnvio);
+                var gastoEnvioAgregado = await _gastoRepositorio.AgregarAsync(gastoEnvio);
+                
+                var movEnvio = new Movimiento
+                {
+                    Tipo = TipoMovimientoConstants.SalidaDeDinero,
+                    Fecha = DateTime.Now,
+                    Descripcion = $"ENV | {producto?.Descripcion ?? ventaDto.ProductoId.ToString()} por el usuario con ID {ventaDto.UsuarioId}",
+                    MontoTotal = -ventaDto.CostoEnvio,
+                    ReferenciaId = gastoEnvioAgregado.Id,
+                    ProductoId = ventaDto.ProductoId
+                };
+                await _movimientoRepositorio.AgregarAsync(movEnvio);
             }
 
             if (ventaDto.CostosAdicionales > 0)
@@ -142,7 +153,18 @@ namespace Inventory.Application.UseCases
                     ProductoId = ventaDto.ProductoId,
                     Activo = true
                 };
-                await _gastoRepositorio.AgregarAsync(gastoOtros);
+                var gastoOtrosAgregado = await _gastoRepositorio.AgregarAsync(gastoOtros);
+
+                var movOtros = new Movimiento
+                {
+                    Tipo = TipoMovimientoConstants.SalidaDeDinero,
+                    Fecha = DateTime.Now,
+                    Descripcion = $"Otros gastos de venta de {producto?.Descripcion ?? ventaDto.ProductoId.ToString()} por el usuario con ID {ventaDto.UsuarioId}",
+                    MontoTotal = -ventaDto.CostosAdicionales,
+                    ReferenciaId = gastoOtrosAgregado.Id,
+                    ProductoId = ventaDto.ProductoId
+                };
+                await _movimientoRepositorio.AgregarAsync(movOtros);
             }
 
             if (ventaDto.ComisionMonto.HasValue && ventaDto.ComisionMonto.Value > 0)

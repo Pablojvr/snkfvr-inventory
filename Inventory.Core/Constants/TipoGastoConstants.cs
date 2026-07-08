@@ -17,5 +17,6 @@ namespace Inventory.Core.Constants
         public const string AdelantoPorReserva = "Adelanto por reserva";
         public const string Ingreso = "Ingreso";
         public const string CambioDeEstado = "Cambio de Estado";
+        public const string Reserva = "Reserva";
     }
 }

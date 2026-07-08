@@ -969,3 +969,36 @@ body {
   color: #94a3b8 !important;
   left: 1.25rem !important;
 }
+
+/* ===== TABS & TIMELINE OVERRIDES PARA LIGHT THEME ===== */
+.p-tablist {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.p-tab {
+  background: transparent !important;
+  color: #64748b !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  transition: all 0.2s !important;
+}
+
+.p-tab:hover {
+  color: #1e293b !important;
+}
+
+.p-tab.p-tab-active, .p-tab[data-p-active="true"] {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color) !important;
+  font-weight: 700 !important;
+}
+
+.p-tabpanels, .p-tabpanel {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+
+.p-timeline .p-timeline-event-content {
+  color: #1e293b !important;
+}

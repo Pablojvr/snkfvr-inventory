@@ -224,4 +224,36 @@ export class ProductoDetalle implements OnInit {
   abrirVenta() {
     this.dialogVenta.showDialog(this.producto, this.ventaAsociada || undefined);
   }
+
+  getIconForMovimiento(tipo: string): string {
+    switch (tipo?.toLowerCase()) {
+      case 'compra':
+      case 'salida de dinero':
+      case 'devolución':
+        return 'pi pi-shopping-bag';
+      case 'venta':
+      case 'ingreso':
+        return 'pi pi-arrow-down-left';
+      case 'comisión':
+        return 'pi pi-percentage';
+      case 'adelanto por reserva':
+        return 'pi pi-clock';
+      case 'cambio de estado':
+        return 'pi pi-sync';
+      default:
+        return 'pi pi-info-circle';
+    }
+  }
+
+  getColorForMovimiento(tipo: string, monto: number): string {
+    if (monto < 0) return '#ef4444'; // Red
+    if (monto > 0) return '#10b981'; // Green
+    
+    // Fallbacks
+    switch (tipo?.toLowerCase()) {
+      case 'comisión': return '#f59e0b';
+      case 'cambio de estado': return '#3b82f6';
+      default: return '#64748b';
+    }
+  }
 }

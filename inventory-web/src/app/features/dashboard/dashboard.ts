@@ -43,6 +43,13 @@ export class Dashboard implements OnInit {
   // Detail modal
   displayDetalleVenta: boolean = false;
   ventaSeleccionada: any = null;
+  displayConfirmarEntrega: boolean = false;
+  
+  // Anular Venta modal
+  displayAnularVenta: boolean = false;
+  ventaAAnular: any = null;
+  montoMaximoDevolucion: number = 0;
+  montoDevolucionIngresado: number = 0;
 
   displayDetalleMovimiento: boolean = false;
   movimientoSeleccionado: any = null;
@@ -224,22 +231,49 @@ export class Dashboard implements OnInit {
   }
 
   marcarEntregado(venta: any) {
-      const productoAsociado = this.productos.find(p => p.id === venta.productoId);
-      this.displayDetalleVenta = false;
-      this.dialogVenta.showDialog(productoAsociado, venta, 'Vendido');
+      this.displayConfirmarEntrega = true;
+  }
+
+  confirmarEntrega(estadoPago: string) {
+      if (!this.ventaSeleccionada) return;
+      
+      const ventaActualizada = {
+          ...this.ventaSeleccionada,
+          estado: 'Vendido',
+          estadoPago: estadoPago
+      };
+
+      this.api.editarVenta(this.ventaSeleccionada.id, ventaActualizada).subscribe(() => {
+          this.cargarDatos();
+          this.displayConfirmarEntrega = false;
+          this.displayDetalleVenta = false;
+          this.toastManager.showSuccess('Entrega Confirmada', 'El estado del producto ha sido actualizado.');
+      });
   }
 
   liberarProducto(venta: any) {
-    const msg = '¿Seguro que desea liberar este producto?\n\n' +
-                'Esto significa que el usuario no recibió su producto. Se anulará la venta y el producto se habilitará para otra venta. ' +
-                'Sin embargo, sus gastos asociados se mantienen (incluso los de envío), porque aunque no haya recibido el envío lo pagamos nosotros.';
-    
-    if (confirm(msg)) {
-        this.api.eliminarVenta(venta.id!).subscribe(() => {
+      this.ventaAAnular = venta;
+      let montoAbonado = 0;
+      
+      // Calcular monto que el cliente ya dio
+      if (venta.estado === 'Vendido' && venta.estadoPago === 'Cobrado') {
+          montoAbonado = venta.precioVenta || 0;
+      } else if (venta.estado === 'Reservado' && venta.adelantoMonto > 0) {
+          montoAbonado = venta.adelantoMonto;
+      }
+      
+      this.montoMaximoDevolucion = montoAbonado;
+      this.montoDevolucionIngresado = 0; // Por defecto devolvemos 0, o podria ser montoAbonado
+      this.displayAnularVenta = true;
+  }
+
+  confirmarAnulacion() {
+      if (!this.ventaAAnular) return;
+      this.api.eliminarVenta(this.ventaAAnular.id, this.montoDevolucionIngresado).subscribe(() => {
           this.cargarDatos();
+          this.displayAnularVenta = false;
           this.displayDetalleVenta = false;
-          this.toastManager.showSuccess('Producto Liberado', 'El producto vuelve a estar disponible para venta.');
-        });
-    }
+          this.toastManager.showSuccess('Éxito', 'Venta anulada y producto liberado');
+      });
   }
 }

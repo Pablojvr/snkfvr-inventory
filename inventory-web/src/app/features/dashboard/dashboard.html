@@ -53,7 +53,7 @@
         <i class="pi pi-clock"></i> Ventas Pendientes ({{ ventasReservadas.length }})
     </h3>
     
-    <div class="entity-cards-grid" *ngIf="ventasReservadas.length > 0">
+    <div class="entity-cards-grid" *ngIf="ventasReservadas.length > 0" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem;">
         <div class="entity-card" *ngFor="let venta of ventasReservadas" (click)="abrirDetalle(venta)">
             <div class="entity-card-header">
                 <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
@@ -118,50 +118,67 @@
 
 <!-- Modal Detalle de Venta (Read-Only) -->
 <p-dialog [(visible)]="displayDetalleVenta" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Venta" [draggable]="false" [resizable]="false">
-    <div *ngIf="ventaSeleccionada" style="display: flex; flex-direction: column; gap: 0;">
-        <div class="detail-row">
-            <span class="detail-label">Producto</span>
-            <span class="detail-value">{{ ventaSeleccionada.productoDescripcion }}</span>
+    <div *ngIf="ventaSeleccionada" style="display: flex; flex-direction: column; gap: 1rem;">
+        
+        <!-- Hero / Main info -->
+        <div style="background: linear-gradient(135deg, var(--primary-color), #ff7e5f); padding: 1.5rem; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);">
+            <i class="pi pi-box" style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.9;"></i>
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; line-height: 1.3;">{{ ventaSeleccionada.productoDescripcion }}</h3>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1.6rem; font-weight: 800;">{{ ventaSeleccionada.precioVenta | currency }}</p>
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Precio de Venta</span>
-            <span class="detail-value" style="color: #10b981;">{{ ventaSeleccionada.precioVenta | currency }}</span>
+
+        <!-- Detalles Financieros -->
+        <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0;">
+            <h4 style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 700;"><i class="pi pi-money-bill" style="margin-right: 0.5rem;"></i>Finanzas</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #475569;">Costo de Envío</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.costoEnvio | currency }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: #475569;">Costos Adicionales</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
+                </div>
+            </div>
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Costo de Envío</span>
-            <span class="detail-value">{{ ventaSeleccionada.costoEnvio | currency }}</span>
+
+        <!-- Detalles Logísticos -->
+        <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0;">
+            <h4 style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 700;"><i class="pi pi-truck" style="margin-right: 0.5rem;"></i>Logística & Cliente</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div *ngIf="ventaSeleccionada.nombreComprador" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #475569;">Cliente</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.nombreComprador }}</span>
+                </div>
+                <div *ngIf="ventaSeleccionada.lugarDestino" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #475569;">Lugar Entrega</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color); text-align: right;">{{ ventaSeleccionada.lugarDestino }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #475569;">Vendedor</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.usuarioNombre }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #475569;">Registro</span>
+                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div *ngIf="ventaSeleccionada.fechaEntrega" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: #475569;">Día de Entrega</span>
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #ea580c;">{{ ventaSeleccionada.fechaEntrega | date:'dd/MM/yyyy' }}</span>
+                </div>
+            </div>
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Costos Adicionales</span>
-            <span class="detail-value">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Vendedor</span>
-            <span class="detail-value">{{ ventaSeleccionada.usuarioNombre }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Fecha Registro</span>
-            <span class="detail-value">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="ventaSeleccionada.nombreComprador">
-            <span class="detail-label">Cliente</span>
-            <span class="detail-value">{{ ventaSeleccionada.nombreComprador }}</span>
-        </div>
-        <div class="detail-row" *ngIf="ventaSeleccionada.lugarDestino">
-            <span class="detail-label">Lugar Entrega</span>
-            <span class="detail-value">{{ ventaSeleccionada.lugarDestino }}</span>
-        </div>
-        <div class="detail-row" *ngIf="ventaSeleccionada.fechaEntrega">
-            <span class="detail-label">Día de Entrega</span>
-            <span class="detail-value" style="color: #ea580c; font-weight: 700;">{{ ventaSeleccionada.fechaEntrega | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Estado</span>
-            <span [ngClass]="ventaSeleccionada.estado === 'Vendido' ? 'badge-success' : 'badge-warn'">{{ ventaSeleccionada.estado }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Cobranza</span>
-            <span [ngClass]="ventaSeleccionada.estadoPago === 'Cobrado' ? 'badge-success' : (ventaSeleccionada.estado === 'Vendido' ? 'badge-secondary' : 'badge-warn')">{{ ventaSeleccionada.estadoPago }}</span>
+
+        <!-- Status -->
+        <div style="display: flex; gap: 0.5rem;">
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">
+                <span style="display: block; font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">Estado</span>
+                <span [ngClass]="ventaSeleccionada.estado === 'Vendido' ? 'badge-success' : 'badge-warn'" style="font-size: 0.85rem;">{{ ventaSeleccionada.estado }}</span>
+            </div>
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">
+                <span style="display: block; font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">Cobranza</span>
+                <span [ngClass]="(ventaSeleccionada.estadoPago || 'Pendiente') === 'Cobrado' ? 'badge-success' : (ventaSeleccionada.estado === 'Vendido' ? 'badge-secondary' : 'badge-warn')" style="font-size: 0.85rem;">{{ ventaSeleccionada.estadoPago || 'Pendiente' }}</span>
+            </div>
         </div>
     </div>
 
@@ -191,6 +208,60 @@
         <div class="detail-row">
             <span class="detail-label">Fecha</span>
             <span class="detail-value">{{ movimientoSeleccionado.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Modal Confirmar Entrega (Mini-Modal) -->
+<p-dialog [(visible)]="displayConfirmarEntrega" [modal]="true" [style]="{width: 'min(350px, 95vw)'}" header="Confirmar Entrega" [draggable]="false" [resizable]="false">
+    <div style="text-align: center; padding: 1rem 0;">
+        <i class="pi pi-question-circle" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+        <h4 style="margin-bottom: 1rem; color: var(--text-color);">¿Ya recibiste el pago completo?</h4>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem;">
+            El artículo está siendo entregado. Selecciona si ya cobraste el dinero o si quedará pendiente.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <p-button label="Sí, Pago Realizado" icon="pi pi-check" severity="success" styleClass="w-full" (onClick)="confirmarEntrega('Cobrado')"></p-button>
+            <p-button label="No, Pagar Después" icon="pi pi-clock" severity="warn" styleClass="w-full" (onClick)="confirmarEntrega('Pendiente')"></p-button>
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" (onClick)="displayConfirmarEntrega = false"></p-button>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Modal Anular Venta y Devolución -->
+<p-dialog [(visible)]="displayAnularVenta" [modal]="true" [style]="{width: 'min(400px, 95vw)'}" header="Anular Venta" [draggable]="false" [resizable]="false">
+    <div style="padding: 1rem 0;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <i class="pi pi-exclamation-triangle" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
+            <h4 style="margin-bottom: 0.5rem; color: var(--text-color);">¿Liberar este artículo?</h4>
+            <p style="color: #64748b; font-size: 0.9rem;">
+                La venta/reserva será anulada y el producto volverá a estar "Disponible".
+            </p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.85rem; color: #64748b;">Precio Acordado:</span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ (ventaAAnular?.precioVenta || 0) | currency }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.85rem; color: #64748b;">Monto Abonado (Pagado):</span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ montoMaximoDevolucion | currency }}</span>
+            </div>
+            
+            <div *ngIf="montoMaximoDevolucion > 0" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-bottom: 0.5rem;">¿Cuánto devolverás al cliente?</label>
+                <p-inputNumber [(ngModel)]="montoDevolucionIngresado" mode="currency" currency="USD" locale="en-US" [min]="0" [max]="montoMaximoDevolucion" [style]="{'width': '100%'}"></p-inputNumber>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; text-align: center;">Si devuelves menos del abonado, el restante quedará como ganancia del negocio.</p>
+            </div>
+            <div *ngIf="montoMaximoDevolucion === 0" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1; text-align: center;">
+                <p style="font-size: 0.8rem; color: #64748b; font-style: italic;">No hay pagos registrados para devolver.</p>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <p-button label="Confirmar Anulación" icon="pi pi-trash" severity="danger" styleClass="w-full" (onClick)="confirmarAnulacion()"></p-button>
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" (onClick)="displayAnularVenta = false"></p-button>
         </div>
     </div>
 </p-dialog>

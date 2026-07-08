@@ -95,7 +95,7 @@ export class DialogVentaComponent implements OnInit {
           comisionMonto: venta.comisionMonto,
           comisionUsuarioId: venta.comisionUsuarioId,
           adelantoMonto: venta.adelantoMonto,
-          fechaEntrega: venta.fechaEntrega ? new Date(venta.fechaEntrega) : null,
+          fechaEntrega: venta.fechaEntrega ? new Date(venta.fechaEntrega).toISOString().split('T')[0] : null,
           estadoPago: venta.estadoPago || 'Pendiente'
       };
       if (venta.adelantoMonto) {
@@ -117,7 +117,7 @@ export class DialogVentaComponent implements OnInit {
           estado: 'Reservado',
           nombreComprador: '',
           lugarDestino: '',
-          fechaEntrega: null,
+          fechaEntrega: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0],
           estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,
@@ -135,7 +135,7 @@ export class DialogVentaComponent implements OnInit {
           estado: 'Reservado',
           nombreComprador: '',
           lugarDestino: '',
-          fechaEntrega: null,
+          fechaEntrega: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0],
           estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,

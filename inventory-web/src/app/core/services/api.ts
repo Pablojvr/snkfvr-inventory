@@ -70,6 +70,8 @@ export interface Venta {
   lugarDestino?: string;
   comisionMonto?: number | null;
   comisionUsuarioId?: number | null;
+  fechaEntrega?: string | Date | null;
+  estadoPago?: string;
 }
 
 export interface Movimiento {
@@ -156,8 +158,8 @@ export class ApiService {
   editarVenta(id: number, venta: Venta): Observable<Venta> {
     return this.http.put<Venta>(`${this.apiUrl}/ventas/${id}`, venta);
   }
-  eliminarVenta(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/ventas/${id}`);
+  eliminarVenta(id: number, montoDevolucion: number = 0): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/Ventas/${id}?montoDevolucion=${montoDevolucion}`);
   }
 
   // --- Ingresos ---

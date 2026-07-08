@@ -33,7 +33,7 @@ namespace Inventory.Proyecto.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> EliminarVenta(int id)
+        public async Task<IActionResult> EliminarVenta(int id, [FromQuery] decimal? montoDevolucion = 0)
         {
             var venta = await _ventaRepositorio.ObtenerPorIdAsync(id);
             if (venta != null)
@@ -59,6 +59,63 @@ namespace Inventory.Proyecto.Controllers
                             ProductoId = venta.ProductoId
                         };
                         await movRepo.AgregarAsync(movimientoEstado);
+                    }
+
+                    // Anular movimientos originales de la venta SÓLO si no involucran dinero real histórico.
+                    // Si involucran dinero, los dejamos activos para no borrar el historial de caja.
+                    var movimientosAsociados = (await movRepo.ObtenerTodosAsync())
+                        .Where(m => m.ReferenciaId == venta.Id && m.ProductoId == venta.ProductoId)
+                        .ToList();
+                    
+                    foreach(var mov in movimientosAsociados)
+                    {
+                        if (mov.Tipo == "Cambio de Estado" || mov.Tipo == "Reserva" || mov.MontoTotal == 0)
+                        {
+                            mov.Activo = false;
+                            await movRepo.ActualizarAsync(mov);
+                        }
+                    }
+
+                    // Crear movimiento de devolución si aplica
+                    if (montoDevolucion.HasValue && montoDevolucion.Value > 0)
+                    {
+                        var devolucion = new Inventory.Core.Entities.Movimiento
+                        {
+                            Tipo = "Salida de Dinero",
+                            Fecha = DateTime.Now,
+                            Descripcion = $"Devolución parcial/total por anulación de reserva/venta de producto {venta.ProductoId}",
+                            MontoTotal = -montoDevolucion.Value, // Negativo para salir
+                            ReferenciaId = venta.Id,
+                            ProductoId = venta.ProductoId
+                        };
+                        await movRepo.AgregarAsync(devolucion);
+                    }
+                }
+
+                var gastoRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.Gasto>)) as IRepositorio<Inventory.Core.Entities.Gasto>;
+                if (gastoRepo != null)
+                {
+                    var gastos = await gastoRepo.ObtenerTodosAsync();
+                    var gastosAsociados = gastos.Where(g => g.ProductoId == venta.ProductoId && g.Activo).ToList();
+                    foreach (var g in gastosAsociados)
+                    {
+                        g.ProductoId = null;
+                        g.Motivo = "Pérdida por venta anulada - " + g.Motivo;
+                        await gastoRepo.ActualizarAsync(g);
+                    }
+                }
+
+                var ingresoRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.Ingreso>)) as IRepositorio<Inventory.Core.Entities.Ingreso>;
+                if (ingresoRepo != null && prodRepo != null)
+                {
+                    var ingresos = await ingresoRepo.ObtenerTodosAsync();
+                    var producto = await prodRepo.ObtenerPorIdAsync(venta.ProductoId);
+                    var descripcionProd = producto?.Descripcion ?? venta.ProductoId.ToString();
+                    var gananciaAsociada = ingresos.FirstOrDefault(i => i.Motivo.StartsWith("Ganancia Venta | " + descripcionProd) && i.UsuarioId == venta.UsuarioId && i.Activo);
+                    if (gananciaAsociada != null)
+                    {
+                        gananciaAsociada.Activo = false;
+                        await ingresoRepo.ActualizarAsync(gananciaAsociada);
                     }
                 }
             }

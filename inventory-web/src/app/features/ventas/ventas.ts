@@ -43,6 +43,13 @@ export class Ventas implements OnInit, AfterViewInit {
   ];
 
   menuItems: MenuItem[] = [];
+  displayConfirmarEntrega: boolean = false;
+  productoSeleccionadoParaEntrega: any = null;
+
+  displayAnularVenta: boolean = false;
+  ventaAAnular: any = null;
+  montoMaximoDevolucion: number = 0;
+  montoDevolucionIngresado: number = 0;
 
   // Paginación
   first: number = 0;
@@ -127,7 +134,7 @@ export class Ventas implements OnInit, AfterViewInit {
            return {
                ...p,
                costoCalculado: costoCalculado,
-               ventaAsociada: venta,
+               ventaAsociada: venta ? { ...venta, estadoPago: venta.estadoPago || 'Pendiente' } : undefined,
                estadoActual: venta ? venta.estado : 'Disponible',
                nombreComprador: venta?.nombreComprador || '',
                lugarDestino: venta?.lugarDestino || '',
@@ -147,7 +154,7 @@ export class Ventas implements OnInit, AfterViewInit {
     
     if (this.estadoFiltro !== 'Todos') {
         if (this.estadoFiltro === 'PorCobrar') {
-            filtradas = filtradas.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && p.ventaAsociada.estadoPago === 'Pendiente');
+            filtradas = filtradas.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && (p.ventaAsociada.estadoPago === 'Pendiente' || !p.ventaAsociada.estadoPago));
         } else {
             filtradas = filtradas.filter(p => p.estadoActual === this.estadoFiltro);
         }
@@ -171,7 +178,7 @@ export class Ventas implements OnInit, AfterViewInit {
 
   countByState(state: string): number {
     if (state === 'Todos') return this.productos.length;
-    if (state === 'PorCobrar') return this.productos.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && p.ventaAsociada.estadoPago === 'Pendiente').length;
+    if (state === 'PorCobrar') return this.productos.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && (p.ventaAsociada.estadoPago === 'Pendiente' || !p.ventaAsociada.estadoPago)).length;
     return this.productos.filter(p => p.estadoActual === state).length;
   }
 
@@ -208,8 +215,8 @@ export class Ventas implements OnInit, AfterViewInit {
             command: () => this.showDialog(producto)
         });
     } else if (producto.estadoActual === 'Reservado') {
-      this.menuItems.push({ label: 'Marcar como Vendido', icon: 'pi pi-check', command: () => this.marcarComoVendido(producto) });
-      this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada.id) });
+      this.menuItems.push({ label: 'Marcar como Entregado', icon: 'pi pi-check', command: () => this.marcarComoVendido(producto) });
+      this.menuItems.push({ label: 'Marcar como Disponible', icon: 'pi pi-undo', command: () => this.anularVenta(producto.ventaAsociada) });
     }
     
     menu.toggle(event);
@@ -222,17 +229,50 @@ export class Ventas implements OnInit, AfterViewInit {
 
   marcarComoVendido(producto: any) {
       if (producto.ventaAsociada) {
-          this.dialogVenta.showDialog(producto, producto.ventaAsociada, 'Vendido');
+          this.productoSeleccionadoParaEntrega = producto;
+          this.displayConfirmarEntrega = true;
       }
   }
 
-  anularVenta(ventaId: number) {
-      if(confirm('¿Seguro que desea liberar este producto? (Significa que el usuario no recibió su producto). Se anula la venta, y el producto se habilita para otra venta, pero sus gastos asociados se mantienen incluso los de envío, porque aunque no haya recibido el envío lo pagamos nosotros.')) {
-          this.api.eliminarVenta(ventaId).subscribe(() => {
-              this.cargarDatos();
-              this.toastManager.showSuccess('Éxito', 'Venta anulada correctamente');
-          });
+  confirmarEntrega(estadoPago: string) {
+      if (!this.productoSeleccionadoParaEntrega || !this.productoSeleccionadoParaEntrega.ventaAsociada) return;
+      
+      const ventaActualizada = {
+          ...this.productoSeleccionadoParaEntrega.ventaAsociada,
+          estado: 'Vendido',
+          estadoPago: estadoPago
+      };
+
+      this.api.editarVenta(this.productoSeleccionadoParaEntrega.ventaAsociada.id, ventaActualizada).subscribe(() => {
+          this.cargarDatos();
+          this.displayConfirmarEntrega = false;
+          this.toastManager.showSuccess('Entrega Confirmada', 'El estado del producto ha sido actualizado.');
+      });
+  }
+
+  anularVenta(venta: any) {
+      if (!venta) return;
+      this.ventaAAnular = venta;
+      let montoAbonado = 0;
+      
+      if (venta.estado === 'Vendido' && venta.estadoPago === 'Cobrado') {
+          montoAbonado = venta.precioVenta || 0;
+      } else if (venta.estado === 'Reservado' && venta.adelantoMonto > 0) {
+          montoAbonado = venta.adelantoMonto;
       }
+      
+      this.montoMaximoDevolucion = montoAbonado;
+      this.montoDevolucionIngresado = 0; 
+      this.displayAnularVenta = true;
+  }
+
+  confirmarAnulacion() {
+      if (!this.ventaAAnular) return;
+      this.api.eliminarVenta(this.ventaAAnular.id, this.montoDevolucionIngresado).subscribe(() => {
+          this.cargarDatos();
+          this.displayAnularVenta = false;
+          this.toastManager.showSuccess('Éxito', 'Venta anulada y producto liberado');
+      });
   }
 
   abrirDetalle(producto: any) {

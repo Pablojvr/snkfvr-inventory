@@ -51,6 +51,11 @@
                     <span style="font-weight: bold; color: #64748b;">Costo Calculado: {{ producto.costoCalculado | currency }}</span>
                     <span *ngIf="producto.estadoActual !== 'Disponible'"><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.nombreComprador || 'Sin nombre' }}</span>
                     <span *ngIf="producto.estadoActual !== 'Disponible' && producto.lugarDestino"><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ producto.lugarDestino }}</span>
+                    
+                    <span *ngIf="producto.estadoActual === 'Reservado' && producto.ventaAsociada?.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #ea580c;"></i> <span style="color: #ea580c; font-weight: 600;">{{ producto.ventaAsociada.fechaEntrega | date:'dd/MM/yyyy' }}</span></span>
+                    <span *ngIf="producto.estadoActual === 'Reservado' && !producto.ventaAsociada?.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #94a3b8;"></i> <span style="color: #94a3b8; font-weight: 600;">Por definir</span></span>
+                    
+                    <span *ngIf="producto.estadoActual === 'Vendido' && producto.ventaAsociada?.fechaVenta"><i class="pi pi-check-circle" style="font-size: 0.75rem; margin-right: 0.25rem; color: #10b981;"></i> <span style="color: #10b981; font-weight: 600;">{{ producto.ventaAsociada.fechaVenta | date:'dd/MM/yyyy' }}</span></span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; gap: 0.5rem;">
                     <span *ngIf="producto.estadoActual !== 'Disponible'" class="entity-card-amount" style="color: #3b82f6;">{{ producto.precioVenta | currency }}</span>

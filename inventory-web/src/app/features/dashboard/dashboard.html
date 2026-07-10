@@ -120,6 +120,8 @@
                             Abonado: {{ venta.adelantoMonto | currency }} <br>
                             Deuda: {{ venta.saldoPendiente | currency }}
                         </div>
+
+                        <p-button label="Cobrar" icon="pi pi-check" severity="success" [text]="true" size="small" [loading]="marcandoCobrado" (onClick)="$event.stopPropagation(); marcarCobrado(venta)" styleClass="mt-1"></p-button>
                     </div>
                 </div>
             </div>
@@ -265,9 +267,9 @@
             El artículo está siendo entregado. Selecciona si ya cobraste el dinero o si quedará pendiente.
         </p>
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <p-button label="Sí, Pago Realizado" icon="pi pi-check" severity="success" styleClass="w-full" (onClick)="confirmarEntrega('Cobrado')"></p-button>
-            <p-button label="No, Pagar Después" icon="pi pi-clock" severity="warn" styleClass="w-full" (onClick)="confirmarEntrega('Pendiente')"></p-button>
-            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" (onClick)="displayConfirmarEntrega = false"></p-button>
+            <p-button label="Sí, Pago Realizado" icon="pi pi-check" severity="success" styleClass="w-full" [loading]="confirmandoEntrega" [disabled]="confirmandoEntrega" (onClick)="confirmarEntrega('Cobrado')"></p-button>
+            <p-button label="No, Pagar Después" icon="pi pi-clock" severity="warn" styleClass="w-full" [loading]="confirmandoEntrega" [disabled]="confirmandoEntrega" (onClick)="confirmarEntrega('Pendiente')"></p-button>
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" [disabled]="confirmandoEntrega" (onClick)="displayConfirmarEntrega = false"></p-button>
         </div>
     </div>
 </p-dialog>
@@ -303,8 +305,8 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <p-button label="Confirmar Anulación" icon="pi pi-trash" severity="danger" styleClass="w-full" (onClick)="confirmarAnulacion()"></p-button>
-            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" (onClick)="displayAnularVenta = false"></p-button>
+            <p-button label="Confirmar Anulación" icon="pi pi-trash" severity="danger" styleClass="w-full" [loading]="anulandoVenta" [disabled]="anulandoVenta" (onClick)="confirmarAnulacion()"></p-button>
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" styleClass="w-full" [disabled]="anulandoVenta" (onClick)="displayAnularVenta = false"></p-button>
         </div>
     </div>
 </p-dialog>

@@ -55,12 +55,17 @@ export class Dashboard implements OnInit {
   displayDetalleVenta: boolean = false;
   ventaSeleccionada: VentaDashboard | null = null;
   displayConfirmarEntrega: boolean = false;
+  confirmandoEntrega: boolean = false;
   
   // Anular Venta modal
   displayAnularVenta: boolean = false;
   ventaAAnular: VentaDashboard | null = null;
   montoMaximoDevolucion: number = 0;
   montoDevolucionIngresado: number = 0;
+  anulandoVenta: boolean = false;
+
+  // Cobro
+  marcandoCobrado: boolean = false;
 
   displayDetalleMovimiento: boolean = false;
   movimientoSeleccionado: Movimiento | null = null;
@@ -316,6 +321,7 @@ export class Dashboard implements OnInit {
 
   confirmarEntrega(estadoPago: string) {
       if (!this.ventaSeleccionada || !this.ventaSeleccionada.id) return;
+      this.confirmandoEntrega = true;
       
       const ventaActualizada: Venta = {
           ...this.ventaSeleccionada,
@@ -323,11 +329,18 @@ export class Dashboard implements OnInit {
           estadoPago: estadoPago
       };
 
-      this.api.editarVenta(this.ventaSeleccionada.id, ventaActualizada).subscribe(() => {
-          this.cargarDatos();
-          this.displayConfirmarEntrega = false;
-          this.displayDetalleVenta = false;
-          this.toastManager.showSuccess('Entrega Confirmada', 'El estado del producto ha sido actualizado.');
+      this.api.editarVenta(this.ventaSeleccionada.id, ventaActualizada).subscribe({
+          next: () => {
+              this.confirmandoEntrega = false;
+              this.cargarDatos();
+              this.displayConfirmarEntrega = false;
+              this.displayDetalleVenta = false;
+              this.toastManager.showSuccess('Entrega Confirmada', 'El estado del producto ha sido actualizado.');
+          },
+          error: () => {
+              this.confirmandoEntrega = false;
+              this.toastManager.showError('Error', 'No se pudo confirmar la entrega. Intenta de nuevo.');
+          }
       });
   }
 
@@ -344,17 +357,47 @@ export class Dashboard implements OnInit {
       }
       
       this.montoMaximoDevolucion = montoAbonado;
-      this.montoDevolucionIngresado = 0; // Por defecto devolvemos 0, o podria ser montoAbonado
+      this.montoDevolucionIngresado = 0;
       this.displayAnularVenta = true;
   }
 
   confirmarAnulacion() {
       if (!this.ventaAAnular || !this.ventaAAnular.id) return;
-      this.api.eliminarVenta(this.ventaAAnular.id, this.montoDevolucionIngresado).subscribe(() => {
-          this.cargarDatos();
-          this.displayAnularVenta = false;
-          this.displayDetalleVenta = false;
-          this.toastManager.showSuccess('Éxito', 'Venta anulada y producto liberado');
+      this.anulandoVenta = true;
+      this.api.eliminarVenta(this.ventaAAnular.id, this.montoDevolucionIngresado).subscribe({
+          next: () => {
+              this.anulandoVenta = false;
+              this.cargarDatos();
+              this.displayAnularVenta = false;
+              this.displayDetalleVenta = false;
+              this.toastManager.showSuccess('Éxito', 'Venta anulada y producto liberado');
+          },
+          error: () => {
+              this.anulandoVenta = false;
+              this.toastManager.showError('Error', 'No se pudo anular la venta. Intenta de nuevo.');
+          }
+      });
+  }
+
+  marcarCobrado(venta: VentaDashboard) {
+      if (!venta || !venta.id) return;
+      this.marcandoCobrado = true;
+      
+      const ventaActualizada: Venta = {
+          ...venta,
+          estadoPago: 'Cobrado'
+      };
+
+      this.api.editarVenta(venta.id, ventaActualizada).subscribe({
+          next: () => {
+              this.marcandoCobrado = false;
+              this.cargarDatos();
+              this.toastManager.showSuccess('Cobro Registrado', `Se marcó como cobrado: ${venta.productoDescripcion}`);
+          },
+          error: () => {
+              this.marcandoCobrado = false;
+              this.toastManager.showError('Error', 'No se pudo registrar el cobro. Intenta de nuevo.');
+          }
       });
   }
 }

@@ -11,9 +11,11 @@ namespace Inventory.Application.DTOs
         public decimal PrecioVenta { get; set; }
         public int UsuarioId { get; set; }
         public string? NombreComprador { get; set; }
+        public string? TelefonoComprador { get; set; }
         public string? LugarDestino { get; set; }
         public DateTime FechaRegistro { get; set; }
         public DateTime? FechaEntrega { get; set; }
+        public bool EsEnvioPersonalizado { get; set; }
         public string Estado { get; set; } = "Reservado";
         public string EstadoPago { get; set; } = "Pendiente";
         public decimal? ComisionMonto { get; set; }

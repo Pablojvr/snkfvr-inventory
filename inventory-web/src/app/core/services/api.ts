@@ -64,9 +64,11 @@ export interface Venta {
   usuarioNombre?: string;
   productoDescripcion?: string;
   fechaRegistro?: string | Date;
-  estado?: string;
+  esEnvioPersonalizado?: boolean;
+  estado: string;
   activo?: boolean;
   nombreComprador?: string;
+  telefonoComprador?: string;
   lugarDestino?: string;
   comisionMonto?: number | null;
   comisionUsuarioId?: number | null;

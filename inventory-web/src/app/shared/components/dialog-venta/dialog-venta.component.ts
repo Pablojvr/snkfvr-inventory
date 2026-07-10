@@ -33,11 +33,13 @@ export class DialogVentaComponent implements OnInit {
     costosAdicionales: null,
     estado: 'Reservado',
     nombreComprador: '',
+    telefonoComprador: '',
     lugarDestino: '',
     comisionMonto: null,
     comisionUsuarioId: null,
     adelantoMonto: null,
     fechaEntrega: null,
+    esEnvioPersonalizado: false,
     estadoPago: 'Pendiente'
   };
 
@@ -91,11 +93,13 @@ export class DialogVentaComponent implements OnInit {
           costosAdicionales: venta.costosAdicionales,
           estado: overrideState || venta.estado,
           nombreComprador: venta.nombreComprador,
+          telefonoComprador: venta.telefonoComprador || '',
           lugarDestino: venta.lugarDestino,
           comisionMonto: venta.comisionMonto,
           comisionUsuarioId: venta.comisionUsuarioId,
           adelantoMonto: venta.adelantoMonto,
           fechaEntrega: venta.fechaEntrega ? new Date(venta.fechaEntrega).toISOString().split('T')[0] : null,
+          esEnvioPersonalizado: venta.esEnvioPersonalizado || false,
           estadoPago: venta.estadoPago || 'Pendiente'
       };
       if (venta.adelantoMonto) {
@@ -116,8 +120,10 @@ export class DialogVentaComponent implements OnInit {
           costosAdicionales: null,
           estado: 'Reservado',
           nombreComprador: '',
+          telefonoComprador: '',
           lugarDestino: '',
           fechaEntrega: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0],
+          esEnvioPersonalizado: false,
           estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,
@@ -134,8 +140,10 @@ export class DialogVentaComponent implements OnInit {
           costosAdicionales: null,
           estado: 'Reservado',
           nombreComprador: '',
+          telefonoComprador: '',
           lugarDestino: '',
           fechaEntrega: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0],
+          esEnvioPersonalizado: false,
           estadoPago: 'Pendiente',
           comisionMonto: null,
           comisionUsuarioId: fabriUser ? fabriUser.id : null,
@@ -185,6 +193,12 @@ export class DialogVentaComponent implements OnInit {
   guardar() {
       if (!this.nuevaVentaData.productoSeleccionado) return;
 
+      // Validar teléfono obligatorio
+      if (!this.nuevaVentaData.telefonoComprador || this.nuevaVentaData.telefonoComprador.trim().length < 10) {
+          this.toastManager.showError('Teléfono Requerido', 'Ingresa el número de WhatsApp del comprador (mínimo 10 dígitos).');
+          return;
+      }
+
       if (this.nuevaVentaData.estado === 'Vendido') {
           if (!this.nuevaVentaData.nombreComprador || !this.nuevaVentaData.lugarDestino) {
               this.toastManager.showError('Error', 'Para un producto Vendido, Comprador y Lugar son obligatorios.');
@@ -200,12 +214,14 @@ export class DialogVentaComponent implements OnInit {
           usuarioId: Number(localStorage.getItem('userId')) || 1, 
           estado: this.nuevaVentaData.estado,
           nombreComprador: this.nuevaVentaData.nombreComprador,
+          telefonoComprador: this.nuevaVentaData.telefonoComprador.trim(),
           lugarDestino: this.nuevaVentaData.lugarDestino,
           fechaVenta: this.nuevaVentaData.estado === 'Vendido' ? new Date() : undefined,
           comisionMonto: this.nuevaVentaData.estado === 'Vendido' ? this.nuevaVentaData.comisionMonto : null,
           comisionUsuarioId: this.nuevaVentaData.comisionUsuarioId,
           adelantoMonto: this.tieneAdelanto ? this.nuevaVentaData.adelantoMonto : null,
           fechaEntrega: this.nuevaVentaData.fechaEntrega ? new Date(this.nuevaVentaData.fechaEntrega) : null,
+          esEnvioPersonalizado: this.nuevaVentaData.esEnvioPersonalizado,
           estadoPago: this.nuevaVentaData.estadoPago || 'Pendiente'
       };
 

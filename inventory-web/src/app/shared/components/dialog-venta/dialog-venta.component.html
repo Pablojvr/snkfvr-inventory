@@ -52,8 +52,15 @@
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="field">
-                    <label style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-truck" style="margin-right: 0.25rem;"></i> Envío (Costo)</label>
+                    <label style="color: #64748b; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="pi pi-truck" style="margin-right: 0.25rem;"></i> Envío (Costo)</span>
+                    </label>
                     <p-inputNumber [(ngModel)]="nuevaVentaData.costoEnvio" mode="currency" currency="USD" locale="en-US" class="w-full" (onInput)="nuevaVentaData.costoEnvio = $event.value; onNuevaVentaChange()"></p-inputNumber>
+                    
+                    <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <p-checkbox [(ngModel)]="nuevaVentaData.esEnvioPersonalizado" [binary]="true" inputId="chkEnvioPers"></p-checkbox>
+                        <span for="chkEnvioPers" style="font-size: 0.8rem; color: #64748b;">¿Es envío personalizado?</span>
+                    </div>
                 </div>
                 <div class="field">
                     <label style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-plus-circle" style="margin-right: 0.25rem;"></i> Otros Costos</label>
@@ -64,6 +71,12 @@
             <div class="field">
                 <label style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-user" style="margin-right: 0.25rem;"></i> Nombre Comprador <span *ngIf="nuevaVentaData.estado === 'Vendido'" style="color: var(--primary-color);">*</span><span *ngIf="nuevaVentaData.estado !== 'Vendido'" style="opacity:0.6;"> (Opcional)</span></label>
                 <input pInputText type="text" [(ngModel)]="nuevaVentaData.nombreComprador" class="w-full" />
+            </div>
+
+            <div class="field">
+                <label style="color: #64748b; font-size: 0.85rem; font-weight: 600;"><i class="pi pi-whatsapp" style="margin-right: 0.25rem; color: #25d366;"></i> WhatsApp del Comprador <span style="color: var(--primary-color);">*</span></label>
+                <input pInputText type="tel" [(ngModel)]="nuevaVentaData.telefonoComprador" class="w-full" placeholder="Ej: +526141234567" />
+                <small style="color: #94a3b8; margin-top: 0.25rem; display: block;">Obligatorio. Se usará para recordatorios de entrega.</small>
             </div>
 
             <div class="field">

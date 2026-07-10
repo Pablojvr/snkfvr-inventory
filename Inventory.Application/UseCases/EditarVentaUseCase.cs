@@ -53,7 +53,9 @@ namespace Inventory.Application.UseCases
             venta.PrecioVenta = ventaDto.PrecioVenta;
             venta.UsuarioId = ventaDto.UsuarioId;
             venta.NombreComprador = ventaDto.NombreComprador;
+            venta.TelefonoComprador = ventaDto.TelefonoComprador;
             venta.LugarDestino = ventaDto.LugarDestino;
+            venta.EsEnvioPersonalizado = ventaDto.EsEnvioPersonalizado;
             venta.FechaEntrega = ventaDto.FechaEntrega;
             venta.Estado = ventaDto.Estado;
             venta.EstadoPago = !string.IsNullOrEmpty(ventaDto.EstadoPago) ? ventaDto.EstadoPago : "Pendiente";

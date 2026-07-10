@@ -17,6 +17,7 @@ import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialo
 import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { DialogCierreDiaComponent } from '../../shared/components/dialog-cierre-dia/dialog-cierre-dia.component';
 
 // Interface extendida para Venta en el Dashboard
 interface VentaDashboard extends Venta {
@@ -30,7 +31,7 @@ interface VentaDashboard extends Venta {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, InputNumberModule, InputTextModule],
+  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, InputNumberModule, InputTextModule, DialogCierreDiaComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -38,6 +39,7 @@ export class Dashboard implements OnInit {
   
   ventasReservadas: VentaDashboard[] = [];
   ventasPorCobrar: VentaDashboard[] = [];
+  entregasDeHoy: VentaDashboard[] = [];
   activeTab: 'pendientes' | 'cobrar' = 'pendientes';
   movimientos: Movimiento[] = [];
   productos: Producto[] = [];
@@ -69,6 +71,8 @@ export class Dashboard implements OnInit {
 
   displayDetalleMovimiento: boolean = false;
   movimientoSeleccionado: Movimiento | null = null;
+
+  displayCierreDia: boolean = false;
 
   // Menu
   menuItems: MenuItem[] = [];
@@ -223,6 +227,15 @@ export class Dashboard implements OnInit {
                 const dateB = isValidB ? new Date(b.fechaEntrega!).getTime() : Number.MAX_SAFE_INTEGER;
                 return dateA - dateB;
             });
+
+          this.entregasDeHoy = this.ventasReservadas.filter(v => {
+              if (!v.fechaEntrega) return false;
+              const fecha = new Date(v.fechaEntrega);
+              const hoy = new Date();
+              const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+              const hoyNormalizado = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+              return fechaNormalizada.getTime() <= hoyNormalizado.getTime();
+          });
 
           this.ventasPorCobrar = ventas
             .filter(v => v.estado === 'Vendido' && (!v.estadoPago || v.estadoPago === 'Pendiente'))

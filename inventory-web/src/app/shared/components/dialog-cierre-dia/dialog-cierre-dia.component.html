@@ -1,0 +1,65 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{width: 'min(450px, 95vw)', background: 'transparent'}" 
+          header="Cierre de Entregas" [draggable]="false" [resizable]="false" 
+          (onHide)="cerrar()" styleClass="cierre-dia-dialog">
+    
+    <ng-template pTemplate="header">
+        <div class="cierre-dia-header">
+            <i class="pi pi-check-square" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">Cierre de Entregas</h3>
+                <span style="font-size: 0.85rem; color: #64748b;">{{ ventas.length }} entregas de hoy</span>
+            </div>
+        </div>
+    </ng-template>
+
+    <div class="cierre-dia-content">
+        <div *ngIf="ventas.length === 0" class="empty-state">
+            <i class="pi pi-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
+            <h4>¡Todo al día!</h4>
+            <p>No tienes entregas pendientes para hoy.</p>
+        </div>
+
+        <div class="checklist-grid" *ngIf="ventas.length > 0">
+            <div *ngFor="let venta of ventas" class="checklist-card" [class.processing]="isProcessing(venta.id)">
+                <div class="card-info">
+                    <div class="card-title">{{ venta.productoDescripcion }}</div>
+                    <div class="card-meta">
+                        <span><i class="pi pi-user"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
+                        <span><i class="pi pi-map-marker"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-actions-wrapper">
+                    <div class="card-price">{{ venta.precioVenta | currency }}</div>
+                    <div class="card-actions">
+                        <!-- Botón Entregado -->
+                        <button pButton pRipple icon="pi pi-check" 
+                                class="p-button-rounded p-button-success p-button-outlined action-btn" 
+                                pTooltip="Entregado" tooltipPosition="top"
+                                [disabled]="isProcessing(venta.id)"
+                                (click)="marcarEntregado(venta)"></button>
+                        
+                        <!-- Botón Reprogramar -->
+                        <button pButton pRipple icon="pi pi-calendar-plus" 
+                                class="p-button-rounded p-button-warning p-button-outlined action-btn" 
+                                pTooltip="Reprogramar +1 Día" tooltipPosition="top"
+                                [disabled]="isProcessing(venta.id)"
+                                (click)="reprogramar(venta)"></button>
+                        
+                        <!-- Botón Anular -->
+                        <button pButton pRipple icon="pi pi-times" 
+                                class="p-button-rounded p-button-danger p-button-outlined action-btn" 
+                                pTooltip="Anular" tooltipPosition="top"
+                                [disabled]="isProcessing(venta.id)"
+                                (click)="anularVenta(venta)"></button>
+                    </div>
+                </div>
+                
+                <!-- Overlay loading individual -->
+                <div class="processing-overlay" *ngIf="isProcessing(venta.id)">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--primary-color);"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</p-dialog>

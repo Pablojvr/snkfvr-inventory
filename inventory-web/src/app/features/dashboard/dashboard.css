@@ -279,3 +279,49 @@
     color: #1e293b;
     background: rgba(0,0,0,0.02);
 }
+
+/* FAB Cierre de Dia */
+.fab-cierre-dia {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), #ff7e5f);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fab-cierre-dia:hover {
+    transform: scale(1.05);
+    box-shadow: 0 14px 30px rgba(255, 71, 87, 0.5);
+}
+
+.fab-cierre-dia i {
+    font-size: 1.5rem;
+}
+
+.fab-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}

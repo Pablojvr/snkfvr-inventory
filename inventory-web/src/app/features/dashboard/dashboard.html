@@ -109,7 +109,7 @@
                 <div class="entity-card-body">
                     <div class="entity-card-meta">
                         <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
-                        <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+                        <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 600;">Vendido:</span> {{ venta.fechaRegistro | date:'dd/MM/yyyy' }}</span>
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
                         <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
@@ -160,6 +160,12 @@
         </div>
     </div>
 </div>
+
+<!-- FAB Cierre de Día -->
+<button class="fab-cierre-dia" (click)="displayCierreDia = true" pTooltip="Cierre de Entregas" tooltipPosition="left">
+    <i class="pi pi-check-square"></i>
+    <span class="fab-badge" *ngIf="entregasDeHoy.length > 0">{{ entregasDeHoy.length }}</span>
+</button>
 
 <!-- Modal Detalle de Venta -->
 <p-dialog [(visible)]="displayDetalleVenta" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Venta" [draggable]="false" [resizable]="false">
@@ -316,3 +322,6 @@
     <app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>
     <app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>
 }
+
+<app-dialog-cierre-dia [(visible)]="displayCierreDia" [ventas]="entregasDeHoy" (onUpdate)="cargarDatos()"></app-dialog-cierre-dia>
+

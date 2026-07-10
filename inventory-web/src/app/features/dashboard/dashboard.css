@@ -297,8 +297,8 @@
 /* FAB Cierre de Dia */
 .fab-cierre-dia {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 5.5rem;
+    right: 1.5rem;
     background: linear-gradient(135deg, var(--primary-color), #ff7e5f);
     color: white;
     width: 60px;

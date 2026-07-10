@@ -1,32 +1,10 @@
-/* Esconder barra de scroll para los filtros horizontales */
-.filters-container::-webkit-scrollbar {
-    display: none;
+:host ::ng-deep .p-timeline-event-content {
+    padding-bottom: 2rem;
 }
 
-.filter-chip {
-    padding: 0.5rem 1.25rem;
-    border-radius: 20px; /* --radius-master */
-    background: #f1f5f9; /* --color-surface */
-    color: #64748b; /* --color-text-muted */
-    border: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.25s ease-in-out; /* --transition-standard */
-}
-
-.filter-chip:hover {
-    background: #e2e8f0;
-}
-
-.filter-chip.active {
-    background: #1e293b; /* --color-text-primary as background for high contrast */
-    color: #ffffff;
-    box-shadow: 0 4px 10px rgba(30, 41, 59, 0.2);
-}
-
-.transaction-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Soft shadow on hover */
+/* Paginator PrimeNG override (Regla de Diseño) */
+:host ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
 }

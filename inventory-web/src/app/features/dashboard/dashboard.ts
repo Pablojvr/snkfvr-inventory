@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 import { ButtonModule } from 'primeng/button';
 import { TimelineModule } from 'primeng/timeline';
@@ -12,28 +10,41 @@ import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
 import { TooltipModule } from 'primeng/tooltip';
 import { MenuItem } from 'primeng/api';
-import { ApiService, Venta, Producto, Usuario } from '../../core/services/api';
+import { ApiService, Venta, Producto, Usuario, Movimiento } from '../../core/services/api';
 import { ToastManagerService } from '../../core/services/toast-manager.service';
 
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 import { DialogGastoComponent } from '../../shared/components/dialog-gasto/dialog-gasto.component';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+
+// Interface extendida para Venta en el Dashboard
+interface VentaDashboard extends Venta {
+    productoDescripcion?: string;
+    usuarioNombre?: string;
+    adelantoMonto?: number;
+    saldoPendiente?: number;
+    ganancia?: number;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, InputNumberModule, InputTextModule],
   templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css']
 })
 export class Dashboard implements OnInit {
   
-  ventasReservadas: any[] = [];
-  movimientos: any[] = [];
+  ventasReservadas: VentaDashboard[] = [];
+  ventasPorCobrar: VentaDashboard[] = [];
+  activeTab: 'pendientes' | 'cobrar' = 'pendientes';
+  movimientos: Movimiento[] = [];
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
   
   productosParaBuscador: Producto[] = [];
-  productoBuscado: any;
+  productoBuscado: Producto | null = null;
 
   // Estadísticas Reales
   inventarioTotal: number = 0;
@@ -42,17 +53,17 @@ export class Dashboard implements OnInit {
 
   // Detail modal
   displayDetalleVenta: boolean = false;
-  ventaSeleccionada: any = null;
+  ventaSeleccionada: VentaDashboard | null = null;
   displayConfirmarEntrega: boolean = false;
   
   // Anular Venta modal
   displayAnularVenta: boolean = false;
-  ventaAAnular: any = null;
+  ventaAAnular: VentaDashboard | null = null;
   montoMaximoDevolucion: number = 0;
   montoDevolucionIngresado: number = 0;
 
   displayDetalleMovimiento: boolean = false;
-  movimientoSeleccionado: any = null;
+  movimientoSeleccionado: Movimiento | null = null;
 
   // Menu
   menuItems: MenuItem[] = [];
@@ -69,12 +80,12 @@ export class Dashboard implements OnInit {
     this.cargarDatos();
   }
   
-  getTiempoRelativo(fecha: Date | string): string {
+  getTiempoRelativo(fecha: Date | string | null | undefined): string {
     if (!fecha) return '';
     let dateObj = new Date(fecha);
     let diff = new Date().getTime() - dateObj.getTime();
     
-    // Corrección para fechas que vienen del servidor UTC y se parsean en el futuro localmente
+    // Corrección para fechas UTC
     if (diff < -60000 && typeof fecha === 'string' && !fecha.endsWith('Z')) {
         const utcDate = new Date(fecha + 'Z');
         const utcDiff = new Date().getTime() - utcDate.getTime();
@@ -207,6 +218,30 @@ export class Dashboard implements OnInit {
                 const dateB = isValidB ? new Date(b.fechaEntrega!).getTime() : Number.MAX_SAFE_INTEGER;
                 return dateA - dateB;
             });
+
+          this.ventasPorCobrar = ventas
+            .filter(v => v.estado === 'Vendido' && (!v.estadoPago || v.estadoPago === 'Pendiente'))
+            .map(v => {
+              const precio = v.precioVenta || 0;
+              const movAdelanto = movimientos.find(m => m.referenciaId === v.id && m.descripcion.startsWith('Adelanto por reserva'));
+              const adelantoMonto = movAdelanto ? movAdelanto.montoTotal : 0;
+              const saldoPendiente = precio - adelantoMonto;
+              const productoInfo = this.productos.find(p => p.id === v.productoId);
+
+              return {
+                ...v,
+                productoDescripcion: productoInfo?.descripcion || 'Desconocido',
+                usuarioNombre: usuarios.find(u => u.id === v.usuarioId)?.nombre || 'Desconocido',
+                adelantoMonto: adelantoMonto,
+                saldoPendiente: saldoPendiente > 0 ? saldoPendiente : 0,
+                ganancia: precio - (productoInfo?.costoCalculado || 0)
+              };
+            })
+            .sort((a, b) => {
+                const dateA = a.fechaRegistro ? new Date(a.fechaRegistro).getTime() : 0;
+                const dateB = b.fechaRegistro ? new Date(b.fechaRegistro).getTime() : 0;
+                return dateB - dateA;
+            });
             
           // Calcular estadísticas reales
           this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
@@ -254,17 +289,17 @@ export class Dashboard implements OnInit {
   }
 
   // --- Card actions ---
-  abrirDetalleMovimiento(mov: any) {
+  abrirDetalleMovimiento(mov: Movimiento) {
       this.movimientoSeleccionado = mov;
       this.displayDetalleMovimiento = true;
   }
 
-  abrirDetalle(venta: any) {
+  abrirDetalle(venta: VentaDashboard) {
     this.ventaSeleccionada = venta;
     this.displayDetalleVenta = true;
   }
 
-  toggleMenuVenta(event: Event, venta: any, menu: any) {
+  toggleMenuVenta(event: Event, venta: VentaDashboard, menu: any) {
     event.stopPropagation(); // Don't open detail modal
     this.menuItems = [
       { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', venta.productoId]) },
@@ -274,14 +309,15 @@ export class Dashboard implements OnInit {
     menu.toggle(event);
   }
 
-  marcarEntregado(venta: any) {
+  marcarEntregado(venta: VentaDashboard | null) {
+      if (!venta) return;
       this.displayConfirmarEntrega = true;
   }
 
   confirmarEntrega(estadoPago: string) {
-      if (!this.ventaSeleccionada) return;
+      if (!this.ventaSeleccionada || !this.ventaSeleccionada.id) return;
       
-      const ventaActualizada = {
+      const ventaActualizada: Venta = {
           ...this.ventaSeleccionada,
           estado: 'Vendido',
           estadoPago: estadoPago
@@ -295,14 +331,15 @@ export class Dashboard implements OnInit {
       });
   }
 
-  liberarProducto(venta: any) {
+  liberarProducto(venta: VentaDashboard | null) {
+      if (!venta) return;
       this.ventaAAnular = venta;
       let montoAbonado = 0;
       
       // Calcular monto que el cliente ya dio
       if (venta.estado === 'Vendido' && venta.estadoPago === 'Cobrado') {
           montoAbonado = venta.precioVenta || 0;
-      } else if (venta.estado === 'Reservado' && venta.adelantoMonto > 0) {
+      } else if (venta.estado === 'Reservado' && venta.adelantoMonto && venta.adelantoMonto > 0) {
           montoAbonado = venta.adelantoMonto;
       }
       
@@ -312,7 +349,7 @@ export class Dashboard implements OnInit {
   }
 
   confirmarAnulacion() {
-      if (!this.ventaAAnular) return;
+      if (!this.ventaAAnular || !this.ventaAAnular.id) return;
       this.api.eliminarVenta(this.ventaAAnular.id, this.montoDevolucionIngresado).subscribe(() => {
           this.cargarDatos();
           this.displayAnularVenta = false;

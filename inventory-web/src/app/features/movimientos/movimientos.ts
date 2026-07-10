@@ -125,6 +125,21 @@ export class Movimientos implements OnInit, AfterViewInit {
     return filtrados;
   }
 
+  getConteoFiltro(tipo: string): number {
+    if (tipo === 'Todos') return this.movimientos.length;
+    
+    let filtrados = this.movimientos;
+    if (tipo === 'Envío') {
+        return filtrados.filter(m => m.descripcion.includes('ENV |')).length;
+    } else if (tipo === 'Gasto') {
+        return filtrados.filter(m => m.tipo === 'Salida de dinero' && !m.descripcion.includes('ENV |')).length;
+    } else if (tipo === 'Compra') {
+        return filtrados.filter(m => m.tipo === 'Compra' && !m.descripcion.includes('ENV |')).length;
+    } else {
+        return filtrados.filter(m => m.tipo === tipo).length;
+    }
+  }
+
   setFiltro(tipo: string | null) {
       this.filtroTipoActivo = tipo || 'Todos';
       this.first = 0;

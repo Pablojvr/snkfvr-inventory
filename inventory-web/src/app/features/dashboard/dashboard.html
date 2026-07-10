@@ -1,93 +1,133 @@
 <!-- Encabezado de Inicio y Perfil -->
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding: 0 0.5rem;">
-    <div style="display: flex; flex-direction: column;">
-        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-color);">Inicio</h2>
-        <span style="color: #64748b; font-size: 0.9rem;">Resumen General</span>
+<div class="dashboard-header">
+    <div class="dashboard-title-container">
+        <h2 class="dashboard-title">Inicio</h2>
+        <span class="dashboard-subtitle">Resumen General</span>
     </div>
 </div>
 
-<!-- Cuadrícula de Rendimiento (3 Columnas) -->
 <!-- Cuadrícula de Rendimiento (Horizontal Scrollable) -->
-<div style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding: 0.5rem 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
-    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; background: linear-gradient(135deg, #ffffff, #fff5f5); border: 1px solid #ffe4e6; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
-        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Valor Inventario</span>
-        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
-            <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-color);">{{ inventarioTotal | currency }}</span>
-            <i class="pi pi-box" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.5;"></i>
+<div class="stats-grid">
+    <div class="stat-card stat-card-gradient">
+        <span class="stat-title">Valor Inventario</span>
+        <div class="stat-content">
+            <span class="stat-value">{{ inventarioTotal | currency }}</span>
+            <i class="pi pi-box stat-icon" style="color: var(--primary-color);"></i>
         </div>
     </div>
-    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
-        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Ventas Totales</span>
-        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
-            <span style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ ventasTotales | currency }}</span>
-            <i class="pi pi-chart-line" style="font-size: 1.5rem; color: #10b981; opacity: 0.5;"></i>
+    <div class="stat-card stat-card-plain">
+        <span class="stat-title">Ventas Totales</span>
+        <div class="stat-content">
+            <span class="stat-value-green">{{ ventasTotales | currency }}</span>
+            <i class="pi pi-chart-line stat-icon" style="color: #10b981;"></i>
         </div>
     </div>
-    <div class="stat-card" style="min-width: 220px; scroll-snap-align: start; flex: 0 0 auto; background: linear-gradient(135deg, #f0f9ff, #ffffff); border: 1px solid #e0f2fe; display: flex; flex-direction: column; justify-content: space-between; min-height: 120px;">
-        <span style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Disponibles</span>
-        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
-            <span style="font-size: 1.5rem; font-weight: 800; color: #0ea5e9;">{{ articulosDisponibles }} <span style="font-size: 0.9rem; color: #64748b;">unds.</span></span>
-            <i class="pi pi-tags" style="font-size: 1.5rem; color: #0ea5e9; opacity: 0.5;"></i>
+    <div class="stat-card stat-card-blue">
+        <span class="stat-title">Disponibles</span>
+        <div class="stat-content">
+            <span class="stat-value-blue">{{ articulosDisponibles }} <span class="stat-unit">unds.</span></span>
+            <i class="pi pi-tags stat-icon" style="color: #0ea5e9;"></i>
         </div>
     </div>
 </div>
 
-<!-- Acciones Rápidas (Reemplaza Búsqueda) -->
-<div class="card" style="margin-bottom: 2rem; background: var(--primary-color); color: white; border: none; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);">
-    <h3 style="margin-top: 0; font-size: 1.2rem; font-weight: 700;">Acciones Rápidas</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-        <button (click)="nuevaVentaRapida()" style="background: rgba(255,255,255,0.2); border: none; padding: 1rem; border-radius: 16px; color: white; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; transition: background 0.3s;">
+<!-- Acciones Rápidas -->
+<div class="card quick-actions-card">
+    <h3 class="quick-actions-title">Acciones Rápidas</h3>
+    <div class="quick-actions-grid">
+        <button (click)="nuevaVentaRapida()" class="quick-action-btn" aria-label="Registrar nueva venta">
             <i class="pi pi-shopping-cart" style="font-size: 1.5rem;"></i>
             Vender
         </button>
-        <button (click)="nuevoGastoRapido()" style="background: rgba(255,255,255,0.2); border: none; padding: 1rem; border-radius: 16px; color: white; font-weight: 600; cursor: pointer; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; transition: background 0.3s;">
+        <button (click)="nuevoGastoRapido()" class="quick-action-btn" aria-label="Registrar nueva compra o gasto">
             <i class="pi pi-shopping-bag" style="font-size: 1.5rem;"></i>
             Comprar
         </button>
     </div>
 </div>
 
-<!-- Ventas Pendientes: Tarjetas -->
+<!-- Ventas Pendientes -->
 <div class="card">
-    <h3 class="section-title-warn">
-        <i class="pi pi-clock"></i> Ventas Pendientes ({{ ventasReservadas.length }})
-    </h3>
+    <div class="tabs-container">
+        <button class="tab-btn" [class.tab-active]="activeTab === 'pendientes'" [class.tab-inactive]="activeTab !== 'pendientes'" (click)="activeTab = 'pendientes'">
+            <i class="pi pi-clock"></i> Por Entregar ({{ ventasReservadas.length }})
+        </button>
+        <button class="tab-btn" [class.tab-active]="activeTab === 'cobrar'" [class.tab-inactive]="activeTab !== 'cobrar'" (click)="activeTab = 'cobrar'">
+            <i class="pi pi-money-bill"></i> Por Cobrar ({{ ventasPorCobrar.length }})
+        </button>
+    </div>
     
-    <div class="entity-cards-grid" *ngIf="ventasReservadas.length > 0" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem;">
-        <div class="entity-card" *ngFor="let venta of ventasReservadas" (click)="abrirDetalle(venta)">
-            <div class="entity-card-header">
-                <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
-                <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
-                <button class="entity-card-menu-btn" (click)="toggleMenuVenta($event, venta, menu)" pTooltip="Acciones" tooltipPosition="left">
-                    <i class="pi pi-ellipsis-v"></i>
-                </button>
-            </div>
-            <div class="entity-card-body">
-                <div class="entity-card-meta">
-                    <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
-                    <span><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
-                    <span *ngIf="venta.fechaEntrega" [ngStyle]="{'color': esAtrasado(venta.fechaEntrega) ? '#ef4444' : '#ea580c'}">
-                        <i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i>
-                        <span style="font-weight: 600;">{{ formatearFechaEntrega(venta.fechaEntrega) }}</span>
-                    </span>
-                    <span *ngIf="!venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #94a3b8;"></i> <span style="color: #94a3b8; font-weight: 600;">Por definir</span></span>
+    <div *ngIf="activeTab === 'pendientes'">
+        <div class="entity-cards-grid" *ngIf="ventasReservadas.length > 0" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem;">
+            <div class="entity-card cursor-pointer" *ngFor="let venta of ventasReservadas" (click)="abrirDetalle(venta)">
+                <div class="entity-card-header">
+                    <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
+                    <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                    <button class="entity-card-menu-btn" (click)="toggleMenuVenta($event, venta, menu)" pTooltip="Acciones" tooltipPosition="left" aria-label="Opciones de venta">
+                        <i class="pi pi-ellipsis-v"></i>
+                    </button>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
-                    <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
-                    <span class="entity-card-badge" [class.badge-primary]="true" style="font-size: 0.75rem;">Pendiente</span>
-                    
-                    <!-- Adelanto/Restante UI -->
-                    <div *ngIf="venta.adelantoMonto > 0" style="margin-top: 0.25rem; font-size: 0.75rem; text-align: right; background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
-                        Adelanto: {{ venta.adelantoMonto | currency }} <br>
-                        Resta: {{ venta.saldoPendiente | currency }}
+                <div class="entity-card-body">
+                    <div class="entity-card-meta">
+                        <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
+                        <span><i class="pi pi-map-marker" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
+                        <span *ngIf="venta.fechaEntrega" [ngStyle]="{'color': esAtrasado(venta.fechaEntrega) ? '#ef4444' : '#ea580c'}">
+                            <i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i>
+                            <span style="font-weight: 600;">{{ formatearFechaEntrega(venta.fechaEntrega) }}</span>
+                        </span>
+                        <span *ngIf="!venta.fechaEntrega"><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem; color: #94a3b8;"></i> <span style="color: #94a3b8; font-weight: 600;">Por definir</span></span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                        <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
+                        <span class="entity-card-badge" [class.badge-primary]="true" style="font-size: 0.75rem;">Pendiente</span>
+                        
+                        <!-- Adelanto/Restante UI -->
+                        <div *ngIf="venta.adelantoMonto && venta.adelantoMonto > 0" style="margin-top: 0.25rem; font-size: 0.75rem; text-align: right; background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                            Adelanto: {{ venta.adelantoMonto | currency }} <br>
+                            Resta: {{ venta.saldoPendiente | currency }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <div *ngIf="ventasReservadas.length === 0" class="empty-msg">
+            No hay ventas reservadas o por entregar.
+        </div>
     </div>
-    
-    <div *ngIf="ventasReservadas.length === 0" class="empty-msg">
-        No hay ventas reservadas o pendientes.
+
+    <div *ngIf="activeTab === 'cobrar'">
+        <div class="entity-cards-grid" *ngIf="ventasPorCobrar.length > 0" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem;">
+            <div class="entity-card cursor-pointer" *ngFor="let venta of ventasPorCobrar" (click)="abrirDetalle(venta)">
+                <div class="entity-card-header">
+                    <h4 class="entity-card-title">{{ venta.productoDescripcion }}</h4>
+                    <p-menu #menu2 [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+                    <button class="entity-card-menu-btn" (click)="toggleMenuVenta($event, venta, menu2)" pTooltip="Acciones" tooltipPosition="left" aria-label="Opciones de venta">
+                        <i class="pi pi-ellipsis-v"></i>
+                    </button>
+                </div>
+                <div class="entity-card-body">
+                    <div class="entity-card-meta">
+                        <span><i class="pi pi-user" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
+                        <span><i class="pi pi-calendar" style="font-size: 0.75rem; margin-right: 0.25rem;"></i> {{ venta.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+                        <span class="entity-card-amount">{{ venta.precioVenta | currency }}</span>
+                        <span class="entity-card-badge" style="background: #fee2e2; color: #dc2626; font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Por Cobrar</span>
+                        
+                        <!-- Adelanto/Restante UI -->
+                        <div *ngIf="venta.adelantoMonto && venta.adelantoMonto > 0" style="margin-top: 0.25rem; font-size: 0.75rem; text-align: right; background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                            Abonado: {{ venta.adelantoMonto | currency }} <br>
+                            Deuda: {{ venta.saldoPendiente | currency }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div *ngIf="ventasPorCobrar.length === 0" class="empty-msg">
+            No hay ventas pendientes de cobro.
+        </div>
     </div>
 </div>
 
@@ -97,11 +137,9 @@
         <h3 class="section-title-dark" style="margin-bottom: 1rem;">
             <i class="pi pi-list"></i> Actividad Reciente
         </h3>
-        <div style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            <div *ngFor="let mov of movimientos" (click)="abrirDetalleMovimiento(mov)" style="display: flex; align-items: center; background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0.5rem; gap: 0.5rem; cursor: pointer; transition: box-shadow 0.2s;" [ngStyle]="{'box-shadow': '0 0 5px ' + (mov.montoTotal < 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}">
-                <div [style.background]="getColorForMovimiento(mov.tipo, mov.montoTotal) + '20'" 
-                     [style.color]="getColorForMovimiento(mov.tipo, mov.montoTotal)" 
-                     style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="timeline-container">
+            <div *ngFor="let mov of movimientos" (click)="abrirDetalleMovimiento(mov)" class="timeline-item" [ngStyle]="{'border-left': '4px solid ' + getColorForMovimiento(mov.tipo, mov.montoTotal)}">
+                <div class="timeline-icon-container" [style.background]="getColorForMovimiento(mov.tipo, mov.montoTotal) + '20'" [style.color]="getColorForMovimiento(mov.tipo, mov.montoTotal)">
                     <i [class]="getIconForMovimiento(mov.tipo)" style="font-size: 0.9rem;"></i>
                 </div>
                 <div style="flex: 1; min-width: 0; line-height: 1.2;">
@@ -121,65 +159,61 @@
     </div>
 </div>
 
-<!-- Modal Detalle de Venta (Read-Only) -->
+<!-- Modal Detalle de Venta -->
 <p-dialog [(visible)]="displayDetalleVenta" [modal]="true" [style]="{width: 'min(420px, 95vw)'}" header="Detalle de Venta" [draggable]="false" [resizable]="false">
     <div *ngIf="ventaSeleccionada" style="display: flex; flex-direction: column; gap: 1rem;">
         
-        <!-- Hero / Main info -->
-        <div style="background: linear-gradient(135deg, var(--primary-color), #ff7e5f); padding: 1.5rem; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);">
+        <div class="modal-hero">
             <i class="pi pi-box" style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.9;"></i>
             <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; line-height: 1.3;">{{ ventaSeleccionada.productoDescripcion }}</h3>
             <p style="margin: 0.5rem 0 0 0; font-size: 1.6rem; font-weight: 800;">{{ ventaSeleccionada.precioVenta | currency }}</p>
         </div>
 
-        <!-- Detalles Financieros -->
-        <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0;">
-            <h4 style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 700;"><i class="pi pi-money-bill" style="margin-right: 0.5rem;"></i>Finanzas</h4>
+        <div class="modal-section">
+            <h4 class="modal-section-title"><i class="pi pi-money-bill" style="margin-right: 0.5rem;"></i>Finanzas</h4>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #475569;">Costo de Envío</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.costoEnvio | currency }}</span>
+                <div class="detail-row">
+                    <span class="detail-label">Costo de Envío</span>
+                    <span class="detail-value">{{ ventaSeleccionada.costoEnvio | currency }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: #475569;">Costos Adicionales</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
+                <div class="detail-row">
+                    <span class="detail-label">Costos Adicionales</span>
+                    <span class="detail-value">{{ ventaSeleccionada.costosAdicionales | currency }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 0.5rem; margin-top: 0.25rem;">
-                    <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">Ganancia Estimada</span>
-                    <span style="font-size: 0.9rem; font-weight: 800; color: #10b981;">{{ ventaSeleccionada.ganancia | currency }}</span>
+                <div class="detail-row" style="border-top: 1px solid #cbd5e1; padding-top: 0.5rem; margin-top: 0.25rem;">
+                    <span class="detail-label" style="font-weight: 600;">Ganancia Estimada</span>
+                    <span class="detail-value" style="color: #10b981; font-weight: 800;">{{ ventaSeleccionada.ganancia | currency }}</span>
                 </div>
             </div>
         </div>
 
-        <!-- Detalles Logísticos -->
-        <div style="background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0;">
-            <h4 style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 700;"><i class="pi pi-truck" style="margin-right: 0.5rem;"></i>Logística & Cliente</h4>
+        <div class="modal-section">
+            <h4 class="modal-section-title"><i class="pi pi-truck" style="margin-right: 0.5rem;"></i>Logística & Cliente</h4>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <div *ngIf="ventaSeleccionada.nombreComprador" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #475569;">Cliente</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.nombreComprador }}</span>
+                <div *ngIf="ventaSeleccionada.nombreComprador" class="detail-row">
+                    <span class="detail-label">Cliente</span>
+                    <span class="detail-value">{{ ventaSeleccionada.nombreComprador }}</span>
                 </div>
-                <div *ngIf="ventaSeleccionada.lugarDestino" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #475569;">Lugar Entrega</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color); text-align: right;">{{ ventaSeleccionada.lugarDestino }}</span>
+                <div *ngIf="ventaSeleccionada.lugarDestino" class="detail-row">
+                    <span class="detail-label">Lugar Entrega</span>
+                    <span class="detail-value" style="text-align: right;">{{ ventaSeleccionada.lugarDestino }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #475569;">Vendedor</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.usuarioNombre }}</span>
+                <div class="detail-row">
+                    <span class="detail-label">Vendedor</span>
+                    <span class="detail-value">{{ ventaSeleccionada.usuarioNombre }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
-                    <span style="font-size: 0.85rem; color: #475569;">Registro</span>
-                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+                <div class="detail-row">
+                    <span class="detail-label">Registro</span>
+                    <span class="detail-value">{{ ventaSeleccionada.fechaRegistro | date:'dd/MM/yyyy' }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: #475569;">Día de Entrega</span>
+                <div class="detail-row">
+                    <span class="detail-label">Día de Entrega</span>
                     <span *ngIf="ventaSeleccionada.fechaEntrega" style="font-size: 0.9rem; font-weight: 700; color: #ea580c;">{{ ventaSeleccionada.fechaEntrega | date:'dd/MM/yyyy' }}</span>
                     <span *ngIf="!ventaSeleccionada.fechaEntrega" style="font-size: 0.9rem; font-weight: 600; color: #94a3b8;">Por definir</span>
                 </div>
             </div>
         </div>
 
-        <!-- Status -->
         <div style="display: flex; gap: 0.5rem;">
             <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #e2e8f0; text-align: center;">
                 <span style="display: block; font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">Estado</span>
@@ -193,7 +227,7 @@
     </div>
 
     <ng-template pTemplate="footer">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+        <div *ngIf="ventaSeleccionada" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
             <p-button label="Liberar" icon="pi pi-undo" severity="secondary" [text]="true" (onClick)="liberarProducto(ventaSeleccionada)"></p-button>
             <p-button label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
         </div>
@@ -222,7 +256,7 @@
     </div>
 </p-dialog>
 
-<!-- Modal Confirmar Entrega (Mini-Modal) -->
+<!-- Modal Confirmar Entrega -->
 <p-dialog [(visible)]="displayConfirmarEntrega" [modal]="true" [style]="{width: 'min(350px, 95vw)'}" header="Confirmar Entrega" [draggable]="false" [resizable]="false">
     <div style="text-align: center; padding: 1rem 0;">
         <i class="pi pi-question-circle" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
@@ -255,14 +289,13 @@
                 <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ (ventaAAnular?.precioVenta || 0) | currency }}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <span style="font-size: 0.85rem; color: #64748b;">Monto Abonado (Pagado):</span>
+                <span style="font-size: 0.85rem; color: #64748b;">Monto Abonado:</span>
                 <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">{{ montoMaximoDevolucion | currency }}</span>
             </div>
             
             <div *ngIf="montoMaximoDevolucion > 0" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1;">
                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-bottom: 0.5rem;">¿Cuánto devolverás al cliente?</label>
                 <p-inputNumber [(ngModel)]="montoDevolucionIngresado" mode="currency" currency="USD" locale="en-US" [min]="0" [max]="montoMaximoDevolucion" [style]="{'width': '100%'}"></p-inputNumber>
-                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; text-align: center;">Si devuelves menos del abonado, el restante quedará como ganancia del negocio.</p>
             </div>
             <div *ngIf="montoMaximoDevolucion === 0" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1; text-align: center;">
                 <p style="font-size: 0.8rem; color: #64748b; font-style: italic;">No hay pagos registrados para devolver.</p>
@@ -276,8 +309,8 @@
     </div>
 </p-dialog>
 
-<!-- Modal Registrar Venta Compartido -->
-<app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>
-
-<!-- Modal Registrar Gasto/Compra -->
-<app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>
+<!-- Modales Pesados con Defer (Lazy Loading) -->
+@defer (on timer(2s)) {
+    <app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>
+    <app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>
+}

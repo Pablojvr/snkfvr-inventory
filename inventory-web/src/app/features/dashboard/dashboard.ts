@@ -49,6 +49,7 @@ export class Dashboard implements OnInit {
   productoBuscado: Producto | null = null;
 
   // Estadísticas Reales
+  efectivoEnCaja: number = 0;
   inventarioTotal: number = 0;
   ventasTotales: number = 0;
   articulosDisponibles: number = 0;
@@ -262,6 +263,7 @@ export class Dashboard implements OnInit {
             });
             
           // Calcular estadísticas reales
+          this.efectivoEnCaja = movimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
           this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
           this.ventasTotales = ventas.filter(v => v.estado === 'Vendido').reduce((acc, v) => acc + (v.precioVenta || 0), 0);
           this.articulosDisponibles = this.productos.filter(p => p.estado === 'Disponible').length;

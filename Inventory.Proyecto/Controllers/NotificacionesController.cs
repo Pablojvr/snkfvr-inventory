@@ -67,33 +67,34 @@ namespace Inventory.Proyecto.Controllers
                 foreach (var v in entregasHoy)
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
-                    msg += $"  • {prod?.Descripcion ?? "Producto"} → {v.NombreComprador ?? "Sin nombre"} ({v.LugarDestino ?? "Sin destino"})\n";
+                    var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
+                    msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → {v.NombreComprador ?? "Sin nombre"}{tel} — {v.LugarDestino ?? "Sin destino"}\n\n";
                 }
             }
             else
             {
-                msg += "  Sin entregas programadas.\n";
+                msg += "  Sin entregas programadas.\n\n";
             }
 
             // Por cobrar
             var totalPorCobrar = porCobrar.Sum(v => v.PrecioVenta);
-            msg += $"\n💰 *POR COBRAR ({porCobrar.Count}) — Total: ${totalPorCobrar:N2}*\n";
-            foreach (var v in porCobrar.Take(5))
+            msg += $"💰 *POR COBRAR ({porCobrar.Count}) — Total: ${totalPorCobrar:N2}*\n";
+            foreach (var v in porCobrar)
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
-                msg += $"  • {prod?.Descripcion ?? "Producto"} — ${v.PrecioVenta:N2} ({v.NombreComprador ?? "?"})\n";
+                var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
+                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → ${v.PrecioVenta:N2} — {v.NombreComprador ?? "?"}{tel}\n\n";
             }
-            if (porCobrar.Count > 5) msg += $"  ...y {porCobrar.Count - 5} más.\n";
 
             // Pendientes
-            msg += $"\n⏳ *PENDIENTES DE ENTREGA ({pendientes.Count})*\n";
-            foreach (var v in pendientes.Take(5))
+            msg += $"⏳ *PENDIENTES DE ENTREGA ({pendientes.Count})*\n";
+            foreach (var v in pendientes)
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
                 var fechaStr = v.FechaEntrega.HasValue ? v.FechaEntrega.Value.ToString("dd/MMM") : "Sin fecha";
-                msg += $"  • {prod?.Descripcion ?? "Producto"} → {v.NombreComprador ?? "?"} ({fechaStr})\n";
+                var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
+                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → {v.NombreComprador ?? "?"}{tel} [{fechaStr}]\n\n";
             }
-            if (pendientes.Count > 5) msg += $"  ...y {pendientes.Count - 5} más.\n";
 
             var enviado = await _whatsAppService.EnviarMensajeAsync(telefonoDueno, msg);
 

@@ -99,6 +99,7 @@ namespace Inventory.Proyecto.Controllers
                 var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
                 msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
                        $"    *Cliente*: {v.NombreComprador ?? "?"}{tel}\n" +
+                       $"    *Destino*: {v.LugarDestino ?? "Sin destino"}\n" +
                        $"    *Programado*: {fechaStr}\n\n";
             }
 

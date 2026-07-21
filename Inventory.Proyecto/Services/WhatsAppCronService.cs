@@ -28,7 +28,7 @@ namespace Inventory.Proyecto.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time"));
+                var now = DateTime.UtcNow.AddHours(-6); // UTC-6 para El Salvador
                 
                 // Programar reporte matutino a las 7:00 AM
                 var morningTime = new DateTime(now.Year, now.Month, now.Day, 7, 0, 0);
@@ -60,7 +60,7 @@ namespace Inventory.Proyecto.Services
                 var ventas = await ventaRepo.ObtenerTodosAsync();
                 var productos = await productoRepo.ObtenerTodosAsync();
 
-                var hoy = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time")).Date;
+                var hoy = DateTime.UtcNow.AddHours(-6).Date;
 
                 // Entregas de hoy
                 var entregasHoy = ventas

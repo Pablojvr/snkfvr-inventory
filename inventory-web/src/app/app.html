@@ -25,7 +25,7 @@
       </button>
       <div class="topbar-title">SNKFVR</div>
       <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
-        <div *ngIf="selectedUserId" style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.25rem 0.75rem 0.25rem 0.25rem; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" (click)="displayUserModal = true" class="user-pill-hover">
+        <div *ngIf="selectedUserId" style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; padding: 0.25rem 0.75rem 0.25rem 0.25rem; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" (click)="userMenu.toggle($event)" class="user-pill-hover">
             <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ff7a85); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.9rem;">
                 {{ getSelectedUserInitial() }}
             </div>
@@ -68,6 +68,7 @@
       </a>
     </nav>
     <p-menu #mobileMenu [popup]="true" [model]="mobileMenuOptions" appendTo="body" styleClass="light-menu"></p-menu>
+    <p-menu #userMenu [popup]="true" [model]="userMenuOptions" appendTo="body" styleClass="light-menu"></p-menu>
   </div>
 </div>
 
@@ -83,6 +84,26 @@
   <ng-template pTemplate="footer">
     <p-button label="Ingresar" icon="pi pi-check" (onClick)="guardarUsuario()" [disabled]="!selectedUserId"></p-button>
   </ng-template>
+</p-dialog>
+
+<!-- Vista previa Resumen Diario -->
+<p-dialog [(visible)]="displayResumenPreview" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Enviar Resumen Diario" [draggable]="false" [resizable]="false">
+    <div style="background-color: #f8fafc; border-radius: 8px; padding: 1rem; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; border: 1px solid #e2e8f0; max-height: 350px; overflow-y: auto;">
+        <div *ngIf="cargandoPreview" style="display: flex; justify-content: center; padding: 2rem;">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--primary-color);"></i>
+        </div>
+        <ng-container *ngIf="!cargandoPreview">
+            {{ resumenPreviewText }}
+        </ng-container>
+    </div>
+    <div style="margin-top: 1rem; font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="pi pi-info-circle" style="color: #25d366;"></i>
+        <span>Este reporte será enviado a tu número de WhatsApp.</span>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="displayResumenPreview = false" [disabled]="enviandoResumen"></p-button>
+        <p-button label="Enviar por WhatsApp" icon="pi pi-whatsapp" severity="success" (onClick)="confirmarEnvioResumen()" [loading]="enviandoResumen"></p-button>
+    </ng-template>
 </p-dialog>
 
 <p-toast position="bottom-center"></p-toast>

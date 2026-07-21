@@ -163,5 +163,138 @@ namespace Inventory.Proyecto.Controllers
             var enviado = await _whatsAppService.EnviarMensajeAsync(telefonoDueno, "✅ SNKFVR Notificaciones activas. Conexión exitosa.");
             return Ok(new { enviado });
         }
+
+        /// <summary>
+        /// Envía el reporte masivo de todo el día de forma manual.
+        /// </summary>
+        [HttpPost("recordatorio-masivo")]
+        public async Task<IActionResult> RecordatorioMasivo()
+        {
+            // Reutiliza la misma lógica del matutino pero sin requerir clave de cron (podría requerirse JWT en el futuro).
+            return await ReporteMatutino(null);
+        }
+
+        /// <summary>
+        /// Devuelve el texto del reporte masivo para previsualización sin enviarlo.
+        /// </summary>
+        [HttpGet("preview-masivo")]
+        public async Task<IActionResult> PreviewMasivo()
+        {
+            var ventas = await _ventaRepo.ObtenerTodosAsync();
+            var productos = await _productoRepo.ObtenerTodosAsync();
+
+            var hoy = DateTime.Now.Date;
+
+            // Entregas de hoy
+            var entregasHoy = ventas
+                .Where(v => v.Estado == "Reservado" && v.FechaEntrega.HasValue && v.FechaEntrega.Value.Date == hoy)
+                .ToList();
+
+            // Ventas por cobrar
+            var porCobrar = ventas
+                .Where(v => v.Estado == "Vendido" && (v.EstadoPago == "Pendiente" || string.IsNullOrEmpty(v.EstadoPago)))
+                .ToList();
+
+            // Ventas pendientes de entrega (Reservadas)
+            var pendientes = ventas
+                .Where(v => v.Estado == "Reservado")
+                .ToList();
+
+            var msg = $"📋 *REPORTE MATUTINO SNKFVR*\n📅 {hoy:dd/MMM/yyyy}\n\n";
+
+            // Entregas del día
+            msg += $"📦 *ENTREGAS HOY ({entregasHoy.Count}):*\n";
+            if (entregasHoy.Any())
+            {
+                foreach (var v in entregasHoy)
+                {
+                    var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
+                    msg += $"  • {prod?.Descripcion ?? "Producto"} → {v.NombreComprador ?? "Sin nombre"} ({v.LugarDestino ?? "Sin destino"})\n";
+                }
+            }
+            else
+            {
+                msg += "  Sin entregas programadas.\n";
+            }
+
+            // Por cobrar
+            var totalPorCobrar = porCobrar.Sum(v => v.PrecioVenta);
+            msg += $"\n💰 *POR COBRAR ({porCobrar.Count}) — Total: ${totalPorCobrar:N2}*\n";
+            foreach (var v in porCobrar.Take(5))
+            {
+                var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
+                msg += $"  • {prod?.Descripcion ?? "Producto"} — ${v.PrecioVenta:N2} ({v.NombreComprador ?? "?"})\n";
+            }
+            if (porCobrar.Count > 5) msg += $"  ...y {porCobrar.Count - 5} más.\n";
+
+            // Pendientes
+            msg += $"\n⏳ *PENDIENTES DE ENTREGA ({pendientes.Count})*\n";
+            foreach (var v in pendientes.Take(5))
+            {
+                var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
+                var fechaStr = v.FechaEntrega.HasValue ? v.FechaEntrega.Value.ToString("dd/MMM") : "Sin fecha";
+                msg += $"  • {prod?.Descripcion ?? "Producto"} → {v.NombreComprador ?? "?"} ({fechaStr})\n";
+            }
+            if (pendientes.Count > 5) msg += $"  ...y {pendientes.Count - 5} más.\n";
+
+            return Ok(new { msg });
+        }
+
+        /// <summary>
+        /// Envía un recordatorio manual de una entrega/cobro específico.
+        /// Si hay teléfono de comprador, se le envía a él. De lo contrario, al dueño.
+        /// </summary>
+        [HttpPost("recordatorio-individual/{id}")]
+        public async Task<IActionResult> RecordatorioIndividual(int id)
+        {
+            var venta = await _ventaRepo.ObtenerPorIdAsync(id);
+            if (venta == null) return NotFound("Venta no encontrada.");
+
+            var producto = await _productoRepo.ObtenerPorIdAsync(venta.ProductoId);
+            string descripcion = producto?.Descripcion ?? "Producto";
+
+            string telefonoDestino = _config["Notificaciones:TelefonoDueno"] ?? "+50376539597";
+            bool esParaCliente = false;
+
+            if (!string.IsNullOrEmpty(venta.TelefonoComprador))
+            {
+                // En periodo de test, el destino SIEMPRE es el dueño,
+                // pero usamos la plantilla del cliente si existe teléfono.
+                esParaCliente = true;
+            }
+
+            string msg = "";
+
+            if (venta.Estado == "Reservado")
+            {
+                var fechaStr = venta.FechaEntrega.HasValue ? venta.FechaEntrega.Value.ToString("dd/MMM/yyyy") : "fecha por definir";
+                if (esParaCliente)
+                {
+                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de SNKFVR. 👟\n\nTe recordamos que tenemos programada la entrega de *{descripcion}* para el *{fechaStr}* en *{venta.LugarDestino ?? "lugar a convenir"}*.\n\n¡Gracias por tu preferencia!";
+                }
+                else
+                {
+                    msg = $"🔔 *RECORDATORIO DE ENTREGA*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nLugar: {venta.LugarDestino ?? "N/A"}\nFecha: {fechaStr}";
+                }
+            }
+            else if (venta.Estado == "Vendido" && (venta.EstadoPago == "Pendiente" || string.IsNullOrEmpty(venta.EstadoPago)))
+            {
+                if (esParaCliente)
+                {
+                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de SNKFVR. 👟\n\nTe recordamos que tienes un saldo pendiente de *${venta.PrecioVenta:N2}* por el artículo *{descripcion}*.\n\nPor favor, contáctanos para coordinar el pago. ¡Gracias!";
+                }
+                else
+                {
+                    msg = $"🔔 *RECORDATORIO DE COBRO*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nMonto: ${venta.PrecioVenta:N2}";
+                }
+            }
+            else
+            {
+                return BadRequest("La venta no está en estado pendiente de entrega o cobro.");
+            }
+
+            var enviado = await _whatsAppService.EnviarMensajeAsync(telefonoDestino, msg);
+            return Ok(new { enviado, destino = esParaCliente ? "Cliente" : "Dueño", telefono = telefonoDestino });
+        }
     }
 }

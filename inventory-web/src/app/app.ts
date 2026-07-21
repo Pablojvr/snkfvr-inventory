@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { ApiService, Usuario } from './core/services/api';
+import { ToastManagerService } from './core/services/toast-manager.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,13 @@ export class App implements OnInit {
   usuarios: Usuario[] = [];
   selectedUserId: number | null = null;
 
-  constructor(private router: Router, private api: ApiService) {}
+  userMenuOptions: MenuItem[] = [];
+  displayResumenPreview = false;
+  cargandoPreview = false;
+  resumenPreviewText = '';
+  enviandoResumen = false;
+
+  constructor(private router: Router, private api: ApiService, private toastManager: ToastManagerService) {}
 
   ngOnInit() {
     this.mobileMenuOptions = [
@@ -35,6 +42,19 @@ export class App implements OnInit {
       { label: 'Compra Masiva', icon: 'pi pi-plus-circle', command: () => this.router.navigate(['/anadir-masivo']) },
       { label: 'Ingresos', icon: 'pi pi-arrow-down-left', command: () => this.router.navigate(['/ingresos']) },
       { label: 'Movimientos', icon: 'pi pi-list', command: () => this.router.navigate(['/movimientos']) }
+    ];
+
+    this.userMenuOptions = [
+      { 
+        label: 'Enviar Resumen a WhatsApp', 
+        icon: 'pi pi-whatsapp', 
+        command: () => this.abrirPreviewResumen() 
+      },
+      { 
+        label: 'Cambiar Usuario', 
+        icon: 'pi pi-users', 
+        command: () => this.displayUserModal = true 
+      }
     ];
 
     const userId = localStorage.getItem('userId');
@@ -72,5 +92,40 @@ export class App implements OnInit {
 
   closeSidebar() {
     this.sidebarVisible.set(false);
+  }
+
+  abrirPreviewResumen() {
+    this.displayResumenPreview = true;
+    this.cargandoPreview = true;
+    this.resumenPreviewText = '';
+
+    this.api.getPreviewMasivo().subscribe({
+      next: (res: any) => {
+        this.resumenPreviewText = res.msg;
+        this.cargandoPreview = false;
+      },
+      error: (err: any) => {
+        console.error('Error previsualizando resumen masivo', err);
+        this.toastManager.showError('Error', 'No se pudo cargar la previsualización.');
+        this.cargandoPreview = false;
+        this.displayResumenPreview = false;
+      }
+    });
+  }
+
+  confirmarEnvioResumen() {
+    this.enviandoResumen = true;
+    this.api.enviarRecordatorioMasivo().subscribe({
+      next: (res: any) => {
+        this.toastManager.showSuccess('WhatsApp Enviado', 'Se ha enviado el resumen diario a tu WhatsApp.');
+        this.enviandoResumen = false;
+        this.displayResumenPreview = false;
+      },
+      error: (err: any) => {
+        console.error('Error enviando recordatorio masivo', err);
+        this.toastManager.showError('Error', 'No se pudo enviar el reporte de WhatsApp.');
+        this.enviandoResumen = false;
+      }
+    });
   }
 }

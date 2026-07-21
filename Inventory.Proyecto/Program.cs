@@ -39,8 +39,9 @@ builder.Services.AddScoped<Inventory.Application.UseCases.IEditarProductoUseCase
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarVentaUseCase, Inventory.Application.UseCases.EditarVentaUseCase>();
 builder.Services.AddScoped<Inventory.Application.UseCases.IEditarIngresoUseCase, Inventory.Application.UseCases.EditarIngresoUseCase>();
 
-// Configurar Servicio de WhatsApp (Meta API Oficial)
-builder.Services.AddHttpClient<Inventory.Application.Services.IWhatsAppService, Inventory.Settings.Services.MetaWhatsAppService>();
+// Configurar Servicio de WhatsApp (Microservicio Local de Node.js)
+builder.Services.AddHttpClient<Inventory.Application.Services.IWhatsAppService, Inventory.Settings.Services.LocalWhatsAppService>();
+builder.Services.AddHostedService<Inventory.Proyecto.Services.WhatsAppCronService>();
 
 // Configurar CORS para permitir que Angular se conecte
 builder.Services.AddCors(options =>

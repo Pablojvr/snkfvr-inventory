@@ -193,9 +193,13 @@ export class DialogVentaComponent implements OnInit {
   guardar() {
       if (!this.nuevaVentaData.productoSeleccionado) return;
 
-      // Validar teléfono obligatorio
-      if (!this.nuevaVentaData.telefonoComprador || this.nuevaVentaData.telefonoComprador.trim().length < 10) {
-          this.toastManager.showError('Teléfono Requerido', 'Ingresa el número de WhatsApp del comprador (mínimo 10 dígitos).');
+      // Validar formato de teléfono El Salvador (Mínimo 8 dígitos)
+      const rawPhone = this.nuevaVentaData.telefonoComprador || '';
+      const digitsOnly = rawPhone.replace(/\D/g, '');
+      const isElSalvadorPhone = digitsOnly.length === 8 || (digitsOnly.length === 11 && digitsOnly.startsWith('503'));
+
+      if (!rawPhone.trim() || !isElSalvadorPhone) {
+          this.toastManager.showError('Teléfono Inválido', 'Ingresa un número de WhatsApp válido de El Salvador (ej. 7123-4567).');
           return;
       }
 

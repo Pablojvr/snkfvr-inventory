@@ -70,6 +70,9 @@ export class Dashboard implements OnInit {
   // Cobro
   marcandoCobrado: boolean = false;
 
+  // Recordatorios
+  enviandoRecordatorio: boolean = false;
+
   displayDetalleMovimiento: boolean = false;
   movimientoSeleccionado: Movimiento | null = null;
 
@@ -420,5 +423,24 @@ export class Dashboard implements OnInit {
               this.toastManager.showError('Error', 'No se pudo registrar el cobro. Intenta de nuevo.');
           }
       });
+  }
+
+  // --- Recordatorios de WhatsApp ---
+
+  enviarRecordatorioIndividual(venta: Venta) {
+    if (!venta.id) return;
+    this.enviandoRecordatorio = true;
+    this.api.enviarRecordatorioIndividual(venta.id).subscribe({
+      next: (res: any) => {
+        let destinatario = res.destino === 'Cliente' ? 'al cliente' : 'a tu WhatsApp';
+        this.toastManager.showSuccess('WhatsApp Enviado', `Recordatorio enviado exitosamente ${destinatario}.`);
+        this.enviandoRecordatorio = false;
+      },
+      error: (err: any) => {
+        console.error('Error enviando recordatorio individual', err);
+        this.toastManager.showError('Error', 'No se pudo enviar el recordatorio.');
+        this.enviandoRecordatorio = false;
+      }
+    });
   }
 }

@@ -202,4 +202,17 @@ export class ApiService {
       retry(1) // Reintenta 1 vez en caso de fallo temporal de Gemini
     );
   }
+
+  // --- Notificaciones ---
+  enviarRecordatorioMasivo(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Notificaciones/recordatorio-masivo`, {});
+  }
+
+  getPreviewMasivo(): Observable<{msg: string}> {
+    return this.http.get<{msg: string}>(`${this.apiUrl}/Notificaciones/preview-masivo`);
+  }
+
+  enviarRecordatorioIndividual(ventaId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Notificaciones/recordatorio-individual/${ventaId}`, {});
+  }
 }

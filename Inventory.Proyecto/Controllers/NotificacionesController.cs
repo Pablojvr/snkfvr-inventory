@@ -269,17 +269,23 @@ namespace Inventory.Proyecto.Controllers
 
             if (venta.Estado == "Reservado")
             {
-                var fechaStr = venta.FechaEntrega.HasValue ? venta.FechaEntrega.Value.ToString("dd/MMM/yyyy") : "fecha por definir";
+                var fechaEntregaFmt = FormatearFechaConDia(venta.FechaEntrega);
+                var fechaRegistroFmt = FormatearFechaConDia(venta.FechaRegistro);
+                
                 if (esParaCliente)
                 {
                     var cultureEs = new System.Globalization.CultureInfo("es-ES");
                     var diaSemana = venta.FechaEntrega.HasValue ? cultureEs.TextInfo.ToTitleCase(venta.FechaEntrega.Value.ToString("dddd", cultureEs)) : "hoy";
                     
-                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\nRecordar el dia de hoy {diaSemana} debes recibir tu par de zapato *{descripcion}* en el lugar *{venta.LugarDestino ?? "lugar a convenir"}*, gracias por tu preferencia, favor confirmar al recoger por este medio.";
+                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\n" +
+                          $"Recordar el dia de hoy {diaSemana} debes recibir tu par de zapato *{descripcion}* en el lugar *{venta.LugarDestino ?? "lugar a convenir"}*.\n\n" +
+                          $"• Fecha de registro: {fechaRegistroFmt}\n" +
+                          $"• Fecha de entrega: {fechaEntregaFmt}\n\n" +
+                          $"Gracias por tu preferencia, favor confirmar al recoger por este medio.";
                 }
                 else
                 {
-                    msg = $"🔔 *RECORDATORIO DE ENTREGA*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nLugar: {venta.LugarDestino ?? "N/A"}\nFecha: {fechaStr}";
+                    msg = $"🔔 *RECORDATORIO DE ENTREGA*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nLugar: {venta.LugarDestino ?? "N/A"}\nRegistro: {fechaRegistroFmt}\nEntrega: {fechaEntregaFmt}";
                 }
             }
             else if (venta.Estado == "Vendido" && (venta.EstadoPago == "Pendiente" || string.IsNullOrEmpty(venta.EstadoPago)))
@@ -288,13 +294,16 @@ namespace Inventory.Proyecto.Controllers
                 esParaCliente = false;
                 telefonoDestino = _config["Notificaciones:TelefonoDueno"] ?? "+50376539597";
                 
-                var fechaStr = venta.FechaRegistro.ToString("dd/MMM/yyyy");
+                var fechaEntregaFmt = FormatearFechaConDia(venta.FechaEntrega);
+                var fechaRegistroFmt = FormatearFechaConDia(venta.FechaRegistro);
+                
                 msg = $"🧾 *DETALLE DE COBRO*\n" +
                       $"• Producto: {descripcion}\n" +
                       $"• Cliente: {venta.NombreComprador ?? "Sin nombre"}\n" +
                       $"• Teléfono: {venta.TelefonoComprador ?? "No registrado"}\n" +
                       $"• Lugar/Agencia: {venta.LugarDestino ?? "No registrado"}\n" +
-                      $"• Fecha registro: {fechaStr}\n" +
+                      $"• Fecha registro: {fechaRegistroFmt}\n" +
+                      $"• Fecha entrega: {fechaEntregaFmt}\n" +
                       $"• Total a cobrar: *${venta.PrecioVenta:N2}*";
             }
             else
@@ -304,6 +313,13 @@ namespace Inventory.Proyecto.Controllers
 
             var enviado = await _whatsAppService.EnviarMensajeAsync(telefonoDestino, msg);
             return Ok(new { enviado, destino = esParaCliente ? "Cliente" : "Dueño", telefono = telefonoDestino });
+        }
+
+        private string FormatearFechaConDia(DateTime? fecha)
+        {
+            if (!fecha.HasValue) return "Sin fecha";
+            var cultureEs = new System.Globalization.CultureInfo("es-ES");
+            return cultureEs.TextInfo.ToTitleCase(fecha.Value.ToString("dddd dd/MMM/yyyy", cultureEs));
         }
     }
 }

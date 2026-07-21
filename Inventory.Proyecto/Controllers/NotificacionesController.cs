@@ -272,7 +272,10 @@ namespace Inventory.Proyecto.Controllers
                 var fechaStr = venta.FechaEntrega.HasValue ? venta.FechaEntrega.Value.ToString("dd/MMM/yyyy") : "fecha por definir";
                 if (esParaCliente)
                 {
-                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de SNKFVR. 👟\n\nTe recordamos que tenemos programada la entrega de *{descripcion}* para el *{fechaStr}* en *{venta.LugarDestino ?? "lugar a convenir"}*.\n\n¡Gracias por tu preferencia!";
+                    var cultureEs = new System.Globalization.CultureInfo("es-ES");
+                    var diaSemana = venta.FechaEntrega.HasValue ? cultureEs.TextInfo.ToTitleCase(venta.FechaEntrega.Value.ToString("dddd", cultureEs)) : "hoy";
+                    
+                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\nRecordar el dia de hoy {diaSemana} debes recibir tu par de zapato *{descripcion}* en el lugar *{venta.LugarDestino ?? "lugar a convenir"}*, gracias por tu preferencia, favor confirmar al recoger por este medio.";
                 }
                 else
                 {

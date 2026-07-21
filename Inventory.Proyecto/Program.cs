@@ -81,6 +81,7 @@ using (var scope = app.Services.CreateScope())
 // CORS debe ir antes de routing y authorization
 app.UseRouting();
 app.UseCors("AllowVercel");
+app.UseMiddleware<Inventory.Proyecto.Middleware.ApiKeyMiddleware>();
 
 // Configurar el pipeline de peticiones HTTP.
 if (app.Environment.IsDevelopment())

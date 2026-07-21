@@ -70,7 +70,8 @@ namespace Inventory.Proyecto.Controllers
                     var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
                     msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
                            $"    *Cliente*: {v.NombreComprador ?? "Sin nombre"}{tel}\n" +
-                           $"    *Destino*: {v.LugarDestino ?? "Sin destino"}\n\n";
+                           $"    *Destino*: {v.LugarDestino ?? "Sin destino"}\n" +
+                           $"    *Precio*: ${v.PrecioVenta:N2}\n\n";
                 }
             }
             else
@@ -100,6 +101,7 @@ namespace Inventory.Proyecto.Controllers
                 msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
                        $"    *Cliente*: {v.NombreComprador ?? "?"}{tel}\n" +
                        $"    *Destino*: {v.LugarDestino ?? "Sin destino"}\n" +
+                       $"    *Precio*: ${v.PrecioVenta:N2}\n" +
                        $"    *Programado*: {fechaStr}\n\n";
             }
 

@@ -280,14 +280,18 @@ namespace Inventory.Proyecto.Controllers
             }
             else if (venta.Estado == "Vendido" && (venta.EstadoPago == "Pendiente" || string.IsNullOrEmpty(venta.EstadoPago)))
             {
-                if (esParaCliente)
-                {
-                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de SNKFVR. 👟\n\nTe recordamos que tienes un saldo pendiente de *${venta.PrecioVenta:N2}* por el artículo *{descripcion}*.\n\nPor favor, contáctanos para coordinar el pago. ¡Gracias!";
-                }
-                else
-                {
-                    msg = $"🔔 *RECORDATORIO DE COBRO*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nMonto: ${venta.PrecioVenta:N2}";
-                }
+                // El cobro siempre es para el dueño con los detalles
+                esParaCliente = false;
+                telefonoDestino = _config["Notificaciones:TelefonoDueno"] ?? "+50376539597";
+                
+                var fechaStr = venta.FechaRegistro.ToString("dd/MMM/yyyy");
+                msg = $"🧾 *DETALLE DE COBRO*\n" +
+                      $"• Producto: {descripcion}\n" +
+                      $"• Cliente: {venta.NombreComprador ?? "Sin nombre"}\n" +
+                      $"• Teléfono: {venta.TelefonoComprador ?? "No registrado"}\n" +
+                      $"• Lugar/Agencia: {venta.LugarDestino ?? "No registrado"}\n" +
+                      $"• Fecha registro: {fechaStr}\n" +
+                      $"• Total a cobrar: *${venta.PrecioVenta:N2}*";
             }
             else
             {

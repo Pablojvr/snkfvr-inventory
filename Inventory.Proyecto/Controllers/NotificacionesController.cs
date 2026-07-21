@@ -68,7 +68,9 @@ namespace Inventory.Proyecto.Controllers
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
                     var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
-                    msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → {v.NombreComprador ?? "Sin nombre"}{tel} — {v.LugarDestino ?? "Sin destino"}\n\n";
+                    msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
+                           $"    *Cliente*: {v.NombreComprador ?? "Sin nombre"}{tel}\n" +
+                           $"    *Destino*: {v.LugarDestino ?? "Sin destino"}\n\n";
                 }
             }
             else
@@ -83,7 +85,9 @@ namespace Inventory.Proyecto.Controllers
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
                 var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
-                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → ${v.PrecioVenta:N2} — {v.NombreComprador ?? "?"}{tel}\n\n";
+                msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
+                       $"    *Cliente*: {v.NombreComprador ?? "?"}{tel}\n" +
+                       $"    *Monto a cobrar*: ${v.PrecioVenta:N2}\n\n";
             }
 
             // Pendientes
@@ -91,9 +95,11 @@ namespace Inventory.Proyecto.Controllers
             foreach (var v in pendientes)
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
-                var fechaStr = v.FechaEntrega.HasValue ? v.FechaEntrega.Value.ToString("dd/MMM") : "Sin fecha";
+                var fechaStr = FormatearFechaConDia(v.FechaEntrega);
                 var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
-                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → {v.NombreComprador ?? "?"}{tel} [{fechaStr}]\n\n";
+                msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
+                       $"    *Cliente*: {v.NombreComprador ?? "?"}{tel}\n" +
+                       $"    *Programado*: {fechaStr}\n\n";
             }
 
             var enviado = await _whatsAppService.EnviarMensajeAsync(telefonoDueno, msg);
@@ -279,7 +285,6 @@ namespace Inventory.Proyecto.Controllers
                     
                     msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\n" +
                           $"Recordar el dia de hoy {diaSemana} debes recibir tu par de zapato *{descripcion}* en el lugar *{venta.LugarDestino ?? "lugar a convenir"}*.\n\n" +
-                          $"• Fecha de registro: {fechaRegistroFmt}\n" +
                           $"• Fecha de entrega: {fechaEntregaFmt}\n\n" +
                           $"Gracias por tu preferencia, favor confirmar al recoger por este medio.";
                 }

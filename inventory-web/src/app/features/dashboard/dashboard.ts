@@ -322,10 +322,16 @@ export class Dashboard implements OnInit {
   toggleMenuVenta(event: Event, venta: VentaDashboard, menu: any) {
     event.stopPropagation(); // Don't open detail modal
     this.menuItems = [
-      { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', venta.productoId]) },
-      { label: 'Marcar como Entregado', icon: 'pi pi-check-circle', command: () => this.marcarEntregado(venta) },
-      { label: 'Liberar Producto', icon: 'pi pi-undo', command: () => this.liberarProducto(venta) },
+      { label: 'Ver Producto', icon: 'pi pi-eye', command: () => this.router.navigate(['/productos', venta.productoId]) }
     ];
+
+    if (venta.estado === 'Reservado') {
+      this.menuItems.push({ label: 'Marcar como Entregado', icon: 'pi pi-check-circle', command: () => this.marcarEntregado(venta) });
+      this.menuItems.push({ label: 'Liberar Producto', icon: 'pi pi-undo', command: () => this.liberarProducto(venta) });
+    } else if (venta.estado === 'Vendido' && (!venta.estadoPago || venta.estadoPago === 'Pendiente')) {
+      this.menuItems.push({ label: 'Marcar como Cobrado', icon: 'pi pi-money-bill', command: () => this.marcarCobrado(venta) });
+    }
+
     menu.toggle(event);
   }
 

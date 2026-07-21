@@ -243,8 +243,9 @@
 
     <ng-template pTemplate="footer">
         <div *ngIf="ventaSeleccionada" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
-            <p-button label="Liberar" icon="pi pi-undo" severity="secondary" [text]="true" (onClick)="liberarProducto(ventaSeleccionada)"></p-button>
-            <p-button label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
+            <p-button *ngIf="ventaSeleccionada.estado === 'Reservado'" label="Liberar" icon="pi pi-undo" severity="secondary" [text]="true" (onClick)="liberarProducto(ventaSeleccionada)"></p-button>
+            <p-button *ngIf="ventaSeleccionada.estado === 'Reservado'" label="Marcar Entregado" icon="pi pi-check-circle" severity="success" (onClick)="marcarEntregado(ventaSeleccionada)"></p-button>
+            <p-button *ngIf="ventaSeleccionada.estado === 'Vendido' && (!ventaSeleccionada.estadoPago || ventaSeleccionada.estadoPago === 'Pendiente')" label="Marcar Cobrado" icon="pi pi-money-bill" severity="success" (onClick)="marcarCobrado(ventaSeleccionada)"></p-button>
         </div>
     </ng-template>
 </p-dialog>

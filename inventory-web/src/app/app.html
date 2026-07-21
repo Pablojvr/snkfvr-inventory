@@ -88,7 +88,7 @@
 
 <!-- Vista previa Resumen Diario -->
 <p-dialog [(visible)]="displayResumenPreview" [modal]="true" [style]="{width: 'min(450px, 95vw)'}" header="Enviar Resumen Diario" [draggable]="false" [resizable]="false">
-    <div style="background-color: #f8fafc; border-radius: 8px; padding: 1rem; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; border: 1px solid #e2e8f0; max-height: 350px; overflow-y: auto;">
+    <div style="background-color: #f8fafc; border-radius: 8px; padding: 1rem; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; border: 1px solid #e2e8f0; max-height: 350px; overflow-y: auto; color: #1e293b;">
         <div *ngIf="cargandoPreview" style="display: flex; justify-content: center; padding: 2rem;">
             <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--primary-color);"></i>
         </div>
@@ -102,7 +102,7 @@
     </div>
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="displayResumenPreview = false" [disabled]="enviandoResumen"></p-button>
-        <p-button label="Enviar por WhatsApp" icon="pi pi-whatsapp" severity="success" (onClick)="confirmarEnvioResumen()" [loading]="enviandoResumen"></p-button>
+        <p-button label="Enviar por WhatsApp" icon="pi pi-whatsapp" (onClick)="confirmarEnvioResumen()" [loading]="enviandoResumen" [style]="{'background-color': '#25D366', 'border-color': '#25D366', 'color': 'white'}"></p-button>
     </ng-template>
 </p-dialog>
 

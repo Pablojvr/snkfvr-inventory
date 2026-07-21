@@ -39,7 +39,10 @@
     <div class="entity-cards-grid" *ngIf="productosFiltrados.length > 0">
         <div class="entity-card" *ngFor="let prod of (productosFiltrados | slice:first:first+rows)" (click)="toggleMenu($event, prod, menu)">
             <div class="entity-card-header">
-                <h4 class="entity-card-title">{{ prod.descripcion }}</h4>
+                <h4 class="entity-card-title" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    {{ prod.descripcion }}
+                    <i class="pi pi-copy" style="cursor: pointer; color: var(--primary-color); font-size: 0.95rem; background: #fff0f1; padding: 0.3rem; border-radius: 6px;" (click)="copyToClipboard($event, prod.descripcion)" pTooltip="Copiar descripción" tooltipPosition="top"></i>
+                </h4>
                 <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
                 <button class="entity-card-menu-btn" (click)="toggleMenu($event, prod, menu)" pTooltip="Acciones" tooltipPosition="left">
                     <i class="pi pi-ellipsis-v"></i>

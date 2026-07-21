@@ -203,7 +203,6 @@ export class Productos implements OnInit, AfterViewInit {
   }
 
 
-
   registrarVenta(prod: Producto) {
       this.dialogVenta.showDialog(prod);
   }
@@ -215,5 +214,15 @@ export class Productos implements OnInit, AfterViewInit {
         this.toastManager.showSuccess('Éxito', `Se eliminó el producto con ID ${id}`);
       });
     }
+  }
+
+  copyToClipboard(event: Event, text: string) {
+      event.stopPropagation();
+      navigator.clipboard.writeText(text).then(() => {
+          this.toastManager.showSuccess('Copiado', 'Descripción copiada al portapapeles');
+      }).catch(err => {
+          this.toastManager.showError('Error', 'No se pudo copiar');
+          console.error('Error al copiar: ', err);
+      });
   }
 }

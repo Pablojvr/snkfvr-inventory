@@ -274,8 +274,31 @@ export class Estadisticas implements OnInit {
       this.promedioComprasSemana = productosComprados.length / (semanasDelPeriodo > 0 ? semanasDelPeriodo : 1);
 
       const ritmoVentasDiario = ventasCompletadas.length / diasDelPeriodo;
-      this.proyeccionVentasAnual = ritmoVentasDiario * 365;
-      this.proyeccionGananciaAnual = this.proyeccionVentasAnual * this.gananciaPromedioDolares;
+      
+      // Proyección Fin de Año (Año Calendario Actual)
+      const finDeAno = new Date(hoy.getFullYear(), 11, 31, 23, 59, 59);
+      let diasRestantesAno = Math.ceil((finDeAno.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+      if (diasRestantesAno < 0) diasRestantesAno = 0;
+      
+      // Calcular acumulado real del año calendario
+      const inicioDeAno = new Date(hoy.getFullYear(), 0, 1);
+      const ventasEsteAno = this.ventas.filter(v => {
+          if (v.estado !== 'Vendido' || !v.activo) return false;
+          const d = new Date(v.fechaVenta || v.fechaRegistro || hoy);
+          return d >= inicioDeAno && d <= hoy;
+      });
+      
+      const idsVendidosEsteAno = ventasEsteAno.map(v => v.productoId).filter(id => id !== undefined) as number[];
+      const gastosDeVendidosEsteAno = this.gastos.filter(g => g.activo && g.productoId !== undefined && idsVendidosEsteAno.includes(g.productoId));
+      const costoEsteAno = gastosDeVendidosEsteAno.reduce((sum, g) => sum + (g.monto || 0), 0);
+      const ingresosEsteAno = ventasEsteAno.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
+      const gananciaAcumuladaEsteAno = ingresosEsteAno - costoEsteAno;
+
+      const ventasRestantesEst = ritmoVentasDiario * diasRestantesAno;
+      this.proyeccionVentasAnual = ventasEsteAno.length + ventasRestantesEst;
+      
+      const gananciaRestanteEst = ventasRestantesEst * this.gananciaPromedioDolares;
+      this.proyeccionGananciaAnual = gananciaAcumuladaEsteAno + gananciaRestanteEst;
   }
 
   calcularTopProductos(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {

@@ -4,14 +4,14 @@ import { ChartModule } from 'primeng/chart';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ApiService, Producto, Venta, Gasto, Movimiento } from '../../core/services/api';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule, CalendarModule],
+  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule, DatePickerModule],
   templateUrl: './estadisticas.html',
 })
 export class Estadisticas implements OnInit {

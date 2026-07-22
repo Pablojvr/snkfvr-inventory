@@ -146,6 +146,45 @@
             {{ presupuestoRecomendado }}
         </p>
     </div>
+
+    <!-- Proyecciones y Ritmo -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+        <!-- Ritmo Semanal Ventas -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase;">Ritmo de Ventas</span>
+                <i class="pi pi-arrow-up-right" style="color: #FF4757; font-size: 0.9rem;"></i>
+            </div>
+            <span style="font-size: 1.5rem; font-weight: 800; color: #1e293b; display: block; margin-bottom: 0.25rem;">
+                {{ promedioVentasSemana | number:'1.0-1' }} <span style="font-size: 0.85rem; font-weight: 500; color: #64748b;">pares/sem</span>
+            </span>
+        </div>
+
+        <!-- Ritmo Semanal Compras -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase;">Ritmo de Compras</span>
+                <i class="pi pi-shopping-bag" style="color: #f59e0b; font-size: 0.9rem;"></i>
+            </div>
+            <span style="font-size: 1.5rem; font-weight: 800; color: #1e293b; display: block; margin-bottom: 0.25rem;">
+                {{ promedioComprasSemana | number:'1.0-1' }} <span style="font-size: 0.85rem; font-weight: 500; color: #64748b;">pares/sem</span>
+            </span>
+        </div>
+
+        <!-- Proyección Ganancia 1 Año -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase;">Proyección a 1 Año</span>
+                <i class="pi pi-chart-line" style="color: #10b981; font-size: 0.9rem;"></i>
+            </div>
+            <span style="font-size: 1.5rem; font-weight: 800; color: #10b981; display: block; margin-bottom: 0.25rem;">
+                {{ proyeccionGananciaAnual | currency }}
+            </span>
+            <span style="font-size: 0.8rem; color: #94a3b8; display: block; line-height: 1.2;">
+                Mantenido a {{ proyeccionVentasAnual | number:'1.0-0' }} ventas/año
+            </span>
+        </div>
+    </div>
 </div>
 
 <!-- Gráfico de Desempeño Financiero -->

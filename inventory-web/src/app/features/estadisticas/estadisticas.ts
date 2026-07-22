@@ -32,9 +32,17 @@ export class Estadisticas implements OnInit {
   costoPromedioDolares: number = 0;
   gananciaPromedioDolares: number = 0;
 
-  // Diagnóstico
+  // Diagnóstico Inteligente y Proyecciones
   diagnosticoFinanciero: string = '';
   presupuestoRecomendado: string = '';
+  presupuestoSugerido: number = 0;
+  porcentajeCajaSugerido: number = 0;
+  
+  // Ritmo y Proyecciones
+  promedioVentasSemana: number = 0;
+  promedioComprasSemana: number = 0;
+  proyeccionVentasAnual: number = 0;
+  proyeccionGananciaAnual: number = 0;
   
   // Top Productos
   topProductos: any[] = [];
@@ -97,16 +105,17 @@ export class Estadisticas implements OnInit {
   }
 
   procesarEstadisticas() {
-      const { ventasFiltradas, gastosFiltrados, movimientosFiltrados } = this.filtrarPorFecha();
+      const { ventasFiltradas, gastosFiltrados, movimientosFiltrados, fechaInicio, fechaFin } = this.filtrarPorFecha();
       
-      this.calcularKPIs(ventasFiltradas, gastosFiltrados, movimientosFiltrados);
+      this.calcularKPIs(ventasFiltradas, gastosFiltrados, movimientosFiltrados, fechaInicio, fechaFin);
       this.calcularTopProductos(ventasFiltradas, gastosFiltrados);
       this.generarGrafico(ventasFiltradas, gastosFiltrados);
 
-      // Calcular ganancia potencial de los productos en inventario
+      // Calcular ganancia potencial de los productos en inventario (usando la ganancia promedio actual)
       const disponibles = this.productos.filter(p => p.estado === 'Disponible' || !p.estado);
       this.stockDisponible = disponibles.length;
-      this.gananciaPotencial = this.stockDisponible * 20;
+      const promedio = this.gananciaPromedioDolares > 0 ? this.gananciaPromedioDolares : 20; // fallback inicial
+      this.gananciaPotencial = this.stockDisponible * promedio;
 
       // Calcular Efectivo en Caja y Valor Inventario (siempre históricos)
       this.efectivoEnCaja = this.movimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
@@ -171,10 +180,10 @@ export class Estadisticas implements OnInit {
           return d >= fechaInicio && d <= fechaFin && m.activo !== false;
       });
 
-      return { ventasFiltradas, gastosFiltrados, movimientosFiltrados };
+      return { ventasFiltradas, gastosFiltrados, movimientosFiltrados, fechaInicio, fechaFin };
   }
 
-  calcularKPIs(ventasFiltradas: Venta[], gastosFiltrados: Gasto[], movimientosFiltrados: Movimiento[]) {
+  calcularKPIs(ventasFiltradas: Venta[], gastosFiltrados: Gasto[], movimientosFiltrados: Movimiento[], fechaInicio: Date, fechaFin: Date) {
       // 1. Ingresos: Solo las ventas completadas generan ingresos reales
       const ventasCompletadas = ventasFiltradas.filter(v => v.estado === 'Vendido');
       const ingresosVentas = ventasCompletadas.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
@@ -228,6 +237,45 @@ export class Estadisticas implements OnInit {
       this.comisionesCompra = movimientosFiltrados
           .filter(m => m.tipo === 'Comisión' && !m.descripcion.startsWith('Comisión de venta'))
           .reduce((sum, m) => sum + Math.abs(m.montoTotal), 0);
+
+      // Ritmo y Proyecciones
+      const hoy = new Date();
+      let diasDelPeriodo = 0;
+      
+      if (this.rangoSeleccionado === 'historico' || this.rangoSeleccionado === 'todo') {
+          // Si es histórico, buscar la fecha más antigua de compra o venta
+          let minDate = hoy.getTime();
+          if (this.productos.length > 0) {
+              const fechas = this.productos.map(p => p.fechaCompra ? new Date(p.fechaCompra).getTime() : hoy.getTime());
+              minDate = Math.min(minDate, ...fechas);
+          }
+          if (this.ventas.length > 0) {
+              const fechasVentas = this.ventas.map(v => v.fechaVenta ? new Date(v.fechaVenta).getTime() : hoy.getTime());
+              minDate = Math.min(minDate, ...fechasVentas);
+          }
+          diasDelPeriodo = Math.ceil((hoy.getTime() - minDate) / (1000 * 60 * 60 * 24));
+      } else {
+          // Calcular días transcurridos reales en el rango (limitado a 'hoy' para no bajar promedios con días futuros)
+          const finReal = fechaFin > hoy ? hoy : fechaFin;
+          diasDelPeriodo = Math.ceil((finReal.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      diasDelPeriodo = diasDelPeriodo > 0 ? diasDelPeriodo : 1; // Evitar división por cero
+      const semanasDelPeriodo = diasDelPeriodo / 7;
+
+      // Calcular cantidad de pares físicos comprados en el periodo
+      const productosComprados = this.productos.filter(p => {
+          if (!p.fechaCompra) return false;
+          const d = new Date(p.fechaCompra);
+          return d >= fechaInicio && d <= fechaFin;
+      });
+
+      this.promedioVentasSemana = ventasCompletadas.length / (semanasDelPeriodo > 0 ? semanasDelPeriodo : 1);
+      this.promedioComprasSemana = productosComprados.length / (semanasDelPeriodo > 0 ? semanasDelPeriodo : 1);
+
+      const ritmoVentasDiario = ventasCompletadas.length / diasDelPeriodo;
+      this.proyeccionVentasAnual = ritmoVentasDiario * 365;
+      this.proyeccionGananciaAnual = this.proyeccionVentasAnual * this.gananciaPromedioDolares;
   }
 
   calcularTopProductos(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {

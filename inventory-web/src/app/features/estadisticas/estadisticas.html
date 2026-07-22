@@ -2,10 +2,17 @@
     <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
         <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Reportes</h2>
         
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
         <p-select [options]="rangoOpciones" [(ngModel)]="rangoSeleccionado" (onChange)="onRangoChange()" 
             optionLabel="label" optionValue="value" styleClass="w-full md:w-56"
             style="border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
         </p-select>
+        <p-calendar *ngIf="rangoSeleccionado === 'personalizado'" 
+            [(ngModel)]="fechaRango" selectionMode="range" [readonlyInput]="true" 
+            (onSelect)="onRangoChange()" placeholder="Seleccione fechas..." 
+            styleClass="w-full md:w-56" [showIcon]="true">
+        </p-calendar>
+    </div>
     </div>
     <span style="color: #64748b; font-size: 0.9rem;">Inteligencia de Negocios y Flujos Financieros</span>
 </div>
@@ -64,37 +71,79 @@
     <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
 </div>
 
-<!-- Top Productos -->
-<div class="card" style="margin-top: 2rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
-    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-        <i class="pi pi-star-fill" style="color: #f59e0b;"></i> Top 5 Más Rentables
-    </h3>
-    
-    <p-table [value]="topProductos" responsiveLayout="scroll" styleClass="p-datatable-sm" [rowHover]="true">
-        <ng-template pTemplate="header">
-            <tr>
-                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Producto</th>
-                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Ganancia Pura</th>
-                <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ROI</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-prod>
-            <tr>
-                <td style="font-weight: 600; color: #1e293b;">{{prod.descripcion}}</td>
-                <td style="color: #10b981; font-weight: 700;">+{{prod.ganancia | currency}}</td>
-                <td>
-                    <span style="background: #f1f5f9; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155;">
-                        {{prod.roi | number:'1.0-1'}}%
-                    </span>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td colspan="3" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                    Aún no hay ventas registradas en este periodo.
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+<!-- Estilos Forzados Light para Tablas -->
+<style>
+    .light-theme-table .p-datatable-wrapper { background: white !important; border-radius: 12px; }
+    .light-theme-table .p-datatable-thead > tr > th { background: white !important; color: #64748b !important; border-bottom: 1px solid #e2e8f0 !important; }
+    .light-theme-table .p-datatable-tbody > tr > td { background: white !important; color: #1e293b !important; border-bottom: 1px solid #f1f5f9 !important; }
+    .light-theme-table .p-datatable-tbody > tr:hover > td { background: #f8fafc !important; }
+</style>
+
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-top: 2rem;">
+    <!-- Top Productos -->
+    <div class="card" style="border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03); background: white;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="pi pi-star-fill" style="color: #f59e0b;"></i> Top 5 Más Rentables
+        </h3>
+        
+        <p-table [value]="topProductos" responsiveLayout="scroll" styleClass="p-datatable-sm light-theme-table" [rowHover]="true">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Producto</th>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Ganancia Pura</th>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ROI</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-prod>
+                <tr>
+                    <td style="font-weight: 600; color: #1e293b;">{{prod.descripcion}}</td>
+                    <td style="color: #10b981; font-weight: 700;">+{{prod.ganancia | currency}}</td>
+                    <td>
+                        <span style="background: #f1f5f9; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155;">
+                            {{prod.roi | number:'1.0-1'}}%
+                        </span>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                        Aún no hay ventas registradas en este periodo.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Baja Rotación -->
+    <div class="card" style="border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03); background: white; border-top: 4px solid #ef4444;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="pi pi-exclamation-triangle" style="color: #ef4444;"></i> Alerta de Rotación Lenta
+        </h3>
+        <p style="margin-top: -1rem; margin-bottom: 1rem; color: #64748b; font-size: 0.85rem;">Productos en inventario que superan el promedio global de rotación ({{tiempoPromedioVenta | number:'1.0-0'}} días).</p>
+        
+        <p-table [value]="productosBajaRotacion" responsiveLayout="scroll" styleClass="p-datatable-sm light-theme-table" [rowHover]="true" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Producto</th>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Días</th>
+                    <th style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Costo</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-prod>
+                <tr>
+                    <td style="font-weight: 600; color: #1e293b;">{{prod.descripcion}}</td>
+                    <td style="color: #ef4444; font-weight: 700;">{{prod.diasEnInventario}} d</td>
+                    <td style="color: #1e293b; font-weight: 600;">{{prod.costo | currency}}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                        Excelente. Ningún producto disponible supera el tiempo promedio de venta.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>

@@ -4,13 +4,14 @@ import { ChartModule } from 'primeng/chart';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { CalendarModule } from 'primeng/calendar';
 import { ApiService, Producto, Venta, Gasto, Movimiento } from '../../core/services/api';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule],
+  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule, CalendarModule],
   templateUrl: './estadisticas.html',
 })
 export class Estadisticas implements OnInit {
@@ -25,6 +26,7 @@ export class Estadisticas implements OnInit {
   
   // Top Productos
   topProductos: any[] = [];
+  productosBajaRotacion: any[] = [];
   
   // Charts
   chartData: any;
@@ -35,9 +37,11 @@ export class Estadisticas implements OnInit {
       { label: 'Este Mes', value: 'mes_actual' },
       { label: 'Últimos 6 Meses', value: '6_meses' },
       { label: 'Año Actual', value: 'ano_actual' },
-      { label: 'Histórico', value: 'historico' }
+      { label: 'Histórico', value: 'historico' },
+      { label: 'Personalizado', value: 'personalizado' }
   ];
   rangoSeleccionado: string = '6_meses';
+  fechaRango: Date[] = [];
 
   // Raw Data
   productos: Producto[] = [];
@@ -68,6 +72,10 @@ export class Estadisticas implements OnInit {
   }
 
   onRangoChange() {
+      if (this.rangoSeleccionado === 'personalizado') {
+          if (!this.fechaRango || this.fechaRango.length === 0) return; // Esperar a que seleccione
+          if (this.fechaRango[0] && !this.fechaRango[1]) return; // Esperar rango completo
+      }
       this.procesarEstadisticas();
   }
 
@@ -82,11 +90,27 @@ export class Estadisticas implements OnInit {
       const disponibles = this.productos.filter(p => p.estado === 'Disponible' || !p.estado);
       this.stockDisponible = disponibles.length;
       this.gananciaPotencial = this.stockDisponible * 20;
+
+      // Calcular Baja Rotación (solo inventario disponible que supera el promedio)
+      const hoyTime = new Date().getTime();
+      this.productosBajaRotacion = disponibles.map(p => {
+          const diasEnInventario = p.fechaCompra ? Math.ceil(Math.abs(hoyTime - new Date(p.fechaCompra).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          const gastosProd = this.gastos.filter(g => g.productoId === p.id && g.activo);
+          const costoProd = gastosProd.reduce((sum, g) => sum + (g.monto || 0), 0);
+          return {
+              descripcion: p.descripcion,
+              diasEnInventario: diasEnInventario,
+              costo: costoProd
+          };
+      })
+      .filter(p => p.diasEnInventario > this.tiempoPromedioVenta && this.tiempoPromedioVenta > 0)
+      .sort((a, b) => b.diasEnInventario - a.diasEnInventario);
   }
 
   filtrarPorFecha() {
       const hoy = new Date();
       let fechaInicio = new Date(2000, 0, 1); // fallback histórico
+      let fechaFin = new Date(2100, 0, 1);
 
       if (this.rangoSeleccionado === 'mes_actual') {
           fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -94,11 +118,24 @@ export class Estadisticas implements OnInit {
           fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
       } else if (this.rangoSeleccionado === 'ano_actual') {
           fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+      } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+          fechaInicio = this.fechaRango[0];
+          fechaFin = this.fechaRango[1];
+          fechaFin.setHours(23, 59, 59, 999);
       }
 
-      const ventasFiltradas = this.ventas.filter(v => new Date(v.fechaVenta || v.fechaRegistro || hoy) >= fechaInicio && v.activo);
-      const gastosFiltrados = this.gastos.filter(g => new Date(g.fecha) >= fechaInicio && g.activo);
-      const movimientosFiltrados = this.movimientos.filter(m => new Date(m.fecha) >= fechaInicio && m.activo !== false);
+      const ventasFiltradas = this.ventas.filter(v => {
+          const d = new Date(v.fechaVenta || v.fechaRegistro || hoy);
+          return d >= fechaInicio && d <= fechaFin && v.activo;
+      });
+      const gastosFiltrados = this.gastos.filter(g => {
+          const d = new Date(g.fecha);
+          return d >= fechaInicio && d <= fechaFin && g.activo;
+      });
+      const movimientosFiltrados = this.movimientos.filter(m => {
+          const d = new Date(m.fecha);
+          return d >= fechaInicio && d <= fechaFin && m.activo !== false;
+      });
 
       return { ventasFiltradas, gastosFiltrados, movimientosFiltrados };
   }

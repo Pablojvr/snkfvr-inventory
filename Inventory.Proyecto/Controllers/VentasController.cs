@@ -93,10 +93,16 @@ namespace Inventory.Proyecto.Controllers
                 }
 
                 var gastoRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.Gasto>)) as IRepositorio<Inventory.Core.Entities.Gasto>;
-                if (gastoRepo != null)
+                var tipoGastoRepo = HttpContext.RequestServices.GetService(typeof(IRepositorio<Inventory.Core.Entities.TipoGasto>)) as IRepositorio<Inventory.Core.Entities.TipoGasto>;
+                
+                if (gastoRepo != null && tipoGastoRepo != null)
                 {
+                    var tiposGasto = await tipoGastoRepo.ObtenerTodosAsync();
+                    var tipoProductoId = tiposGasto.FirstOrDefault(t => t.Nombre == Inventory.Core.Constants.TipoGastoConstants.Producto)?.Id ?? 1;
+
                     var gastos = await gastoRepo.ObtenerTodosAsync();
-                    var gastosAsociados = gastos.Where(g => g.ProductoId == venta.ProductoId && g.Activo).ToList();
+                    // EXCLUIR los gastos que son el costo original de compra del producto (TipoGastoId != tipoProductoId)
+                    var gastosAsociados = gastos.Where(g => g.ProductoId == venta.ProductoId && g.Activo && g.TipoGastoId != tipoProductoId).ToList();
                     foreach (var g in gastosAsociados)
                     {
                         g.ProductoId = null;

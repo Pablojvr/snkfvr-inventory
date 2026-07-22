@@ -7,11 +7,11 @@
             optionLabel="label" optionValue="value" styleClass="w-full md:w-56"
             style="border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
         </p-select>
-        <p-calendar *ngIf="rangoSeleccionado === 'personalizado'" 
+        <p-datepicker *ngIf="rangoSeleccionado === 'personalizado'" 
             [(ngModel)]="fechaRango" selectionMode="range" [readonlyInput]="true" 
             (onSelect)="onRangoChange()" placeholder="Seleccione fechas..." 
             styleClass="w-full md:w-56" [showIcon]="true">
-        </p-calendar>
+        </p-datepicker>
     </div>
     </div>
     <span style="color: #64748b; font-size: 0.9rem;">Inteligencia de Negocios y Flujos Financieros</span>

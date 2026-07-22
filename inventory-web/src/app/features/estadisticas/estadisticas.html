@@ -20,39 +20,195 @@
 <h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
     <i class="pi pi-wallet" style="color: #10b981;"></i> Salud Financiera
 </h3>
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2.5rem;">
+<style>
+.reporteria-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+}
+.reporteria-card {
+    background: white;
+    border-radius: 12px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.reporteria-card.gradient-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+.reporteria-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.reporteria-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.reporteria-title.text-white {
+    color: rgba(255,255,255,0.9);
+}
+.reporteria-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+.reporteria-value.text-white {
+    color: white;
+}
+</style>
+
+<div class="reporteria-grid">
+    <!-- Efectivo en Caja -->
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Caja</span>
+            <i class="pi pi-wallet" style="color: #10b981; font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value">{{ efectivoEnCaja | currency }}</span>
+    </div>
+
+    <!-- Valor Inventario -->
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Inventario</span>
+            <i class="pi pi-box" style="color: var(--primary-color); font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value">{{ inventarioTotal | currency }}</span>
+    </div>
+
     <!-- Ganancia Neta -->
-    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);">
-        <h4 style="color: rgba(255,255,255,0.8);">Ganancia Neta</h4>
-        <h2 style="color: white; display: flex; align-items: center; gap: 0.5rem;">
-            {{ gananciaNeta | currency }}
-            <i class="pi pi-arrow-up-right" style="font-size: 1.2rem; opacity: 0.7;" *ngIf="gananciaNeta >= 0"></i>
-            <i class="pi pi-arrow-down-right" style="font-size: 1.2rem; opacity: 0.7;" *ngIf="gananciaNeta < 0"></i>
-        </h2>
+    <div class="reporteria-card gradient-green">
+        <div class="reporteria-header">
+            <span class="reporteria-title text-white">Ganancia Neta</span>
+            <i class="pi pi-arrow-up-right text-white" style="font-size: 0.9rem;" *ngIf="gananciaNeta >= 0"></i>
+            <i class="pi pi-arrow-down-right text-white" style="font-size: 0.9rem;" *ngIf="gananciaNeta < 0"></i>
+        </div>
+        <span class="reporteria-value text-white">{{ gananciaNeta | currency }}</span>
     </div>
 
     <!-- ROI Promedio -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Margen Promedio (ROI)</h4>
-        <h2 style="color: #0f172a;">{{ roiPromedio | number:'1.0-1' }}%</h2>
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Margen (ROI)</span>
+            <i class="pi pi-percentage" style="color: #64748b; font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value">{{ roiPromedio | number:'1.0-1' }}%</span>
     </div>
 
-    <!-- Comisiones de Venta -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Comisiones de Venta</h4>
-        <h2 style="color: #f59e0b;">{{ comisionesVenta | currency }}</h2>
+    <!-- Ganancia Promedio USD -->
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Prom. Ganancia</span>
+            <i class="pi pi-arrow-up" style="color: #10b981; font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value" style="color: #10b981;">{{ gananciaPromedioDolares | currency }}</span>
     </div>
 
-    <!-- Comisiones de Compra -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Comisiones de Compra</h4>
-        <h2 style="color: #ef4444;">{{ comisionesCompra | currency }}</h2>
+    <!-- Costo Promedio USD -->
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Prom. Costo</span>
+            <i class="pi pi-arrow-down" style="color: #f43f5e; font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value" style="color: #f43f5e;">{{ costoPromedioDolares | currency }}</span>
+    </div>
+</div>
+
+<!-- Diagnóstico Inteligente y Presupuesto -->
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="pi pi-sparkles" style="color: var(--primary-color);"></i> Inteligencia de Negocios
+</h3>
+<div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;">
+    <!-- Diagnóstico Textual -->
+    <div style="background: linear-gradient(135deg, #f8fafc, #ffffff); border: 1px solid #e2e8f0; border-left: 4px solid var(--primary-color); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+        <h4 style="margin-top: 0; color: #334155; font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="pi pi-info-circle" style="color: var(--primary-color);"></i> Diagnóstico del Periodo
+        </h4>
+        <p style="margin: 0; color: #475569; line-height: 1.6; font-size: 0.95rem;">
+            {{ diagnosticoFinanciero }}
+        </p>
+    </div>
+
+    <!-- Presupuesto Recomendado -->
+    <div style="background: #ecfdf5; border: 1px solid #d1fae5; border-left: 4px solid #10b981; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+        <h4 style="margin-top: 0; color: #065f46; font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="pi pi-money-bill" style="color: #10b981;"></i> Presupuesto Sugerido
+        </h4>
+        <p style="margin: 0; color: #047857; line-height: 1.6; font-size: 0.95rem; font-weight: 500;">
+            {{ presupuestoRecomendado }}
+        </p>
     </div>
 </div>
 
 <!-- Gráfico de Desempeño Financiero -->
-<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-    <i class="pi pi-chart-line" style="color: #3b82f6;"></i> Evolución del Flujo
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <i class="pi pi-chart-line" style="color: #3b82f6;"></i> Evolución del Flujo
+    </div>
+    
+    <div style="position: relative;">
+        <i class="pi pi-info-circle" 
+           style="color: #94a3b8; font-size: 1.25rem; cursor: pointer; transition: color 0.2s;"
+           onmouseover="this.style.color='#64748b'"
+           onmouseout="this.style.color='#94a3b8'"
+           (click)="op.toggle($event)">
+        </i>
+        <p-popover #op styleClass="custom-light-popover">
+            <div style="padding: 0.75rem; max-width: 340px; background: #ffffff; color: #1e293b; border-radius: 8px;">
+                <div style="margin-bottom: 1.25rem;">
+                    <h4 style="margin: 0 0 0.35rem 0; color: #FF4757; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
+                        <i class="pi pi-arrow-up-right"></i> Ventas
+                    </h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                        Suma del <strong>precio final de venta</strong> de los zapatos que fueron exitosamente vendidos.
+                    </p>
+                </div>
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                    <h4 style="margin: 0 0 0.85rem 0; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
+                        <i class="pi pi-arrow-down-right"></i> Gastos Desglosados
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <i class="pi pi-box" style="color: #f59e0b; margin-top: 0.15rem;"></i>
+                            <div>
+                                <strong style="font-size: 0.85rem; display: block; color: #1e293b; line-height: 1.2;">Compras</strong>
+                                <span style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block; margin-top: 0.1rem;">Costo de adquisición del zapato para el inventario.</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <i class="pi pi-truck" style="color: #3b82f6; margin-top: 0.15rem;"></i>
+                            <div>
+                                <strong style="font-size: 0.85rem; display: block; color: #1e293b; line-height: 1.2;">Envío</strong>
+                                <span style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block; margin-top: 0.1rem;">Costos logísticos y paquetería pagada.</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <i class="pi pi-percentage" style="color: #10b981; margin-top: 0.15rem;"></i>
+                            <div>
+                                <strong style="font-size: 0.85rem; display: block; color: #1e293b; line-height: 1.2;">Comisión</strong>
+                                <span style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block; margin-top: 0.1rem;">Comisiones generadas por transacciones de compra o venta.</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <i class="pi pi-ellipsis-h" style="color: #8b5cf6; margin-top: 0.15rem;"></i>
+                            <div>
+                                <strong style="font-size: 0.85rem; display: block; color: #1e293b; line-height: 1.2;">Otro</strong>
+                                <span style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block; margin-top: 0.1rem;">Cualquier otro tipo de egreso o mantenimiento.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-popover>
+    </div>
 </h3>
 <div class="card chart-card" style="margin-bottom: 2.5rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
     <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
@@ -62,20 +218,23 @@
 <h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
     <i class="pi pi-box" style="color: #8b5cf6;"></i> Salud del Inventario
 </h3>
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2.5rem;">
+<div class="reporteria-grid">
     <!-- Rotación -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Rotación Promedio</h4>
-        <h2 style="color: #0f172a;">{{ tiempoPromedioVenta | number:'1.0-0' }} <span style="font-size: 1rem; color: #94a3b8; font-weight: 500;">días</span></h2>
+    <div class="reporteria-card">
+        <div class="reporteria-header">
+            <span class="reporteria-title">Rotación</span>
+            <i class="pi pi-sync" style="color: #64748b; font-size: 0.9rem;"></i>
+        </div>
+        <span class="reporteria-value">{{ tiempoPromedioVenta | number:'1.0-0' }} <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">días</span></span>
     </div>
 
     <!-- Ganancia Potencial -->
-    <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2);">
-        <h4 style="color: rgba(255,255,255,0.9);">Ganancia Potencial Esperada</h4>
-        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
-            <h2 style="color: white; margin: 0;">{{ gananciaPotencial | currency }}</h2>
-            <span style="font-size: 0.9rem; color: rgba(255,255,255,0.8); font-weight: 500;">(de {{ stockDisponible }} pares)</span>
+    <div class="reporteria-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+        <div class="reporteria-header">
+            <span class="reporteria-title text-white">Potencial ({{ stockDisponible }} pares)</span>
+            <i class="pi pi-chart-line text-white" style="font-size: 0.9rem;"></i>
         </div>
+        <span class="reporteria-value text-white">{{ gananciaPotencial | currency }}</span>
     </div>
 </div>
 

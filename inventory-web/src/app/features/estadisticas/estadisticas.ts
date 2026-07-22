@@ -5,13 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { DatePickerModule } from 'primeng/datepicker';
-import { ApiService, Producto, Venta, Gasto, Movimiento } from '../../core/services/api';
+import { TooltipModule } from 'primeng/tooltip';
+import { PopoverModule } from 'primeng/popover';
+import { ApiService, Producto, Venta, Gasto, Movimiento, TipoGasto } from '../../core/services/api';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule, DatePickerModule],
+  imports: [CommonModule, ChartModule, FormsModule, SelectModule, TableModule, DatePickerModule, TooltipModule, PopoverModule],
   templateUrl: './estadisticas.html',
 })
 export class Estadisticas implements OnInit {
@@ -23,6 +25,16 @@ export class Estadisticas implements OnInit {
   comisionesCompra: number = 0;
   gananciaPotencial: number = 0;
   stockDisponible: number = 0;
+  efectivoEnCaja: number = 0;
+  inventarioTotal: number = 0;
+  
+  // Promedios en dólares
+  costoPromedioDolares: number = 0;
+  gananciaPromedioDolares: number = 0;
+
+  // Diagnóstico
+  diagnosticoFinanciero: string = '';
+  presupuestoRecomendado: string = '';
   
   // Top Productos
   topProductos: any[] = [];
@@ -51,6 +63,7 @@ export class Estadisticas implements OnInit {
   ventas: Venta[] = [];
   gastos: Gasto[] = [];
   movimientos: Movimiento[] = [];
+  tiposGasto: TipoGasto[] = [];
 
   constructor(private api: ApiService) {}
 
@@ -58,18 +71,19 @@ export class Estadisticas implements OnInit {
     this.initChartOptions();
     this.cargarDatos();
   }
-  
   cargarDatos() {
     forkJoin({
       productos: this.api.getProductos(),
       ventas: this.api.getVentas(),
       gastos: this.api.getGastos(),
-      movimientos: this.api.getMovimientos()
-    }).subscribe(({ productos, ventas, gastos, movimientos }) => {
+      movimientos: this.api.getMovimientos(),
+      tiposGasto: this.api.getTiposGasto()
+    }).subscribe(({ productos, ventas, gastos, movimientos, tiposGasto }) => {
       this.productos = productos;
       this.ventas = ventas;
       this.gastos = gastos;
       this.movimientos = movimientos;
+      this.tiposGasto = tiposGasto;
       this.procesarEstadisticas();
     });
   }
@@ -93,6 +107,14 @@ export class Estadisticas implements OnInit {
       const disponibles = this.productos.filter(p => p.estado === 'Disponible' || !p.estado);
       this.stockDisponible = disponibles.length;
       this.gananciaPotencial = this.stockDisponible * 20;
+
+      // Calcular Efectivo en Caja y Valor Inventario (siempre históricos)
+      this.efectivoEnCaja = this.movimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
+      this.inventarioTotal = this.productos.reduce((acc, p) => {
+          const gastosProd = this.gastos.filter(g => g.productoId === p.id && g.activo);
+          const costo = gastosProd.reduce((sum, g) => sum + (g.monto || 0), 0);
+          return acc + costo;
+      }, 0);
 
       // Calcular Baja Rotación (solo inventario disponible que supera el promedio)
       const hoyTime = new Date().getTime();
@@ -171,6 +193,15 @@ export class Estadisticas implements OnInit {
       } else {
           this.roiPromedio = 0;
       }
+      
+      // Promedios en Dólares
+      this.costoPromedioDolares = ventasCompletadas.length > 0 ? (costosTotales / ventasCompletadas.length) : 0;
+      this.gananciaPromedioDolares = ventasCompletadas.length > 0 ? (this.gananciaNeta / ventasCompletadas.length) : 0;
+
+      // Diagnóstico Inteligente
+      const totalGastadoEnPeriodo = gastosFiltrados.reduce((sum, g) => sum + (g.monto || 0), 0);
+      this.generarDiagnosticoInteligente(ingresosVentas, totalGastadoEnPeriodo, ventasCompletadas.length, costosTotales);
+      this.generarPresupuesto();
 
       // Tiempo Promedio de Venta
       let diasTotales = 0;
@@ -227,14 +258,51 @@ export class Estadisticas implements OnInit {
       this.topProductos = utilidades.slice(0, 5);
   }
 
+  generarDiagnosticoInteligente(ingresosVentas: number, totalGastadoEnPeriodo: number, cantidadVendida: number, costosVenta: number) {
+      if (cantidadVendida === 0) {
+          this.diagnosticoFinanciero = "Aún no hay ventas registradas en este periodo. Enfócate en promocionar tu inventario actual.";
+          return;
+      }
+
+      const gananciaPura = ingresosVentas - costosVenta;
+      const flujoCaja = ingresosVentas - totalGastadoEnPeriodo;
+      let texto = "";
+
+      if (gananciaPura > 0) {
+          texto = `¡Altamente rentable! Generaste $${gananciaPura.toFixed(2)} de ganancia pura. `;
+      } else if (gananciaPura === 0) {
+          texto = `Estás en punto de equilibrio de rentabilidad. `;
+      } else {
+          texto = `Estás perdiendo margen. Tus productos se vendieron por debajo del costo real. `;
+      }
+
+      if (flujoCaja < 0) {
+          texto += `Sin embargo, gastaste $${Math.abs(flujoCaja).toFixed(2)} más de lo que ingresó, probablemente porque adquiriste inventario que aún no se vende (lo cual es normal para crecer). Tu flujo de efectivo temporal es negativo.`;
+      } else {
+          texto += `Además, tuviste un flujo de caja positivo de $${flujoCaja.toFixed(2)}. Ingresó más dinero del que gastaste en el periodo.`;
+      }
+
+      this.diagnosticoFinanciero = texto;
+  }
+
+  generarPresupuesto() {
+      // El presupuesto se calcula sobre el efectivo REAL en caja hoy, no del periodo.
+      // Suponiendo que de lo que tienes en caja, es sano reinvertir el 70% si tienes liquidez.
+      if (this.efectivoEnCaja > 0) {
+          const reinversion = this.efectivoEnCaja * 0.70;
+          this.presupuestoRecomendado = `Basado en tu liquidez actual, tu presupuesto sugerido para reinversión inmediata en nuevo inventario es de $${reinversion.toFixed(2)} (70% de caja).`;
+      } else {
+          this.presupuestoRecomendado = `Tu efectivo en caja es limitado o negativo. Sugerimos no realizar grandes compras y enfocarte en vender los ${this.stockDisponible} artículos disponibles para recuperar liquidez.`;
+      }
+  }
+
   generarGrafico(ventasFiltradas: Venta[], gastosFiltrados: Gasto[]) {
       const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
       const ingresosMap = new Map<string, number>();
-      const gastosMap = new Map<string, number>();
+      const gastosPorCategoria = new Map<string, Map<string, number>>();
       
       const labels: string[] = [];
       const ingresosData: number[] = [];
-      const gastosData: number[] = [];
 
       // Determine period
       let numMonths = 6;
@@ -249,7 +317,6 @@ export class Estadisticas implements OnInit {
           const label = `${meses[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`;
           labels.push(label);
           ingresosMap.set(label, 0);
-          gastosMap.set(label, 0);
           d.setMonth(d.getMonth() + 1);
       }
 
@@ -264,37 +331,69 @@ export class Estadisticas implements OnInit {
           }
       });
 
-      // Flujo de caja real: Mostrar TODOS los gastos ocurridos en el periodo,
-      // independientemente de si el producto ya se vendió o no.
+      // Flujo de caja real: Desglosar gastos por categoría
       gastosFiltrados.forEach(g => {
           const date = new Date(g.fecha);
           const label = `${meses[date.getMonth()]} ${date.getFullYear().toString().substring(2)}`;
-          if (gastosMap.has(label)) {
-              gastosMap.set(label, gastosMap.get(label)! + (g.monto || 0));
+          
+          let categoria = 'Otros Gastos';
+          if (g.tipoGastoNombre) {
+              categoria = g.tipoGastoNombre;
+          } else if (g.tipoGastoId) {
+              const tipoEncontrado = this.tiposGasto.find(t => t.id === g.tipoGastoId);
+              if (tipoEncontrado) {
+                  categoria = tipoEncontrado.nombre;
+              }
+          }
+          
+          if (categoria === 'Producto' || categoria === 'Productos') {
+              categoria = 'Compras';
+          }
+          
+          if (!gastosPorCategoria.has(categoria)) {
+              const newMap = new Map<string, number>();
+              labels.forEach(l => newMap.set(l, 0));
+              gastosPorCategoria.set(categoria, newMap);
+          }
+          
+          const categoryMap = gastosPorCategoria.get(categoria)!;
+          if (categoryMap.has(label)) {
+              categoryMap.set(label, categoryMap.get(label)! + (g.monto || 0));
           }
       });
 
       labels.forEach(l => {
           ingresosData.push(ingresosMap.get(l)!);
-          gastosData.push(gastosMap.get(l)!);
+      });
+
+      const datasets: any[] = [
+          {
+              label: 'Ventas',
+              data: ingresosData,
+              backgroundColor: '#FF4757', // Color Primario de la Marca
+              borderRadius: 6
+          }
+      ];
+
+      // Colores vibrantes y amigables para los gastos (evitando el gris/negro)
+      const expenseColors = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#f97316', '#06b6d4'];
+      let colorIndex = 0;
+
+      gastosPorCategoria.forEach((map, category) => {
+          const data: number[] = [];
+          labels.forEach(l => data.push(map.get(l)!));
+          datasets.push({
+              label: `${category}`,
+              data: data,
+              backgroundColor: expenseColors[colorIndex % expenseColors.length],
+              borderRadius: 6
+          });
+          colorIndex++;
       });
 
       this.chartData = {
           labels: labels,
-          datasets: [
-              {
-                  label: 'Ingresos (Ventas)',
-                  data: ingresosData,
-                  backgroundColor: '#f43f5e', // Coral
-                  borderRadius: 6
-              },
-              {
-                  label: 'Costos (Gastos)',
-                  data: gastosData,
-                  backgroundColor: '#e2e8f0', // Neutral Slate
-                  borderRadius: 6
-              }
-          ]
+          datasets: datasets
       };
   }
 
@@ -309,8 +408,12 @@ export class Estadisticas implements OnInit {
           aspectRatio: 0.8,
           plugins: {
               legend: {
+                  position: 'right',
+                  align: 'start',
                   labels: {
                       color: textColor,
+                      padding: 12,
+                      usePointStyle: true,
                       font: {
                           family: 'Inter, sans-serif',
                           weight: '600'

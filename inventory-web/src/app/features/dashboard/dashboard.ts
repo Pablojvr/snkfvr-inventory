@@ -19,6 +19,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogCierreDiaComponent } from '../../shared/components/dialog-cierre-dia/dialog-cierre-dia.component';
 
+import { DatePickerModule } from 'primeng/datepicker';
+
 // Interface extendida para Venta en el Dashboard
 interface VentaDashboard extends Venta {
     productoDescripcion?: string;
@@ -31,7 +33,7 @@ interface VentaDashboard extends Venta {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, InputNumberModule, InputTextModule, DialogCierreDiaComponent],
+  imports: [CommonModule, ButtonModule, TimelineModule, SelectModule, DatePickerModule, FormsModule, DialogModule, MenuModule, TooltipModule, DialogGastoComponent, DialogVentaComponent, InputNumberModule, InputTextModule, DialogCierreDiaComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -67,9 +69,8 @@ export class Dashboard implements OnInit {
   productoBuscado: Producto | null = null;
 
   // Estadísticas Reales
-  efectivoEnCaja: number = 0;
-  inventarioTotal: number = 0;
   ventasTotales: number = 0;
+  comprasTotales: number = 0;
   articulosDisponibles: number = 0;
 
   // Detail modal
@@ -356,12 +357,9 @@ export class Dashboard implements OnInit {
       }
 
       this.ventasTotales = ventasValidas.reduce((acc, v) => acc + (v.precioVenta || 0), 0);
+      this.comprasTotales = productosFiltrados.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
       this.unidadesVendidas = ventasValidas.length;
-      this.articulosDisponibles = productosFiltrados.length; // Unidades ingresadas en ese periodo (Disponibles + Vendidos, todo lo ingresado en ese rango)
-      
-      // El efectivo en caja y el valor inventario se mantienen como el histórico total, a menos que cambien.
-      this.efectivoEnCaja = this.todosLosMovimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
-      this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
+      this.articulosDisponibles = productosFiltrados.length; // Unidades ingresadas en ese periodo
   }
   onProductoSeleccionado(event: any) {
     if (event.value && event.value.id) {

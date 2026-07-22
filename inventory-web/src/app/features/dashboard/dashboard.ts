@@ -41,9 +41,27 @@ export class Dashboard implements OnInit {
   ventasPorCobrar: VentaDashboard[] = [];
   entregasDeHoy: VentaDashboard[] = [];
   activeTab: 'pendientes' | 'cobrar' = 'pendientes';
+  
+  // Filtros de fecha
+  rangoOpciones: any[] = [
+      { label: 'Hoy', value: 'hoy' },
+      { label: 'Ayer', value: 'ayer' },
+      { label: 'Esta Semana', value: 'esta_semana' },
+      { label: 'Este Mes', value: 'mes_actual' },
+      { label: 'Últimos 6 Meses', value: '6_meses' },
+      { label: 'Año Actual', value: 'ano_actual' },
+      { label: 'Histórico', value: 'historico' },
+      { label: 'Personalizado', value: 'personalizado' }
+  ];
+  rangoSeleccionado: string = 'historico';
+  fechaRango: Date[] = [];
+  unidadesVendidas: number = 0;
+
   movimientos: Movimiento[] = [];
   productos: Producto[] = [];
   usuarios: Usuario[] = [];
+  todasLasVentas: Venta[] = [];
+  todosLosMovimientos: Movimiento[] = [];
   
   productosParaBuscador: Producto[] = [];
   productoBuscado: Producto | null = null;
@@ -265,12 +283,11 @@ export class Dashboard implements OnInit {
                 return dateB - dateA;
             });
             
-          // Calcular estadísticas reales
-          this.efectivoEnCaja = movimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
-          this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
-          this.ventasTotales = ventas.filter(v => v.estado === 'Vendido').reduce((acc, v) => acc + (v.precioVenta || 0), 0);
-          this.articulosDisponibles = this.productos.filter(p => p.estado === 'Disponible').length;
-            
+          this.todasLasVentas = ventas;
+          this.todosLosMovimientos = movimientos;
+          
+          this.calcularEstadisticas();
+          
           this.movimientos = movimientos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 10).map(mov => {
               let desc = mov.descripcion;
               
@@ -293,6 +310,59 @@ export class Dashboard implements OnInit {
     });
   }
 
+  onFilterChange() {
+      this.calcularEstadisticas();
+  }
+
+  calcularEstadisticas() {
+      let ventasValidas = this.todasLasVentas.filter(v => v.estado === 'Vendido');
+      let productosFiltrados = this.productos;
+
+      if (this.rangoSeleccionado !== 'historico') {
+          const hoy = new Date();
+          let fechaInicio = new Date(2000, 0, 1);
+          let fechaFin = new Date(2100, 0, 1);
+
+          if (this.rangoSeleccionado === 'hoy') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+              fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+          } else if (this.rangoSeleccionado === 'ayer') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+              fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+          } else if (this.rangoSeleccionado === 'esta_semana') {
+              const day = hoy.getDay() || 7;
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+          } else if (this.rangoSeleccionado === 'mes_actual') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+          } else if (this.rangoSeleccionado === '6_meses') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+          } else if (this.rangoSeleccionado === 'ano_actual') {
+              fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+          } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+              fechaInicio = this.fechaRango[0];
+              fechaFin = this.fechaRango[1];
+              fechaFin.setHours(23, 59, 59, 999);
+          }
+
+          ventasValidas = ventasValidas.filter(v => {
+              const d = new Date(v.fechaVenta || v.fechaRegistro || 0);
+              return d >= fechaInicio && d <= fechaFin;
+          });
+
+          productosFiltrados = this.productos.filter(p => {
+              const d = new Date(p.fechaCompra);
+              return d >= fechaInicio && d <= fechaFin;
+          });
+      }
+
+      this.ventasTotales = ventasValidas.reduce((acc, v) => acc + (v.precioVenta || 0), 0);
+      this.unidadesVendidas = ventasValidas.length;
+      this.articulosDisponibles = productosFiltrados.length; // Unidades ingresadas en ese periodo (Disponibles + Vendidos, todo lo ingresado en ese rango)
+      
+      // El efectivo en caja y el valor inventario se mantienen como el histórico total, a menos que cambien.
+      this.efectivoEnCaja = this.todosLosMovimientos.reduce((acc, m) => acc + (m.montoTotal || 0), 0);
+      this.inventarioTotal = this.productos.reduce((acc, p) => acc + (p.costoCalculado || 0), 0);
+  }
   onProductoSeleccionado(event: any) {
     if (event.value && event.value.id) {
         this.router.navigate(['/productos', event.value.id]);

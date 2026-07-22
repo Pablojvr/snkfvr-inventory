@@ -1,23 +1,26 @@
-<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
-    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Reportes</h2>
-        
-    <div style="display: flex; gap: 0.75rem; align-items: center;">
-        <p-select [options]="rangoOpciones" [(ngModel)]="rangoSeleccionado" (onChange)="onRangoChange()" 
-            optionLabel="label" optionValue="value" styleClass="w-full md:w-56"
-            style="border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-        </p-select>
-        <p-datepicker *ngIf="rangoSeleccionado === 'personalizado'" 
-            [(ngModel)]="fechaRango" selectionMode="range" [readonlyInput]="true" 
-            (onSelect)="onRangoChange()" placeholder="Seleccione fechas..." 
-            styleClass="w-full md:w-56" [showIcon]="true">
-        </p-datepicker>
+<div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0;">Reportes</h2>
+    <span style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">Inteligencia de Negocios y Flujos Financieros</span>
+    
+    <div class="filter-card" style="background: white; border-radius: 20px; padding: 1rem 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); width: 100%; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;"><i class="pi pi-calendar" style="margin-right: 0.5rem;"></i>Periodo de Análisis</span>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <p-select [options]="rangoOpciones" [(ngModel)]="rangoSeleccionado" (onChange)="onRangoChange()" 
+                optionLabel="label" optionValue="value" styleClass="w-full" style="flex: 1; min-width: 200px;">
+            </p-select>
+            <p-datepicker *ngIf="rangoSeleccionado === 'personalizado'" 
+                [(ngModel)]="fechaRango" selectionMode="range" [readonlyInput]="true" 
+                (onSelect)="onRangoChange()" placeholder="Seleccione fechas..." 
+                styleClass="w-full" [showIcon]="true" style="flex: 2; min-width: 250px;">
+            </p-datepicker>
+        </div>
     </div>
-    </div>
-    <span style="color: #64748b; font-size: 0.9rem;">Inteligencia de Negocios y Flujos Financieros</span>
 </div>
 
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 1.5rem;">
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="pi pi-wallet" style="color: #10b981;"></i> Salud Financiera
+</h3>
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2.5rem;">
     <!-- Ganancia Neta -->
     <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);">
         <h4 style="color: rgba(255,255,255,0.8);">Ganancia Neta</h4>
@@ -34,6 +37,32 @@
         <h2 style="color: #0f172a;">{{ roiPromedio | number:'1.0-1' }}%</h2>
     </div>
 
+    <!-- Comisiones de Venta -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Comisiones de Venta</h4>
+        <h2 style="color: #f59e0b;">{{ comisionesVenta | currency }}</h2>
+    </div>
+
+    <!-- Comisiones de Compra -->
+    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h4 style="color: #64748b;">Comisiones de Compra</h4>
+        <h2 style="color: #ef4444;">{{ comisionesCompra | currency }}</h2>
+    </div>
+</div>
+
+<!-- Gráfico de Desempeño Financiero -->
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="pi pi-chart-line" style="color: #3b82f6;"></i> Evolución del Flujo
+</h3>
+<div class="card chart-card" style="margin-bottom: 2.5rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
+    <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
+</div>
+
+<!-- Salud del Inventario -->
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="pi pi-box" style="color: #8b5cf6;"></i> Salud del Inventario
+</h3>
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2.5rem;">
     <!-- Rotación -->
     <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
         <h4 style="color: #64748b;">Rotación Promedio</h4>
@@ -50,36 +79,19 @@
     </div>
 </div>
 
-<h3 style="margin-top: 2rem; margin-bottom: 1rem; font-weight: 700; color: #1e293b;">Costos Operativos</h3>
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-    <!-- Comisiones de Venta -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Comisiones de Venta</h4>
-        <h2 style="color: #f59e0b;">{{ comisionesVenta | currency }}</h2>
-    </div>
-
-    <!-- Comisiones de Compra -->
-    <div class="stat-card" style="background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <h4 style="color: #64748b;">Comisiones de Compra</h4>
-        <h2 style="color: #ef4444;">{{ comisionesCompra | currency }}</h2>
-    </div>
-</div>
-
-<!-- Gráfico de Desempeño Financiero -->
-<div class="card chart-card" style="margin-top: 2rem; border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
-    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b;">Flujo de Efectivo</h3>
-    <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="300px"></p-chart>
-</div>
+<h3 style="margin-top: 0; margin-bottom: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="pi pi-sparkles" style="color: #f43f5e;"></i> Inteligencia de Productos
+</h3>
 
 <!-- Estilos Forzados Light para Tablas -->
 <style>
-    .light-theme-table .p-datatable-wrapper { background: white !important; border-radius: 12px; }
-    .light-theme-table .p-datatable-thead > tr > th { background: white !important; color: #64748b !important; border-bottom: 1px solid #e2e8f0 !important; }
-    .light-theme-table .p-datatable-tbody > tr > td { background: white !important; color: #1e293b !important; border-bottom: 1px solid #f1f5f9 !important; }
-    .light-theme-table .p-datatable-tbody > tr:hover > td { background: #f8fafc !important; }
+    ::ng-deep .light-theme-table .p-datatable-wrapper { background: white !important; border-radius: 12px; }
+    ::ng-deep .light-theme-table .p-datatable-thead > tr > th { background: white !important; color: #64748b !important; border-bottom: 1px solid #e2e8f0 !important; }
+    ::ng-deep .light-theme-table .p-datatable-tbody > tr > td { background: white !important; color: #1e293b !important; border-bottom: 1px solid #f1f5f9 !important; }
+    ::ng-deep .light-theme-table .p-datatable-tbody > tr:hover > td { background: #f8fafc !important; }
 </style>
 
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-top: 2rem;">
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-bottom: 2rem;">
     <!-- Top Productos -->
     <div class="card" style="border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03); background: white;">
         <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
@@ -117,10 +129,15 @@
 
     <!-- Baja Rotación -->
     <div class="card" style="border-radius: 24px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03); background: white; border-top: 4px solid #ef4444;">
-        <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <i class="pi pi-exclamation-triangle" style="color: #ef4444;"></i> Alerta de Rotación Lenta
+            <span style="background: #fee2e2; color: #ef4444; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; margin-left: auto;">
+                {{productosBajaRotacion.length}} / {{stockDisponible}}
+            </span>
         </h3>
-        <p style="margin-top: -1rem; margin-bottom: 1rem; color: #64748b; font-size: 0.85rem;">Productos en inventario que superan el promedio global de rotación ({{tiempoPromedioVenta | number:'1.0-0'}} días).</p>
+        <p style="margin-top: -1rem; margin-bottom: 1rem; color: #64748b; font-size: 0.85rem;">
+            <strong>{{productosBajaRotacion.length}}</strong> de <strong>{{stockDisponible}}</strong> productos disponibles superan el promedio global de rotación ({{tiempoPromedioVenta | number:'1.0-0'}} días).
+        </p>
         
         <p-table [value]="productosBajaRotacion" responsiveLayout="scroll" styleClass="p-datatable-sm light-theme-table" [rowHover]="true" [paginator]="true" [rows]="5">
             <ng-template pTemplate="header">

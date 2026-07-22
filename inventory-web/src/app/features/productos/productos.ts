@@ -44,6 +44,20 @@ export class Productos implements OnInit, AfterViewInit {
   first: number = 0;
   rows: number = 12;
 
+  // Filtros de fecha
+  rangoOpciones: any[] = [
+      { label: 'Hoy', value: 'hoy' },
+      { label: 'Ayer', value: 'ayer' },
+      { label: 'Esta Semana', value: 'esta_semana' },
+      { label: 'Este Mes', value: 'mes_actual' },
+      { label: 'Últimos 6 Meses', value: '6_meses' },
+      { label: 'Año Actual', value: 'ano_actual' },
+      { label: 'Histórico', value: 'historico' },
+      { label: 'Personalizado', value: 'personalizado' }
+  ];
+  rangoSeleccionado: string = 'historico';
+  fechaRango: Date[] = [];
+
   onPageChange(event: any) {
       this.first = event.first;
       this.rows = event.rows;
@@ -52,7 +66,45 @@ export class Productos implements OnInit, AfterViewInit {
   isScrolled: boolean = false;
 
   countByState(state: string): number {
-      return this.productos.filter(p => (p.estado || 'Disponible') === state).length;
+      // Calculate based on the date filter logic, but ignore the text and state filters themselves
+      let result = this.productos;
+
+      if (this.rangoSeleccionado !== 'historico') {
+          const hoy = new Date();
+          let fechaInicio = new Date(2000, 0, 1);
+          let fechaFin = new Date(2100, 0, 1);
+
+          if (this.rangoSeleccionado === 'hoy') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+              fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+          } else if (this.rangoSeleccionado === 'ayer') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+              fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+          } else if (this.rangoSeleccionado === 'esta_semana') {
+              const day = hoy.getDay() || 7;
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+          } else if (this.rangoSeleccionado === 'mes_actual') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+          } else if (this.rangoSeleccionado === '6_meses') {
+              fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+          } else if (this.rangoSeleccionado === 'ano_actual') {
+              fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+          } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+              fechaInicio = this.fechaRango[0];
+              fechaFin = this.fechaRango[1];
+              fechaFin.setHours(23, 59, 59, 999);
+          }
+
+          result = result.filter(p => {
+              const d = new Date(p.fechaCompra);
+              return d >= fechaInicio && d <= fechaFin;
+          });
+      }
+
+      if (state === 'Todos') {
+          return result.length;
+      }
+      return result.filter(p => (p.estado || 'Disponible') === state).length;
   }
 
   @HostListener('window:scroll', [])
@@ -126,6 +178,40 @@ export class Productos implements OnInit, AfterViewInit {
 
   get productosFiltrados() {
     let result = this.productos;
+
+    // Filtro por fecha
+    const hoy = new Date();
+    let fechaInicio = new Date(2000, 0, 1);
+    let fechaFin = new Date(2100, 0, 1);
+
+    if (this.rangoSeleccionado === 'hoy') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'ayer') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'esta_semana') {
+        const day = hoy.getDay() || 7; // Lunes = 1
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+    } else if (this.rangoSeleccionado === 'mes_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    } else if (this.rangoSeleccionado === '6_meses') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+    } else if (this.rangoSeleccionado === 'ano_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+    } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+        fechaInicio = this.fechaRango[0];
+        fechaFin = this.fechaRango[1];
+        fechaFin.setHours(23, 59, 59, 999);
+    }
+
+    if (this.rangoSeleccionado !== 'historico') {
+        result = result.filter(p => {
+            const d = new Date(p.fechaCompra);
+            return d >= fechaInicio && d <= fechaFin;
+        });
+    }
+
     if (this.estadoFiltro !== 'Todos') {
         result = result.filter(p => (p.estado || 'Disponible') === this.estadoFiltro);
     }

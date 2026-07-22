@@ -8,11 +8,13 @@ import { ApiService, Movimiento } from '../../core/services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PaginatorModule } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-movimientos',
   standalone: true,
-  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule, PaginatorModule],
+  imports: [CommonModule, TimelineModule, InputTextModule, FormsModule, DialogModule, PaginatorModule, SelectModule, DatePickerModule],
   templateUrl: './movimientos.html',
   styleUrls: ['./movimientos.css'],
   styles: [`
@@ -29,6 +31,20 @@ export class Movimientos implements OnInit, AfterViewInit {
   displayDetalle: boolean = false;
   movimientoSeleccionado: Movimiento | null = null;
   
+  // Filtros de fecha
+  rangoOpciones: any[] = [
+      { label: 'Hoy', value: 'hoy' },
+      { label: 'Ayer', value: 'ayer' },
+      { label: 'Esta Semana', value: 'esta_semana' },
+      { label: 'Este Mes', value: 'mes_actual' },
+      { label: 'Últimos 6 Meses', value: '6_meses' },
+      { label: 'Año Actual', value: 'ano_actual' },
+      { label: 'Histórico', value: 'historico' },
+      { label: 'Personalizado', value: 'personalizado' }
+  ];
+  rangoSeleccionado: string = 'historico';
+  fechaRango: Date[] = [];
+
   // Paginación
   first: number = 0;
   rows: number = 12;
@@ -102,33 +118,99 @@ export class Movimientos implements OnInit, AfterViewInit {
 
   get movimientosFiltrados() {
     let filtrados = this.movimientos;
+
+    // Filtro por fecha
+    const hoy = new Date();
+    let fechaInicio = new Date(2000, 0, 1);
+    let fechaFin = new Date(2100, 0, 1);
+
+    if (this.rangoSeleccionado === 'hoy') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'ayer') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'esta_semana') {
+        const day = hoy.getDay() || 7;
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+    } else if (this.rangoSeleccionado === 'mes_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    } else if (this.rangoSeleccionado === '6_meses') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+    } else if (this.rangoSeleccionado === 'ano_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+    } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+        fechaInicio = this.fechaRango[0];
+        fechaFin = this.fechaRango[1];
+        fechaFin.setHours(23, 59, 59, 999);
+    }
+
+    if (this.rangoSeleccionado !== 'historico') {
+        filtrados = filtrados.filter(m => {
+            const d = new Date(m.fecha);
+            return d >= fechaInicio && d <= fechaFin;
+        });
+    }
     
     if (this.filtroTipoActivo !== 'Todos') {
-      if (this.filtroTipoActivo === 'Envío') {
-        filtrados = filtrados.filter(m => m.descripcion.includes('ENV |'));
-      } else if (this.filtroTipoActivo === 'Gasto') {
-        filtrados = filtrados.filter(m => m.tipo === 'Salida de dinero' && !m.descripcion.includes('ENV |'));
-      } else if (this.filtroTipoActivo === 'Compra') {
-        filtrados = filtrados.filter(m => m.tipo === 'Compra' && !m.descripcion.includes('ENV |'));
-      } else {
-        filtrados = filtrados.filter(m => m.tipo === this.filtroTipoActivo);
-      }
+        if (this.filtroTipoActivo === 'Envío') {
+            filtrados = filtrados.filter(m => m.descripcion.includes('ENV |'));
+        } else if (this.filtroTipoActivo === 'Gasto') {
+            filtrados = filtrados.filter(m => m.tipo === 'Salida de dinero' && !m.descripcion.includes('ENV |'));
+        } else if (this.filtroTipoActivo === 'Compra') {
+            filtrados = filtrados.filter(m => m.tipo === 'Compra' && !m.descripcion.includes('ENV |'));
+        } else {
+            filtrados = filtrados.filter(m => m.tipo === this.filtroTipoActivo);
+        }
     }
     
     if (this.textoFiltro) {
-      const text = this.textoFiltro.toLowerCase();
-      filtrados = filtrados.filter(m => 
-        m.descripcion.toLowerCase().includes(text) ||
-        m.tipo.toLowerCase().includes(text)
-      );
+        const text = this.textoFiltro.toLowerCase();
+        filtrados = filtrados.filter(m => 
+          m.descripcion.toLowerCase().includes(text) ||
+          m.tipo.toLowerCase().includes(text)
+        );
     }
     return filtrados;
   }
 
   getConteoFiltro(tipo: string): number {
-    if (tipo === 'Todos') return this.movimientos.length;
-    
     let filtrados = this.movimientos;
+
+    if (this.rangoSeleccionado !== 'historico') {
+        const hoy = new Date();
+        let fechaInicio = new Date(2000, 0, 1);
+        let fechaFin = new Date(2100, 0, 1);
+
+        if (this.rangoSeleccionado === 'hoy') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+            fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+        } else if (this.rangoSeleccionado === 'ayer') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+            fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+        } else if (this.rangoSeleccionado === 'esta_semana') {
+            const day = hoy.getDay() || 7;
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+        } else if (this.rangoSeleccionado === 'mes_actual') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        } else if (this.rangoSeleccionado === '6_meses') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+        } else if (this.rangoSeleccionado === 'ano_actual') {
+            fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+        } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+            fechaInicio = this.fechaRango[0];
+            fechaFin = this.fechaRango[1];
+            fechaFin.setHours(23, 59, 59, 999);
+        }
+
+        filtrados = filtrados.filter(m => {
+            const d = new Date(m.fecha);
+            return d >= fechaInicio && d <= fechaFin;
+        });
+    }
+
+    if (tipo === 'Todos') return filtrados.length;
+    
     if (tipo === 'Envío') {
         return filtrados.filter(m => m.descripcion.includes('ENV |')).length;
     } else if (tipo === 'Gasto') {

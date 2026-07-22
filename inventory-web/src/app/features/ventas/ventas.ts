@@ -14,11 +14,12 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogVentaComponent } from '../../shared/components/dialog-venta/dialog-venta.component';
 import { PaginatorModule } from 'primeng/paginator';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent, PaginatorModule],
+  imports: [CommonModule, ButtonModule, InputTextModule, TooltipModule, MenuModule, FormsModule, DialogModule, SelectModule, InputNumberModule, DialogVentaComponent, PaginatorModule, DatePickerModule],
   templateUrl: './ventas.html',
 })
 export class Ventas implements OnInit, AfterViewInit {
@@ -41,6 +42,20 @@ export class Ventas implements OnInit, AfterViewInit {
     { label: 'Vendido', value: 'Vendido' },
     { label: 'Disponible (Anular)', value: 'Disponible' }
   ];
+
+  // Filtros de fecha
+  rangoOpciones: any[] = [
+      { label: 'Hoy', value: 'hoy' },
+      { label: 'Ayer', value: 'ayer' },
+      { label: 'Esta Semana', value: 'esta_semana' },
+      { label: 'Este Mes', value: 'mes_actual' },
+      { label: 'Últimos 6 Meses', value: '6_meses' },
+      { label: 'Año Actual', value: 'ano_actual' },
+      { label: 'Histórico', value: 'historico' },
+      { label: 'Personalizado', value: 'personalizado' }
+  ];
+  rangoSeleccionado: string = 'historico';
+  fechaRango: Date[] = [];
 
   menuItems: MenuItem[] = [];
   displayConfirmarEntrega: boolean = false;
@@ -151,6 +166,46 @@ export class Ventas implements OnInit, AfterViewInit {
 
   get productosFiltrados() {
     let filtradas = this.productos;
+
+    // Filtro por fecha
+    const hoy = new Date();
+    let fechaInicio = new Date(2000, 0, 1);
+    let fechaFin = new Date(2100, 0, 1);
+
+    if (this.rangoSeleccionado === 'hoy') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'ayer') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+        fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+    } else if (this.rangoSeleccionado === 'esta_semana') {
+        const day = hoy.getDay() || 7;
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+    } else if (this.rangoSeleccionado === 'mes_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    } else if (this.rangoSeleccionado === '6_meses') {
+        fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+    } else if (this.rangoSeleccionado === 'ano_actual') {
+        fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+    } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+        fechaInicio = this.fechaRango[0];
+        fechaFin = this.fechaRango[1];
+        fechaFin.setHours(23, 59, 59, 999);
+    }
+
+    if (this.rangoSeleccionado !== 'historico') {
+        filtradas = filtradas.filter(p => {
+            // Usamos la fecha de la venta asociada. Si no hay (ej. Disponible), 
+            // usamos la fecha de compra del producto.
+            let dateStr = p.fechaCompra;
+            if (p.ventaAsociada && (p.ventaAsociada.fechaVenta || p.ventaAsociada.fechaRegistro)) {
+                dateStr = p.ventaAsociada.fechaVenta || p.ventaAsociada.fechaRegistro;
+            }
+            if (!dateStr) return false;
+            const d = new Date(dateStr);
+            return d >= fechaInicio && d <= fechaFin;
+        });
+    }
     
     if (this.estadoFiltro !== 'Todos') {
         if (this.estadoFiltro === 'PorCobrar') {
@@ -177,9 +232,48 @@ export class Ventas implements OnInit, AfterViewInit {
   }
 
   countByState(state: string): number {
-    if (state === 'Todos') return this.productos.length;
-    if (state === 'PorCobrar') return this.productos.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && (p.ventaAsociada.estadoPago === 'Pendiente' || !p.ventaAsociada.estadoPago)).length;
-    return this.productos.filter(p => p.estadoActual === state).length;
+    let filtradas = this.productos;
+
+    if (this.rangoSeleccionado !== 'historico') {
+        const hoy = new Date();
+        let fechaInicio = new Date(2000, 0, 1);
+        let fechaFin = new Date(2100, 0, 1);
+
+        if (this.rangoSeleccionado === 'hoy') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+            fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+        } else if (this.rangoSeleccionado === 'ayer') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+            fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+        } else if (this.rangoSeleccionado === 'esta_semana') {
+            const day = hoy.getDay() || 7;
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+        } else if (this.rangoSeleccionado === 'mes_actual') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        } else if (this.rangoSeleccionado === '6_meses') {
+            fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+        } else if (this.rangoSeleccionado === 'ano_actual') {
+            fechaInicio = new Date(hoy.getFullYear(), 0, 1);
+        } else if (this.rangoSeleccionado === 'personalizado' && this.fechaRango && this.fechaRango.length === 2 && this.fechaRango[1]) {
+            fechaInicio = this.fechaRango[0];
+            fechaFin = this.fechaRango[1];
+            fechaFin.setHours(23, 59, 59, 999);
+        }
+
+        filtradas = filtradas.filter(p => {
+            let dateStr = p.fechaCompra;
+            if (p.ventaAsociada && (p.ventaAsociada.fechaVenta || p.ventaAsociada.fechaRegistro)) {
+                dateStr = p.ventaAsociada.fechaVenta || p.ventaAsociada.fechaRegistro;
+            }
+            if (!dateStr) return false;
+            const d = new Date(dateStr);
+            return d >= fechaInicio && d <= fechaFin;
+        });
+    }
+
+    if (state === 'Todos') return filtradas.length;
+    if (state === 'PorCobrar') return filtradas.filter(p => p.ventaAsociada && p.ventaAsociada.estado === 'Vendido' && (p.ventaAsociada.estadoPago === 'Pendiente' || !p.ventaAsociada.estadoPago)).length;
+    return filtradas.filter(p => p.estadoActual === state).length;
   }
 
   showDialog(producto: any) {

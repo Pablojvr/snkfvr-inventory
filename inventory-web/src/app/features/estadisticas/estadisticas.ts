@@ -34,13 +34,16 @@ export class Estadisticas implements OnInit {
   
   // Filters
   rangoOpciones: any[] = [
+      { label: 'Hoy', value: 'hoy' },
+      { label: 'Ayer', value: 'ayer' },
+      { label: 'Esta Semana', value: 'esta_semana' },
       { label: 'Este Mes', value: 'mes_actual' },
       { label: 'Últimos 6 Meses', value: '6_meses' },
       { label: 'Año Actual', value: 'ano_actual' },
       { label: 'Histórico', value: 'historico' },
       { label: 'Personalizado', value: 'personalizado' }
   ];
-  rangoSeleccionado: string = '6_meses';
+  rangoSeleccionado: string = 'mes_actual';
   fechaRango: Date[] = [];
 
   // Raw Data
@@ -112,7 +115,16 @@ export class Estadisticas implements OnInit {
       let fechaInicio = new Date(2000, 0, 1); // fallback histórico
       let fechaFin = new Date(2100, 0, 1);
 
-      if (this.rangoSeleccionado === 'mes_actual') {
+      if (this.rangoSeleccionado === 'hoy') {
+          fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+          fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
+      } else if (this.rangoSeleccionado === 'ayer') {
+          fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+          fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1, 23, 59, 59, 999);
+      } else if (this.rangoSeleccionado === 'esta_semana') {
+          const day = hoy.getDay() || 7; // Lunes = 1
+          fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - day + 1);
+      } else if (this.rangoSeleccionado === 'mes_actual') {
           fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       } else if (this.rangoSeleccionado === '6_meses') {
           fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
@@ -146,8 +158,9 @@ export class Estadisticas implements OnInit {
       const ingresosVentas = ventasCompletadas.reduce((sum, v) => sum + (v.precioVenta || 0), 0);
       
       // 2. Costos: El costo solo se resta si el producto ya se vendió (Costo de Bienes Vendidos - COGS)
+      // IMPORTANT: COGS must include ALL expenses tied to the product, regardless of the date range selected.
       const idsProductosVendidos = ventasCompletadas.map(v => v.productoId).filter(id => id !== undefined) as number[];
-      const gastosDeProductosVendidos = gastosFiltrados.filter(g => g.productoId !== undefined && idsProductosVendidos.includes(g.productoId));
+      const gastosDeProductosVendidos = this.gastos.filter(g => g.activo && g.productoId !== undefined && idsProductosVendidos.includes(g.productoId));
       const costosTotales = gastosDeProductosVendidos.reduce((sum, g) => sum + (g.monto || 0), 0);
 
       this.gananciaNeta = ingresosVentas - costosTotales;
@@ -193,8 +206,8 @@ export class Estadisticas implements OnInit {
       ventasCompletadas.forEach(v => {
           const producto = this.productos.find(p => p.id === v.productoId);
           if (producto) {
-              // Costos del producto
-              const gastosProd = gastosFiltrados.filter(g => g.productoId === producto.id);
+              // Costos del producto (usando this.gastos para incluir compras fuera del rango de fecha actual)
+              const gastosProd = this.gastos.filter(g => g.activo && g.productoId === producto.id);
               const costoProd = gastosProd.reduce((sum, g) => sum + (g.monto || 0), 0);
               
               const ganancia = (v.precioVenta || 0) - costoProd;
@@ -251,8 +264,9 @@ export class Estadisticas implements OnInit {
           }
       });
 
-      const idsProductosVendidosGrafico = ventasCompletadas.map(v => v.productoId).filter(id => id !== undefined) as number[];
-      gastosFiltrados.filter(g => g.productoId !== undefined && idsProductosVendidosGrafico.includes(g.productoId)).forEach(g => {
+      // Flujo de caja real: Mostrar TODOS los gastos ocurridos en el periodo,
+      // independientemente de si el producto ya se vendió o no.
+      gastosFiltrados.forEach(g => {
           const date = new Date(g.fecha);
           const label = `${meses[date.getMonth()]} ${date.getFullYear().toString().substring(2)}`;
           if (gastosMap.has(label)) {

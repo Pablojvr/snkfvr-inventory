@@ -1,8 +1,22 @@
 <!-- Encabezado de Inicio y Perfil -->
-<div class="dashboard-header">
-    <div class="dashboard-title-container">
-        <h2 class="dashboard-title">Inicio</h2>
-        <span class="dashboard-subtitle">Resumen General</span>
+<div class="dashboard-header" style="display: flex; flex-direction: column; gap: 1rem;">
+    <div class="dashboard-title-container" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 class="dashboard-title">Inicio</h2>
+            <span class="dashboard-subtitle">Resumen General</span>
+        </div>
+        
+        <!-- Nuevo Filtro de Fechas -->
+        <div style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.5rem; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+            <p-select [options]="rangoOpciones" [(ngModel)]="rangoSeleccionado" (ngModelChange)="onFilterChange()"
+                styleClass="w-full" style="width: 140px; border-radius: 20px; font-size: 0.85rem; border: none; box-shadow: none;">
+            </p-select>
+            <p-datepicker *ngIf="rangoSeleccionado === 'personalizado'" 
+                [(ngModel)]="fechaRango" selectionMode="range" [readonlyInput]="true" (ngModelChange)="onFilterChange()"
+                placeholder="Fechas..." 
+                styleClass="w-full" style="width: 200px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #e2e8f0;">
+            </p-datepicker>
+        </div>
     </div>
 </div>
 
@@ -29,8 +43,15 @@
             <i class="pi pi-chart-line stat-icon" style="color: #10b981;"></i>
         </div>
     </div>
+    <div class="stat-card stat-card-plain" style="border-left: 4px solid var(--primary-color);">
+        <span class="stat-title">Unidades Vendidas</span>
+        <div class="stat-content">
+            <span class="stat-value" style="color: var(--text-color);">{{ unidadesVendidas }} <span class="stat-unit" style="color: #64748b;">unds.</span></span>
+            <i class="pi pi-shopping-bag stat-icon" style="color: var(--primary-color);"></i>
+        </div>
+    </div>
     <div class="stat-card stat-card-blue">
-        <span class="stat-title">Disponibles</span>
+        <span class="stat-title">Ingresadas</span>
         <div class="stat-content">
             <span class="stat-value-blue">{{ articulosDisponibles }} <span class="stat-unit">unds.</span></span>
             <i class="pi pi-tags stat-icon" style="color: #0ea5e9;"></i>
@@ -330,7 +351,7 @@
     </div>
 </p-dialog>
 
-<!-- Modales Pesados con Defer (Lazy Loading) -->
+<!-- Modales Pesados con Defer (Lazy Loading) -->add
 @defer (on timer(2s)) {
     <app-dialog-venta (onSaved)="cargarDatos()"></app-dialog-venta>
     <app-dialog-gasto (onSaved)="cargarDatos()"></app-dialog-gasto>

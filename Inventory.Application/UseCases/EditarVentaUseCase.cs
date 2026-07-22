@@ -60,6 +60,13 @@ namespace Inventory.Application.UseCases
             venta.Estado = ventaDto.Estado;
             venta.EstadoPago = !string.IsNullOrEmpty(ventaDto.EstadoPago) ? ventaDto.EstadoPago : "Pendiente";
 
+            // Si está cambiando a Vendido, asignamos la fecha de ese momento
+            var productoPrevio = await _productoRepositorio.ObtenerPorIdAsync(venta.ProductoId);
+            if (venta.Estado == "Vendido" && (productoPrevio?.Estado != "Vendido" || venta.FechaVenta == null))
+            {
+                venta.FechaVenta = DateTime.Now;
+            }
+
             await _ventaRepositorio.ActualizarAsync(venta);
 
             // Resolve TipoGasto IDs

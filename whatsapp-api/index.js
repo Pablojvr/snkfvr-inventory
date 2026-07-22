@@ -48,15 +48,21 @@ app.post('/send', async (req, res) => {
         }
 
         // Formatear el número para whatsapp-web.js
-        // Si viene con '+', lo quitamos.
         let formattedPhone = phone.replace(/\+/g, '');
-        // El formato debe terminar en @c.us
-        const chatId = `${formattedPhone}@c.us`;
 
+        // Obtener el ID del número válido desde WhatsApp para evitar 'Lid is missing in chat table'
+        const contactId = await client.getNumberId(formattedPhone);
+        if (!contactId) {
+            console.error(`El número ${formattedPhone} no está registrado en WhatsApp`);
+            return res.status(404).json({ success: false, error: 'Número no registrado en WhatsApp.' });
+        }
+
+        const chatId = contactId._serialized;
         const response = await client.sendMessage(chatId, message);
         console.log(`Mensaje enviado a ${formattedPhone}: ${message.substring(0, 30)}...`);
         
-        res.json({ success: true, messageId: response.id.id });
+        // Evitamos buscar response.id.id porque a veces el cliente retorna un objeto diferente o undefined
+        res.json({ success: true, messageId: response?.id?._serialized || 'ok' });
     } catch (error) {
         console.error('Error enviando mensaje:', error);
         res.status(500).json({ success: false, error: error.message });

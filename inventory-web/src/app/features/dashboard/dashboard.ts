@@ -432,8 +432,12 @@ export class Dashboard implements OnInit {
     this.enviandoRecordatorio = true;
     this.api.enviarRecordatorioIndividual(venta.id).subscribe({
       next: (res: any) => {
-        let destinatario = res.destino === 'Cliente' ? 'al cliente' : 'a tu WhatsApp';
-        this.toastManager.showSuccess('WhatsApp Enviado', `Recordatorio enviado exitosamente ${destinatario}.`);
+        if (res.enviado === false) {
+            this.toastManager.showError('Error de Envío', 'El bot local de WhatsApp está dormido o desconectado.');
+        } else {
+            let destinatario = res.destino === 'Cliente' ? 'al cliente' : 'a tu WhatsApp';
+            this.toastManager.showSuccess('WhatsApp Enviado', `Recordatorio enviado exitosamente ${destinatario}.`);
+        }
         this.enviandoRecordatorio = false;
       },
       error: (err: any) => {

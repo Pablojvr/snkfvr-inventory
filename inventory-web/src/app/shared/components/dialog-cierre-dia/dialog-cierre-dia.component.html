@@ -1,65 +1,129 @@
 <p-dialog [(visible)]="visible" [modal]="true" [style]="{width: 'min(450px, 95vw)', background: 'transparent'}" 
-          header="Cierre de Entregas" [draggable]="false" [resizable]="false" 
-          (onHide)="cerrar()" styleClass="cierre-dia-dialog">
+          [draggable]="false" [resizable]="false" 
+          (onHide)="cerrar()" styleClass="premium-dialog" [showHeader]="false">
     
-    <ng-template pTemplate="header">
-        <div class="cierre-dia-header">
-            <i class="pi pi-check-square" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-            <div>
-                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">Cierre de Entregas</h3>
-                <span style="font-size: 0.85rem; color: #64748b;">{{ ventas.length }} entregas de hoy</span>
+    <ng-template pTemplate="content">
+        <div class="custom-dialog-header">
+            <div class="header-icon">
+                <i class="pi pi-check-circle"></i>
+            </div>
+            <div class="header-text">
+                <h3>Cierre de Entregas</h3>
+                <span class="subtitle">{{ ventas.length }} entregas agendadas para hoy</span>
             </div>
         </div>
+
+        <div class="premium-cards-container" *ngIf="ventas.length > 0; else emptyState">
+            <div class="premium-card" *ngFor="let venta of ventas" 
+                 [class.expanded]="isExpanded(venta.id)">
+                
+                <!-- Card Header (Always Visible) -->
+                <div class="premium-card-header" (click)="toggleExpand(venta.id)">
+                    
+                    <div class="summary-top">
+                        <span class="product-name">{{ venta.productoDescripcion || 'Producto sin nombre' }}</span>
+                        <span class="premium-price-badge">${{ venta.precioVenta | number:'1.2-2' }}</span>
+                    </div>
+
+                    <div class="summary-middle">
+                        <div class="info-pill"><i class="pi pi-user"></i> {{ venta.nombreComprador || 'Sin nombre' }}</div>
+                        <div class="info-pill"><i class="pi pi-map-marker"></i> {{ venta.lugarDestino || 'No especificado' }}</div>
+                    </div>
+
+                    <div class="summary-bottom">
+                        <div class="quick-actions" (click)="$event.stopPropagation()">
+                            <button class="btn-whatsapp-sm" (click)="prepararRecordatorio(venta)">
+                                <i class="pi pi-whatsapp"></i> Recordar
+                            </button>
+                            <button class="btn-primary-sm" [class.loading]="isProcessing(venta.id)" (click)="marcarEntregado(venta)">
+                                <i class="pi" [ngClass]="isProcessing(venta.id) ? 'pi-spin pi-spinner' : 'pi-check'"></i> Entregado
+                            </button>
+                        </div>
+                        <div style="flex: 1"></div>
+                        <div class="expand-icon-wrapper" [class.rotated]="isExpanded(venta.id)">
+                            <i class="pi pi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body (Expandable Details) -->
+                <div class="premium-card-body-wrapper" [class.open]="isExpanded(venta.id)">
+                    <div class="premium-card-body">
+                        
+                        <div class="premium-details-grid">
+                            <div class="detail-item" *ngIf="venta.telefonoComprador">
+                                <div class="detail-icon"><i class="pi pi-phone"></i></div>
+                                <div class="detail-content">
+                                    <span class="detail-label">Teléfono</span>
+                                    <span class="detail-value">{{ venta.telefonoComprador }}</span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item" *ngIf="venta.costoEnvio">
+                                <div class="detail-icon"><i class="pi pi-box"></i></div>
+                                <div class="detail-content">
+                                    <span class="detail-label">Costo Envío</span>
+                                    <span class="detail-value">${{ venta.costoEnvio | number:'1.2-2' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-actions-divider"></div>
+
+                        <div class="secondary-actions-row">
+                            <span class="secondary-label">Otras opciones:</span>
+                            <div class="actions-secondary">
+                                <button pButton pRipple icon="pi pi-calendar-plus" label="Reprogramar"
+                                        class="p-button-text p-button-secondary p-button-sm"
+                                        (click)="reprogramar(venta); $event.stopPropagation()">
+                                </button>
+                                <button pButton pRipple icon="pi pi-times" label="Anular venta"
+                                        class="p-button-text p-button-danger p-button-sm"
+                                        [loading]="isProcessing(venta.id)"
+                                        (click)="anularVenta(venta); $event.stopPropagation()">
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ng-template #emptyState>
+            <div class="premium-empty-state">
+                <i class="pi pi-check-circle"></i>
+                <h4>¡Todo al día!</h4>
+                <p>No hay entregas pendientes para hoy.</p>
+            </div>
+        </ng-template>
     </ng-template>
+</p-dialog>
 
-    <div class="cierre-dia-content">
-        <div *ngIf="ventas.length === 0" class="empty-state">
-            <i class="pi pi-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
-            <h4>¡Todo al día!</h4>
-            <p>No tienes entregas pendientes para hoy.</p>
-        </div>
+<!-- Modal de Vista Previa de WhatsApp -->
+<p-dialog [(visible)]="previewVisible" [modal]="true" [style]="{width: 'min(400px, 95vw)'}" 
+          header="Confirmar Recordatorio" [draggable]="false" [resizable]="false">
+    
+    <div style="display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem;">
+        <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
+            Verifica el mensaje antes de enviarlo:
+        </p>
 
-        <div class="checklist-grid" *ngIf="ventas.length > 0">
-            <div *ngFor="let venta of ventas" class="checklist-card" [class.processing]="isProcessing(venta.id)">
-                <div class="card-info">
-                    <div class="card-title">{{ venta.productoDescripcion }}</div>
-                    <div class="card-meta">
-                        <span><i class="pi pi-user"></i> {{ venta.nombreComprador || 'Sin cliente' }}</span>
-                        <span><i class="pi pi-map-marker"></i> {{ venta.lugarDestino || 'Sin destino' }}</span>
-                    </div>
-                </div>
-                
-                <div class="card-actions-wrapper">
-                    <div class="card-price">{{ venta.precioVenta | currency }}</div>
-                    <div class="card-actions">
-                        <!-- Botón Entregado -->
-                        <button pButton pRipple icon="pi pi-check" 
-                                class="p-button-rounded p-button-success p-button-outlined action-btn" 
-                                pTooltip="Entregado" tooltipPosition="top"
-                                [disabled]="isProcessing(venta.id)"
-                                (click)="marcarEntregado(venta)"></button>
-                        
-                        <!-- Botón Reprogramar -->
-                        <button pButton pRipple icon="pi pi-calendar-plus" 
-                                class="p-button-rounded p-button-warning p-button-outlined action-btn" 
-                                pTooltip="Reprogramar +1 Día" tooltipPosition="top"
-                                [disabled]="isProcessing(venta.id)"
-                                (click)="reprogramar(venta)"></button>
-                        
-                        <!-- Botón Anular -->
-                        <button pButton pRipple icon="pi pi-times" 
-                                class="p-button-rounded p-button-danger p-button-outlined action-btn" 
-                                pTooltip="Anular" tooltipPosition="top"
-                                [disabled]="isProcessing(venta.id)"
-                                (click)="anularVenta(venta)"></button>
-                    </div>
-                </div>
-                
-                <!-- Overlay loading individual -->
-                <div class="processing-overlay" *ngIf="isProcessing(venta.id)">
-                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--primary-color);"></i>
-                </div>
-            </div>
-        </div>
+        <textarea [(ngModel)]="previewMessage" rows="12" 
+                  [disabled]="previewLoading || enviandoMensaje"
+                  style="width: 100%; resize: none; font-family: monospace; font-size: 0.85rem; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #f8fafc;">
+        </textarea>
     </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" 
+                class="p-button-text p-button-secondary" 
+                [disabled]="enviandoMensaje"
+                (click)="previewVisible = false"></button>
+                
+        <button pButton pRipple label="Enviar WhatsApp" icon="pi pi-send" 
+                style="background-color: #25D366; border-color: #25D366; color: white;"
+                [loading]="enviandoMensaje || previewLoading"
+                (click)="confirmarEnvioRecordatorio()"></button>
+    </ng-template>
 </p-dialog>

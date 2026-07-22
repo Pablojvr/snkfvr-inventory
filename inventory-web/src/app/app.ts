@@ -117,9 +117,13 @@ export class App implements OnInit {
     this.enviandoResumen = true;
     this.api.enviarRecordatorioMasivo().subscribe({
       next: (res: any) => {
-        this.toastManager.showSuccess('WhatsApp Enviado', 'Se ha enviado el resumen diario a tu WhatsApp.');
+        if (res.enviado === false) {
+          this.toastManager.showError('Error de Envío', 'El bot local de WhatsApp está dormido o desconectado.');
+        } else {
+          this.toastManager.showSuccess('WhatsApp Enviado', 'Se ha enviado el resumen diario a tu WhatsApp.');
+          this.displayResumenPreview = false;
+        }
         this.enviandoResumen = false;
-        this.displayResumenPreview = false;
       },
       error: (err: any) => {
         console.error('Error enviando recordatorio masivo', err);

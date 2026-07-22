@@ -61,7 +61,8 @@ namespace Inventory.Proyecto.Controllers
             var msg = $"📋 *REPORTE MATUTINO SNKFVR*\n📅 {hoy:dd/MMM/yyyy}\n\n";
 
             // Entregas del día
-            msg += $"📦 *ENTREGAS HOY ({entregasHoy.Count}):*\n";
+            var totalEntregasHoy = entregasHoy.Sum(v => v.PrecioVenta);
+            msg += $"📦 *ENTREGAS HOY ({entregasHoy.Count}) — Total: ${totalEntregasHoy:N2}:*\n";
             if (entregasHoy.Any())
             {
                 foreach (var v in entregasHoy)
@@ -86,8 +87,11 @@ namespace Inventory.Proyecto.Controllers
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
                 var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
+                var fechaVenta = v.FechaVenta.HasValue ? v.FechaVenta.Value.ToString("dd/MMM/yyyy") : "No registrada";
                 msg += $"  • *Producto*: {prod?.Descripcion ?? "Producto"}\n" +
                        $"    *Cliente*: {v.NombreComprador ?? "?"}{tel}\n" +
+                       $"    *Lugar*: {v.LugarDestino ?? "No registrado"}\n" +
+                       $"    *Fecha venta*: {fechaVenta}\n" +
                        $"    *Monto a cobrar*: ${v.PrecioVenta:N2}\n\n";
             }
 
@@ -213,7 +217,8 @@ namespace Inventory.Proyecto.Controllers
             var msg = $"📋 *REPORTE MATUTINO SNKFVR*\n📅 {hoy:dd/MMM/yyyy}\n\n";
 
             // Entregas del día
-            msg += $"📦 *ENTREGAS HOY ({entregasHoy.Count}):*\n";
+            var totalEntregasHoy = entregasHoy.Sum(v => v.PrecioVenta);
+            msg += $"📦 *ENTREGAS HOY ({entregasHoy.Count}) — Total: ${totalEntregasHoy:N2}:*\n";
             if (entregasHoy.Any())
             {
                 foreach (var v in entregasHoy)
@@ -235,7 +240,8 @@ namespace Inventory.Proyecto.Controllers
             {
                 var prod = productos.FirstOrDefault(p => p.Id == v.ProductoId);
                 var tel = !string.IsNullOrEmpty(v.TelefonoComprador) ? $" ({v.TelefonoComprador})" : "";
-                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → ${v.PrecioVenta:N2} — {v.NombreComprador ?? "?"}{tel}\n\n";
+                var fechaVenta = v.FechaVenta.HasValue ? v.FechaVenta.Value.ToString("dd/MMM/yyyy") : "N/A";
+                msg += $"  • {prod?.Descripcion ?? "Producto"}\n    → ${v.PrecioVenta:N2} — {v.NombreComprador ?? "?"}{tel} — {v.LugarDestino ?? "Sin destino"} [{fechaVenta}]\n\n";
             }
 
             // Pendientes
@@ -249,6 +255,67 @@ namespace Inventory.Proyecto.Controllers
             }
 
             return Ok(new { msg });
+        }
+
+        /// <summary>
+        /// Genera el texto del recordatorio individual para su previsualización en el frontend.
+        /// </summary>
+        [HttpGet("preview-individual/{id}")]
+        public async Task<IActionResult> PreviewIndividual(int id)
+        {
+            var venta = await _ventaRepo.ObtenerPorIdAsync(id);
+            if (venta == null) return NotFound("Venta no encontrada.");
+
+            var producto = await _productoRepo.ObtenerPorIdAsync(venta.ProductoId);
+            string descripcion = producto?.Descripcion ?? "Producto";
+
+            string msg = "";
+            bool esParaCliente = !string.IsNullOrEmpty(venta.TelefonoComprador);
+
+            if (venta.Estado == "Reservado")
+            {
+                var fechaEntregaFmt = FormatearFechaConDia(venta.FechaEntrega);
+                var fechaRegistroFmt = FormatearFechaConDia(venta.FechaRegistro);
+                
+                if (esParaCliente)
+                {
+                    var cultureEs = new System.Globalization.CultureInfo("es-ES");
+                    var diaSemana = venta.FechaEntrega.HasValue ? cultureEs.TextInfo.ToTitleCase(venta.FechaEntrega.Value.ToString("dddd", cultureEs)) : "hoy";
+                    var telefonoCliente = venta.TelefonoComprador;
+                    
+                    msg = $"📞 Número: {telefonoCliente}\n\n" +
+                          $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\n" +
+                          $"Recuerda que el día de hoy {diaSemana} está agendado tu envío del par de zapatos *{descripcion}*.\n\n" +
+                          $"📍 *Lugar:* {venta.LugarDestino ?? "A convenir"}\n" +
+                          $"🗓️ *Día:* {fechaEntregaFmt}\n" +
+                          $"💰 *Costo total:* ${venta.PrecioVenta:N2}\n\n" +
+                          $"Gracias por tu preferencia, favor confirmar al recibir por este medio.";
+                }
+                else
+                {
+                    msg = $"🔔 *RECORDATORIO DE ENTREGA*\nProducto: {descripcion}\nCliente: {venta.NombreComprador ?? "Sin nombre"}\nLugar: {venta.LugarDestino ?? "N/A"}\nRegistro: {fechaRegistroFmt}\nEntrega: {fechaEntregaFmt}";
+                }
+            }
+            else if (venta.Estado == "Vendido" && (venta.EstadoPago == "Pendiente" || string.IsNullOrEmpty(venta.EstadoPago)))
+            {
+                var fechaEntregaFmt = FormatearFechaConDia(venta.FechaEntrega);
+                var fechaRegistroFmt = FormatearFechaConDia(venta.FechaRegistro);
+                
+                msg = $"🧾 *DETALLE DE COBRO*\n" +
+                      $"• Producto: {descripcion}\n" +
+                      $"• Cliente: {venta.NombreComprador ?? "Sin nombre"}\n" +
+                      $"• Teléfono: {venta.TelefonoComprador ?? "No registrado"}\n" +
+                      $"• Lugar/Agencia: {venta.LugarDestino ?? "No registrado"}\n" +
+                      $"• Fecha registro: {fechaRegistroFmt}\n" +
+                      $"• Fecha entrega: {fechaEntregaFmt}\n" +
+                      $"• Total a cobrar: *${venta.PrecioVenta:N2}*";
+            }
+            else
+            {
+                return BadRequest("La venta no está en estado pendiente de entrega o cobro.");
+            }
+
+            return Ok(new { msg, esParaCliente });
         }
 
         /// <summary>
@@ -285,11 +352,15 @@ namespace Inventory.Proyecto.Controllers
                 {
                     var cultureEs = new System.Globalization.CultureInfo("es-ES");
                     var diaSemana = venta.FechaEntrega.HasValue ? cultureEs.TextInfo.ToTitleCase(venta.FechaEntrega.Value.ToString("dddd", cultureEs)) : "hoy";
+                    var telefonoCliente = !string.IsNullOrEmpty(venta.TelefonoComprador) ? venta.TelefonoComprador : "No registrado";
                     
-                    msg = $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\n" +
-                          $"Recordar el dia de hoy {diaSemana} debes recibir tu par de zapato *{descripcion}* en el lugar *{venta.LugarDestino ?? "lugar a convenir"}*.\n\n" +
-                          $"• Fecha de entrega: {fechaEntregaFmt}\n\n" +
-                          $"Gracias por tu preferencia, favor confirmar al recoger por este medio.";
+                    msg = $"📞 Número: {telefonoCliente}\n\n" +
+                          $"Hola {venta.NombreComprador ?? "cliente"}, te saludamos de Sneaker Fever Sv. 👟\n\n" +
+                          $"Recuerda que el día de hoy {diaSemana} está agendado tu envío del par de zapatos *{descripcion}*.\n\n" +
+                          $"📍 *Lugar:* {venta.LugarDestino ?? "A convenir"}\n" +
+                          $"🗓️ *Día:* {fechaEntregaFmt}\n" +
+                          $"💰 *Costo total:* ${venta.PrecioVenta:N2}\n\n" +
+                          $"Gracias por tu preferencia, favor confirmar al recibir por este medio.";
                 }
                 else
                 {

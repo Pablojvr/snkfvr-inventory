@@ -15,7 +15,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
-    providePrimeNG({ theme: { preset: Aura } }),
+    providePrimeNG({ 
+      theme: { 
+        preset: Aura,
+        options: {
+          darkModeSelector: '.app-dark'
+        }
+      } 
+    }),
     MessageService
   ]
 };

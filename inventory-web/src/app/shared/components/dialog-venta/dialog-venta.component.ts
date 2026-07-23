@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
+import { ListboxModule } from 'primeng/listbox';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -13,7 +14,7 @@ import { ToastManagerService } from '../../../core/services/toast-manager.servic
 @Component({
   selector: 'app-dialog-venta',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, SelectModule, InputNumberModule, InputTextModule, ButtonModule, CheckboxModule],
+  imports: [CommonModule, FormsModule, DialogModule, SelectModule, ListboxModule, InputNumberModule, InputTextModule, ButtonModule, CheckboxModule],
   templateUrl: './dialog-venta.component.html',
 })
 export class DialogVentaComponent implements OnInit {

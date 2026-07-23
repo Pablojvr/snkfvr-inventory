@@ -1,15 +1,20 @@
 <p-dialog [(visible)]="visible" [modal]="true" [style]="{width: 'min(450px, 95vw)', background: 'transparent'}" 
-          [draggable]="false" [resizable]="false" 
+          [draggable]="false" [resizable]="false" [dismissableMask]="true"
           (onHide)="cerrar()" styleClass="premium-dialog" [showHeader]="false">
     
     <ng-template pTemplate="content">
         <div class="custom-dialog-header">
-            <div class="header-icon">
-                <i class="pi pi-check-circle"></i>
-            </div>
-            <div class="header-text">
-                <h3>Cierre de Entregas</h3>
-                <span class="subtitle">{{ ventas.length }} entregas agendadas para hoy</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="header-icon">
+                        <i class="pi pi-check-circle"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Cierre de Entregas</h3>
+                        <span class="subtitle">{{ ventas.length }} entregas agendadas para hoy</span>
+                    </div>
+                </div>
+                <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-text" (click)="cerrar()" style="color: rgba(255,255,255,0.8); width: 2rem; height: 2rem; padding: 0;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.8)'"></button>
             </div>
         </div>
 
